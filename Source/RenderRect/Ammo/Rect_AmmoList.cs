@@ -15,9 +15,6 @@ namespace CeManualPatcher.RenderRect.Ammo
 {
     internal class Rect_AmmoList : RenderRectBase
     {
-        private List<MP_AmmoSet> AmmoSets = new List<MP_AmmoSet>();
-
-
         //scroll
         private Vector2 scrollPosition = Vector2.zero;
         private float viewHeight = 0f;
@@ -104,11 +101,11 @@ namespace CeManualPatcher.RenderRect.Ammo
             listingStandard.Begin(rect);
 
             //filter
-            listingStandard.ButtonX("category:", 100f, curCategory?.Label ?? "All", () =>
+            listingStandard.ButtonX("MP_Category".Translate(), 150f, curCategory?.Label ?? "MP_All".Translate(), () =>
             {
                 List<FloatMenuOption> list = new List<FloatMenuOption>();
 
-                list.Add(new FloatMenuOption("All", () => curCategory = null));
+                list.Add(new FloatMenuOption("MP_All".Translate(), () => curCategory = null));
                 foreach (var item in MP_Options.ammoCategories)
                 {
                     list.Add(new FloatMenuOption(item.Label, () => curCategory = item));
@@ -117,7 +114,7 @@ namespace CeManualPatcher.RenderRect.Ammo
                 Find.WindowStack.Add(new FloatMenu(list));
             });
 
-            listingStandard.CheckboxLabeled("modifiedOnly", ref modifiedOnly);
+            listingStandard.CheckboxLabeled("MP_ModifiedOnly".Translate(), ref modifiedOnly);
 
             listingStandard.SearchBar(ref keyWords);
 
@@ -161,7 +158,7 @@ namespace CeManualPatcher.RenderRect.Ammo
                 Widgets.DrawHighlightSelected(rect);
             }
 
-            TooltipHandler.TipRegion(rect, $"{ammoSet.Description}\n\nsource: {ammoSet.sourceModName}");
+            TooltipHandler.TipRegion(rect, $"{ammoSet.Description}\n\n{"MP_Source".Translate()} {ammoSet.sourceModName}");
         }
     }
 }

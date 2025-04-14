@@ -16,8 +16,8 @@ namespace CeManualPatcher
 {
     internal class Rect_AmmoInfo : RenderRectBase
     {
-        MP_AmmoSet curAmmoSet => AmmoManager.curAmmoSet;
-        AmmoManager manager => AmmoManager.instance;
+        private static MP_AmmoSet curAmmoSet => AmmoManager.curAmmoSet;
+        private static AmmoManager manager => AmmoManager.instance;
 
         private Vector2 scrollPosition = Vector2.zero;
         private float viewHeight = 0f;
@@ -34,7 +34,7 @@ namespace CeManualPatcher
             Listing_Standard listingStandard = new Listing_Standard();
             listingStandard.Begin(rect);
 
-            WidgetsUtility.ScrollView(listingStandard.GetRect(rect.height - listingStandard.CurHeight), ref scrollPosition, ref viewHeight, scrollListing =>
+            WidgetsUtility.ScrollView(listingStandard.GetRect(rect.height - listingStandard.CurHeight - Text.LineHeight), ref scrollPosition, ref viewHeight, scrollListing =>
             {
                 DrawHead(scrollListing);
 
@@ -44,7 +44,21 @@ namespace CeManualPatcher
                 }
             });
 
+            DrawControlPannel(listingStandard);
+
             listingStandard.End();
+        }
+
+
+        private void DrawControlPannel(Listing_Standard listing)
+        {
+            Rect rect = listing.GetRect(Text.LineHeight);
+
+            Rect rect1 = rect.LeftPartPixels(100f);
+            if (Widgets.ButtonText(rect1, "MP_ResetAll".Translate()))
+            {
+                manager.ResetAll();
+            }
         }
 
         private void DrawHead(Listing_Standard listing)
@@ -56,7 +70,7 @@ namespace CeManualPatcher
 
         private void DrawAmmo(Listing_Standard listing, MP_Ammo ammo)
         {
-
+            //无法编辑
             if (ammo?.projectile?.projectile?.damageDef == null)
             {
                 return;
@@ -75,12 +89,12 @@ namespace CeManualPatcher
             //Explosive
             if (ammo.isExplosive)
             {
-                listing.TextfieldX("Explosion Radius", 100f, props.explosionRadius, newValue =>
+                listing.FieldLineReflexion("CE_DescExplosionRadius".Translate(), "explosionRadius", props, newValue =>
                 {
-                    manager.GetAmmoPatch(ammo.projectile).projectile.explosionRadius = newValue;
+                    manager.GetAmmoPatch(ammo);
                 });
 
-                listing.ButtonX("ExplosionGas", 100f, props.postExplosionGasType.GetLabel(), () =>
+                listing.ButtonX("MP_DescExplosionGas".Translate(), 100f, props.postExplosionGasType.GetLabel(), () =>
                 {
                     List<GasType?> list = new List<GasType?>();
                     list.Add(null);
@@ -90,7 +104,8 @@ namespace CeManualPatcher
                         (gas) => gas.GetLabel(),
                         (gas) => delegate
                         {
-                            manager.GetAmmoPatch(ammo.projectile).projectile.postExplosionGasType = gas;
+                            manager.GetAmmoPatch(ammo);
+                            props.postExplosionGasType = gas;
                         }
                     );
                 });
@@ -101,14 +116,14 @@ namespace CeManualPatcher
             //Non-Explosive
             else
             {
-                listing.TextfieldX("armorPenetrationSharp", 100f, props.armorPenetrationSharp, newValue =>
+                listing.FieldLineReflexion("CE_DescSharpPenetration".Translate(), "armorPenetrationSharp", props, newValue =>
                 {
-                    manager.GetAmmoPatch(ammo.projectile).projectile.armorPenetrationSharp = newValue;
+                    manager.GetAmmoPatch(ammo);
                 });
 
-                listing.TextfieldX("armorPenetrationBlunt", 100f, props.armorPenetrationBlunt, newValue =>
+                listing.FieldLineReflexion("CE_DescBluntPenetration".Translate(), "armorPenetrationBlunt", props, newValue =>
                 {
-                    manager.GetAmmoPatch(ammo.projectile).projectile.armorPenetrationBlunt = newValue;
+                    manager.GetAmmoPatch(ammo);
                 });
 
                 //damage
@@ -116,9 +131,9 @@ namespace CeManualPatcher
             }
 
             //common
-            listing.TextfieldX("suprressionFactor", 100f, props.suppressionFactor, newValue =>
+            listing.FieldLineReflexion("MP_DescSuppressionFactor".Translate(), "suppressionFactor", props, newValue =>
             {
-                manager.GetAmmoPatch(ammo.projectile).projectile.suppressionFactor = newValue;
+                manager.GetAmmoPatch(ammo);
             });
 
             //comps
@@ -130,7 +145,7 @@ namespace CeManualPatcher
                 Rect headRect = listing.GetRect(Text.LineHeight);
                 Rect addRect = headRect.RightPartPixels(headRect.height);
 
-                Widgets.Label(headRect, "Fragments");
+                Widgets.Label(headRect, "CE_DescFragments".Translate());
                 if (Widgets.ButtonImage(addRect, TexButton.Add))
                 {
                     List<ThingDef> list = MP_Options.fragments.ToList();
@@ -138,7 +153,12 @@ namespace CeManualPatcher
                         (x) => x.LabelCap,
                         (x) => delegate
                         {
-                            manager.GetAmmoPatch(ammo.projectile).projectile.fragments.Add(new ThingDefCountClass(x, 1));
+                            manager.GetAmmoPatch(ammo);
+                            compProps.fragments.Add(new ThingDefCountClass()
+                            {
+                                thingDef = x,
+                                count = 1
+                            });
                         }
                     );
                 }
@@ -154,7 +174,7 @@ namespace CeManualPatcher
             {
                 CompProperties_ExplosiveCE compProps = ammo.projectile.GetCompProperties<CompProperties_ExplosiveCE>();
 
-                listing.Label("ExplosiveCE");
+                listing.Label("CE_DescSecondaryExplosion".Translate());
 
                 listing.DamageRow(compProps.explosiveDamageType.LabelCap, damageButtonWidth,
                     () =>
@@ -163,21 +183,23 @@ namespace CeManualPatcher
                             (x) => x.LabelCap,
                             (x) => delegate
                             {
-                                manager.GetAmmoPatch(ammo.projectile).projectile.secondaryExplosion.damageDef = x;
+                                manager.GetAmmoPatch(ammo);
+                                compProps.explosiveDamageType = x;
                             }
                         );
                     }, (int)compProps.damageAmountBase, 100f,
                     (newValue) =>
                     {
-                        manager.GetAmmoPatch(ammo.projectile).projectile.secondaryExplosion.damageAmountBase = newValue;
+                        manager.GetAmmoPatch(ammo);
+                        compProps.damageAmountBase = newValue;
                     }, indent: 20f);
 
-                listing.TextfieldX("explosiveRadius", 100f, compProps.explosiveRadius,
-                    newValue =>
-                    {
-                        manager.GetAmmoPatch(ammo.projectile).projectile.secondaryExplosion.explosionRadius = newValue;
-                    });
-                listing.ButtonX("ExplosionGas", 100f, compProps.postExplosionGasType.GetLabel(), () =>
+                listing.FieldLineReflexion("CE_DescExplosionRadius".Translate(), "explosiveRadius", compProps, newValue =>
+                {
+                    manager.GetAmmoPatch(ammo);
+                }, indent: 20f);
+
+                listing.ButtonX("MP_DescExplosionGas".Translate(), 100f, compProps.postExplosionGasType.GetLabel(), () =>
                 {
                     List<GasType?> list = new List<GasType?>();
                     list.Add(null);
@@ -186,10 +208,11 @@ namespace CeManualPatcher
                         (gas) => gas.GetLabel(),
                         (gas) => delegate
                         {
-                            manager.GetAmmoPatch(ammo.projectile).projectile.secondaryExplosion.postExplosionGasType = gas;
+                            manager.GetAmmoPatch(ammo);
+                            compProps.postExplosionGasType = gas;
                         }
                     );
-                });
+                }, indent: 20f);
             }
         }
 
@@ -204,14 +227,26 @@ namespace CeManualPatcher
 
             if (manager.HasAmmoPatch(ammo))
             {
-                Widgets.DrawBoxSolidWithOutline(signRect, new Color(85f / 256f, 177f / 256f, 85f / 256f), Color.white, 0);
+                Widgets.DrawBoxSolid(signRect, new Color(85f / 256f, 177f / 256f, 85f / 256f));
             }
 
             Widgets.DrawTextureFitted(iconRect, ammo.Icon, 0.7f);
 
-            Widgets.Label(labelRect, ammo.Label);
+            //Widgets.Label(labelRect, ammo.Label);
 
-            if (Widgets.ButtonImage(resetRect, TexButton.Banish))
+            ref string label = ref ammo.projectile.label;
+            if (ammo.ammo != null)
+            {
+                label = ref ammo.ammo.label;
+            }
+
+            WidgetsUtility.LabelChange(labelRect, ref label, ammo.GetHashCode(), () =>
+            {
+                manager.GetAmmoPatch(ammo);
+            }, 100f);
+
+
+            if (Widgets.ButtonImage(resetRect, MP_Texture.Reset))
             {
                 manager.Reset(ammo.projectile);
             }
@@ -228,12 +263,14 @@ namespace CeManualPatcher
 
             ProjectilePropertiesCE props = ammo.projectile.projectile as ProjectilePropertiesCE;
 
-            Widgets.Label(rect, "Damage");
+            Widgets.Label(rect, "CE_DescBaseDamage".Translate());
 
             int damageAmountBase = (int)typeof(ProjectileProperties).GetField("damageAmountBase", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(props);
-            WidgetsUtility.TextFieldOnChange(fieldRect, damageAmountBase, newValue =>
+            //int damageAmountBase = (int)PropUtility.GetPropValue(props, "damageAmountBase");
+            WidgetsUtility.TextFieldOnChange(fieldRect, ref damageAmountBase, newValue =>
             {
-                manager.GetAmmoPatch(ammo.projectile).projectile.damageAmountBase = newValue;
+                manager.GetAmmoPatch(ammo);
+                typeof(ProjectileProperties).GetField("damageAmountBase", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(props, newValue);
             });
 
             if (Widgets.ButtonText(buttonRect, props.damageDef.label))
@@ -244,7 +281,8 @@ namespace CeManualPatcher
                     (x) => x.LabelCap,
                     (x) => delegate
                     {
-                        manager.GetAmmoPatch(ammo.projectile).projectile.damageDef = x;
+                        manager.GetAmmoPatch(ammo);
+                        props.damageDef = x;
                     }
                  );
             }
@@ -259,14 +297,17 @@ namespace CeManualPatcher
 
             ProjectilePropertiesCE props = ammo.projectile.projectile as ProjectilePropertiesCE;
 
-            Widgets.Label(headRect, "Damage");
+            Widgets.Label(headRect, "CE_DescDamage".Translate());
+
+            //add button
             if (Widgets.ButtonImage(addRect, TexButton.Add))
             {
                 FloatMenuUtility.MakeMenu(AvaliableDamageDefs(ammo),
                     (x) => x.LabelCap,
                     (x) => delegate
                     {
-                        manager.GetAmmoPatch(ammo.projectile).projectile.secondaryDamages.Add(new SecondaryDamage()
+                        manager.GetAmmoPatch(ammo);
+                        props.secondaryDamage.Add(new SecondaryDamage()
                         {
                             def = x,
                             amount = 1
@@ -284,7 +325,8 @@ namespace CeManualPatcher
 
                 Action onDelete = delegate
                 {
-                    manager.GetAmmoPatch(ammo.projectile).projectile.secondaryDamages.RemoveAt(i);
+                    manager.GetAmmoPatch(ammo);
+                    props.secondaryDamage.RemoveAt(i);
                 };
 
                 listing.DamageRow(label, damageButtonWidth,
@@ -295,19 +337,22 @@ namespace CeManualPatcher
                             (x) => x.LabelCap,
                             (x) => delegate
                             {
+                                manager.GetAmmoPatch(ammo);
                                 if (index == -1)
-                                    manager.GetAmmoPatch(ammo.projectile).projectile.damageDef = x;
+                                    props.damageDef = x;
                                 else
-                                    manager.GetAmmoPatch(ammo.projectile).projectile.secondaryDamages[i].def = x;
+                                    props.secondaryDamage[index].def = x;
                             }
                         );
                     }, amount, 100f,
                     (newValue) =>
                     {
+                        manager.GetAmmoPatch(ammo);
                         if (i == -1)
-                            manager.GetAmmoPatch(ammo.projectile).projectile.damageAmountBase = newValue;
+                            //PropUtility.SetPropValue(props, "damageAmountBase", newValue);
+                            typeof(ProjectileProperties).GetField("damageAmountBase", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(props, newValue);
                         else
-                            manager.GetAmmoPatch(ammo.projectile).projectile.secondaryDamages[i].amount = newValue;
+                            props.secondaryDamage[i].amount = newValue;
 
                     }, i == -1 ? null : onDelete, 20f);
             }
@@ -328,19 +373,19 @@ namespace CeManualPatcher
 
             Widgets.Label(xRect, "x");
 
-            WidgetsUtility.TextFieldOnChange(fieldRect, fragment.count, newValue =>
+            WidgetsUtility.TextFieldOnChange(fieldRect, ref fragment.count, newValue =>
             {
-                manager.GetAmmoPatch(ammo.projectile).projectile.fragments[index].count = newValue;
+                manager.GetAmmoPatch(ammo);
             });
 
             if (Widgets.ButtonImage(deleteRect, TexButton.Delete))
             {
-                manager.GetAmmoPatch(ammo.projectile).projectile.fragments.RemoveAt(index);
+                manager.GetAmmoPatch(ammo);
+                compProps.fragments.RemoveAt(index);
             }
 
             listing.Gap(listing.verticalSpacing);
         }
-
         private List<DamageDef> AvaliableDamageDefs(MP_Ammo ammo)
         {
             if (ammo.isExplosive)

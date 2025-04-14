@@ -1,4 +1,5 @@
-﻿using CombatExtended;
+﻿using CeManualPatcher.Misc;
+using CombatExtended;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,10 +9,15 @@ using Verse;
 
 namespace CeManualPatcher.Saveable.Ammo
 {
-    struct ThingDefCountClassExpo
+    class ThingDefCountClassExpo : IExposable
     {
         public string defName;
         public int count;
+        public void ExposeData()
+        {
+            Scribe_Values.Look(ref defName, "defName");
+            Scribe_Values.Look(ref count, "count");
+        }
     }
 
     internal class ThingDefCountClassSaveable : SaveableBase
@@ -19,46 +25,59 @@ namespace CeManualPatcher.Saveable.Ammo
 
         private List<ThingDefCountClassExpo> fragmentsExpo = new List<ThingDefCountClassExpo>();
 
-        public List<ThingDefCountClass> fragments = new List<ThingDefCountClass>();
-        ThingDefCountClassSaveable Original => base.originalData as ThingDefCountClassSaveable;
-
-        public ThingDefCountClassSaveable() { }
-
-        public ThingDefCountClassSaveable(ThingDef thingDef, bool isOriginal = false)
+        //private
+        private List<ThingDefCountClass> originalData = new List<ThingDefCountClass>();
+        private CompProperties_Fragments compProps
         {
-            if (thingDef == null || !thingDef.HasComp<CompFragments>())
+            get
             {
-                return;
-            }
-
-            CompProperties_Fragments compProps = thingDef.GetCompProperties<CompProperties_Fragments>();
-
-            this.fragments.Clear();
-            this.fragments.AddRange(compProps.fragments);
-
-            if (isOriginal)
-            {
-                originalData = new ThingDefCountClassSaveable(thingDef, true);
+                if (thingDef == null)
+                {
+                    return null;
+                }
+                if (!thingDef.HasComp<CompFragments>())
+                {
+                    return null;
+                }
+                return thingDef.GetCompProperties<CompProperties_Fragments>();
             }
         }
-
-        public override void Apply(ThingDef thingDef)
+        public ThingDefCountClassSaveable() { }
+        public ThingDefCountClassSaveable(ThingDef thingDef, bool isOriginal = false)
         {
-            if (thingDef == null || !thingDef.HasComp<CompFragments>())
+            this.thingDef = thingDef;
+            if (compProps == null)
             {
                 return;
             }
-            CompProperties_Fragments compProps = thingDef.GetCompProperties<CompProperties_Fragments>();
+
+            InitOriginalData();
+        }
+
+        protected override void Apply()
+        {
+            if (compProps == null)
+            {
+                return;
+            }
+
             compProps.fragments.Clear();
-            compProps.fragments.AddRange(this.fragments);
+            foreach (var fragment in fragmentsExpo)
+            {
+                compProps.fragments.Add(new ThingDefCountClass()
+                {
+                    thingDef = DefDatabase<ThingDef>.GetNamed(fragment.defName, false),
+                    count = fragment.count
+                });
+            }
         }
 
         public override void ExposeData()
         {
-            if(Scribe.mode == LoadSaveMode.Saving)
+            if (Scribe.mode == LoadSaveMode.Saving && compProps!=null)
             {
                 fragmentsExpo.Clear();
-                foreach (var fragment in fragments)
+                foreach (var fragment in compProps.fragments)
                 {
                     fragmentsExpo.Add(new ThingDefCountClassExpo()
                     {
@@ -68,35 +87,52 @@ namespace CeManualPatcher.Saveable.Ammo
                 }
             }
 
-            Scribe_Collections.Look(ref fragmentsExpo, "fragments", LookMode.Value);
+            Scribe_Collections.Look(ref fragmentsExpo, "fragments", LookMode.Deep);
+            if(Scribe.mode == LoadSaveMode.LoadingVars && fragmentsExpo == null)
+            {
+                fragmentsExpo = new List<ThingDefCountClassExpo>();
+            }
         }
 
-        public override void Reset(ThingDef thingDef)
+        public override void Reset()
         {
-            if (Original == null)
+            if(compProps == null)
             {
                 return;
             }
 
-            Original.Apply(thingDef);
+            compProps.fragments.Clear();
+            compProps.fragments.AddRange(originalData);
+            InitOriginalData();
         }
-    
+
         public override void PostLoadInit(ThingDef thingDef)
         {
-            if(this.fragmentsExpo!= null)
+           this.thingDef = thingDef;
+            if (compProps == null)
             {
-                this.fragments.Clear();
-                foreach (var fragment in fragmentsExpo)
-                {
-                    ThingDef thing = DefDatabase<ThingDef>.GetNamed(fragment.defName, false);
-                    if (thing != null)
-                    {
-                        this.fragments.Add(new ThingDefCountClass(thing, fragment.count));
-                    }
-                }
+                return;
             }
-
-            this.originalData = new ThingDefCountClassSaveable(thingDef, true);
+            InitOriginalData();
+            this.Apply();
         }
+
+        protected override void InitOriginalData()
+        {
+            if (compProps == null)
+            {
+                return;
+            }
+            originalData.Clear();
+            foreach (var fragment in compProps.fragments)
+            {
+                ThingDefCountClass temp = new ThingDefCountClass();
+
+                PropUtility.CopyPropValue(fragment, temp);
+
+                originalData.Add(temp);
+            }
+        }
+
     }
 }

@@ -1,6 +1,8 @@
-﻿using CombatExtended;
+﻿using CeManualPatcher.Misc;
+using CombatExtended;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,98 +12,129 @@ namespace CeManualPatcher.Saveable
 {
     internal class CompAmmoUserSaveable : SaveableBase
     {
-        public int magazineSize = 0;
+        public static ReadOnlyCollection<string> propNames = new List<string>()
+        {
+                "magazineSize",
+                "AmmoGenPerMagOverride",
+                "reloadTime",
+                "reloadOneAtATime",
+                "throwMote",
+                "loadedAmmoBulkFactor"
 
-        public int AmmoGenPerMagOverride = 0;
-
-        public float reloadTime = 1f;
-
-        public bool reloadOneAtATime = false;
-
-        public bool throwMote = true;
+        }.AsReadOnly();
+        private Dictionary<string, string> propDic = new Dictionary<string, string>();
 
         private string ammoSetString;
         public AmmoSetDef ammoSet
         {
             get => DefDatabase<AmmoSetDef>.GetNamed(ammoSetString, false);
-            set => ammoSetString = value.defName;
+            set => ammoSetString = value?.defName ?? "null";
         }
 
-        public float loadedAmmoBulkFactor = 0f;
-
-        private CompAmmoUserSaveable Original => base.originalData as CompAmmoUserSaveable;
-
-        public CompAmmoUserSaveable() : base()
+        //private
+        private CompProperties_AmmoUser compProps
         {
+            get
+            {
+                if (thingDef == null || !thingDef.HasComp<CompAmmoUser>())
+                {
+                    return null;
+                }
+                return thingDef.GetCompProperties<CompProperties_AmmoUser>();
+            }
         }
 
-        public CompAmmoUserSaveable(ThingDef thingDef, bool isOriginal = false) : base(thingDef, isOriginal)
+        private CompProperties_AmmoUser originalData;
+
+        public CompAmmoUserSaveable() { }
+
+        public CompAmmoUserSaveable(ThingDef thingDef, bool forceAdd = false)
         {
-            if (thingDef == null || !thingDef.HasComp<CompAmmoUser>())
+            this.thingDef = thingDef;
+            if(compProps == null && !forceAdd)
             {
                 return;
             }
 
-            CompProperties_AmmoUser compProperties_AmmoUser = thingDef.GetCompProperties<CompProperties_AmmoUser>();
-
-            if (compProperties_AmmoUser == null)
-            {
-                return;
-            }
-
-            //初始化
-            this.magazineSize = compProperties_AmmoUser.magazineSize;
-            this.AmmoGenPerMagOverride = compProperties_AmmoUser.AmmoGenPerMagOverride;
-            this.reloadTime = compProperties_AmmoUser.reloadTime;
-            this.reloadOneAtATime = compProperties_AmmoUser.reloadOneAtATime;
-            this.throwMote = compProperties_AmmoUser.throwMote;
-            this.ammoSet = compProperties_AmmoUser.ammoSet;
-            this.loadedAmmoBulkFactor = compProperties_AmmoUser.loadedAmmoBulkFactor;
-
-            if (!isOriginal)
-                this.originalData = new CompAmmoUserSaveable(thingDef, true);
+            InitOriginalData();
         }
 
-        public override void Apply(ThingDef thingDef)
+        protected override void Apply()
         {
-            if (thingDef == null || !thingDef.HasComp<CompAmmoUser>())
+            if(compProps == null)
             {
                 return;
             }
-            CompProperties_AmmoUser compProperties_AmmoUser = thingDef.GetCompProperties<CompProperties_AmmoUser>();
-            //应用
-            compProperties_AmmoUser.magazineSize = this.magazineSize;
-            compProperties_AmmoUser.AmmoGenPerMagOverride = this.AmmoGenPerMagOverride;
-            compProperties_AmmoUser.reloadTime = this.reloadTime;
-            compProperties_AmmoUser.reloadOneAtATime = this.reloadOneAtATime;
-            compProperties_AmmoUser.throwMote = this.throwMote;
-            compProperties_AmmoUser.ammoSet = this.ammoSet;
-            compProperties_AmmoUser.loadedAmmoBulkFactor = this.loadedAmmoBulkFactor;
+
+            foreach (var item in propNames)
+            {
+               PropUtility.SetPropValueString(compProps, item, this.propDic[item]);
+            }
+
+            compProps.ammoSet = ammoSet;
         }
         public override void ExposeData()
         {
-            Scribe_Values.Look(ref magazineSize, "magazineSize", 0);
-            Scribe_Values.Look(ref AmmoGenPerMagOverride, "AmmoGenPerMagOverride", 0);
-            Scribe_Values.Look(ref reloadTime, "reloadTime", 1f);
-            Scribe_Values.Look(ref reloadOneAtATime, "reloadOneAtATime", false);
-            Scribe_Values.Look(ref throwMote, "throwMote", true);
+            if(Scribe.mode == LoadSaveMode.Saving && compProps != null)
+            {
+                foreach (var item in propNames)
+                {
+                    propDic[item] = PropUtility.GetPropValue(compProps, item).ToString();
+                }
+
+                this.ammoSet = compProps.ammoSet;
+            }
+
+            Scribe_Collections.Look(ref propDic, "propDic", LookMode.Value, LookMode.Value);
             Scribe_Values.Look(ref ammoSetString, "ammoSet", null);
-            Scribe_Values.Look(ref loadedAmmoBulkFactor, "loadedAmmoBulkFactor", 0f);
+
+            if(Scribe.mode == LoadSaveMode.LoadingVars)
+            {
+                if (propDic == null)
+                {
+                    propDic = new Dictionary<string, string>();
+                }
+            }
         }
 
-        public override void Reset(ThingDef thingDef)
+        public override void Reset()
         {
-            if (Original == null || thingDef == null || !thingDef.HasComp<CompAmmoUser>())
+            if(compProps == null)
             {
                 return;
             }
-            this.Original.Apply(thingDef);
+
+            if(originalData == null)
+            {
+                thingDef.comps.RemoveWhere(x => x is CompProperties_AmmoUser);
+            }
+            else
+            {
+                PropUtility.CopyPropValue(originalData, compProps);
+            }
         }
 
         public override void PostLoadInit(ThingDef thingDef)
         {
+            this.thingDef = thingDef;
+            InitOriginalData();
 
-            this.originalData = new CompAmmoUserSaveable(thingDef, true);
+            if (!thingDef.HasComp<CompAmmoUser>())
+            {
+                thingDef.comps.Add(new CompProperties_AmmoUser());
+            }
+            this.Apply();
         }
+
+        protected override void InitOriginalData()
+        {
+            if (compProps == null)
+            {
+                return;
+            }
+            originalData = new CompProperties_AmmoUser();
+            PropUtility.CopyPropValue(compProps, originalData);
+        }
+
     }
 }

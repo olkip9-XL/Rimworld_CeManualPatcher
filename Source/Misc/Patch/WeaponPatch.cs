@@ -1,25 +1,26 @@
-﻿using CeManualPatcher.Saveable;
+﻿using CeManualPatcher.Misc;
+using CeManualPatcher.Saveable;
 using CombatExtended;
+using RimWorld;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 using Verse;
+using Verse.AI;
 
 namespace CeManualPatcher
 {
     public class WeaponPatch : PatchBase
     {
-        private string _defName;
-        public ThingDef Def
+        private string weaponDefString;
+        public ThingDef weaponDef
         {
-            get => DefDatabase<ThingDef>.GetNamed(_defName);
-            set => _defName = value.defName;
+            get => DefDatabase<ThingDef>.GetNamed(weaponDefString, false);
+            set => weaponDefString = value?.defName ?? "null";
         }
 
         //字段
-        internal List<StatSaveable> statBase = new List<StatSaveable>();
+        internal StatSaveable statBase;
 
         internal VerbPropertiesCESaveable verbProperties;
 
@@ -29,6 +30,9 @@ namespace CeManualPatcher
 
         internal CompFireModesSaveable fireMode;
 
+        //private
+        List<Tool> originalTools = new List<Tool>();
+
         public WeaponPatch() { }
         public WeaponPatch(ThingDef thingDef)
         {
@@ -36,21 +40,22 @@ namespace CeManualPatcher
             {
                 return;
             }
-            Def = thingDef;
+            weaponDef = thingDef;
 
-            foreach (var statModifier in thingDef.statBases)
-            {
-                statBase.Add(new StatSaveable(statModifier));
-            }
+            statBase = new StatSaveable(thingDef);
 
-            if (thingDef.Verbs != null && thingDef.Verbs.Count > 0 && thingDef.Verbs[0] is VerbPropertiesCE)
-                verbProperties = new VerbPropertiesCESaveable(thingDef.Verbs[0] as VerbPropertiesCE);
+            if (!thingDef.Verbs.NullOrEmpty() && thingDef.Verbs[0] is VerbPropertiesCE)
+                verbProperties = new VerbPropertiesCESaveable(thingDef);
+
             if (thingDef.tools != null)
             {
+                InitTools();
                 foreach (var tool in thingDef.tools)
                 {
                     if (tool is ToolCE)
-                        tools.Add(new ToolCESaveable(tool as ToolCE));
+                    {
+                        tools.Add(new ToolCESaveable(thingDef, tool.id));
+                    }
                 }
             }
 
@@ -62,7 +67,7 @@ namespace CeManualPatcher
                     ammoUser = new CompAmmoUserSaveable(thingDef);
                 }
 
-                if(thingDef.HasComp<CompFireModes>())
+                if (thingDef.HasComp<CompFireModes>())
                 {
                     fireMode = new CompFireModesSaveable(thingDef);
                 }
@@ -71,62 +76,106 @@ namespace CeManualPatcher
 
         public override void ExposeData()
         {
-            Scribe_Values.Look(ref _defName, "defName");
-
-            Scribe_Collections.Look(ref statBase, "statBase", LookMode.Deep);
-            if (Scribe.mode == LoadSaveMode.LoadingVars && statBase == null)
+            if (Scribe.mode == LoadSaveMode.Saving && weaponDef != null)
             {
-                statBase = new List<StatSaveable>();
+                this.tools.Clear();
+                foreach (var item in weaponDef.tools)
+                {
+                    this.tools.Add(new ToolCESaveable(weaponDef, item.id));
+                }
             }
 
+            Scribe_Values.Look(ref weaponDefString, "defName");
+
+            Scribe_Deep.Look(ref statBase, "statBase");
             Scribe_Deep.Look(ref verbProperties, "verbProperties");
-
-            Scribe_Collections.Look(ref tools, "tools", LookMode.Deep);
-            if (Scribe.mode == LoadSaveMode.LoadingVars && tools == null)
-            {
-                tools = new List<ToolCESaveable>();
-            }
-
             Scribe_Deep.Look(ref ammoUser, "ammoUser");
             Scribe_Deep.Look(ref fireMode, "fireMode");
+            Scribe_Collections.Look(ref tools, "tools", LookMode.Deep);
+
+            if (Scribe.mode == LoadSaveMode.LoadingVars)
+            {
+                if (statBase == null)
+                {
+                    statBase = new StatSaveable(weaponDef);
+                }
+
+                if (tools == null)
+                {
+                    tools = new List<ToolCESaveable>();
+                }
+            }
+
         }
-
-        public override void Apply()
-        {
-            statBase.ForEach(x => x?.Apply(Def));
-            verbProperties?.Apply(Def);
-            tools.ForEach(x => x?.Apply(Def));
-
-            //comps
-            ammoUser?.Apply(Def);
-            fireMode?.Apply(Def);
-        }
-
         public override void Reset()
         {
-            statBase.ForEach(x => x?.Reset(Def));
-            verbProperties?.Reset(Def);
-            tools.ForEach(x => x?.Reset(Def));
+            statBase?.Reset();
+            verbProperties?.Reset();
 
-            //sort
-            //Def.statBases = Def.statBases.OrderBy(x => x.stat.defName).ToList();
-            Def.tools = Def.tools.OrderBy(x => x.id).ToList();
+            weaponDef.tools = this.originalTools;
+            InitTools();
 
             //comps
-            ammoUser?.Reset(Def);
-            fireMode?.Reset(Def);
+            ammoUser?.Reset();
+            fireMode?.Reset();
         }
 
         public override void PostLoadInit()
         {
-            if (Def != null)
+            if (weaponDef != null)
             {
-                this.statBase.ForEach(x => x?.PostLoadInit(Def));
-                this.verbProperties?.PostLoadInit(Def);
-                this.tools.ForEach(x => x?.PostLoadInit(Def));
-                this.ammoUser?.PostLoadInit(Def);
-                this.fireMode?.PostLoadInit(Def);
+                this.statBase?.PostLoadInit(weaponDef);
+
+                this.verbProperties?.PostLoadInit(weaponDef);
+
+                InitTools();
+                weaponDef.tools.Clear();
+                this.tools.ForEach(x => x?.PostLoadInit(weaponDef));
+
+
+                this.ammoUser?.PostLoadInit(weaponDef);
+                this.fireMode?.PostLoadInit(weaponDef);
             }
         }
+        private void InitTools()
+        {
+            if (weaponDef == null || weaponDef.tools == null)
+            {
+                return;
+            }
+            originalTools = new List<Tool>();
+            foreach (var item in weaponDef.tools)
+            {
+                Tool tool = new Tool();
+
+                if (item is ToolCE)
+                {
+                    tool = new ToolCE();
+                }
+
+                PropUtility.CopyPropValue(item, tool);
+
+                List<ToolCapacityDef> toolCapacityDefs = new List<ToolCapacityDef>(item.capacities);
+                tool.capacities = toolCapacityDefs;
+
+                this.originalTools.Add(tool);
+            }
+        }
+
+        public void AddVerb()
+        {
+            this.verbProperties = new VerbPropertiesCESaveable(weaponDef, true);
+        }
+
+        public void AddAmmoUser()
+        {
+            this.ammoUser = new CompAmmoUserSaveable(weaponDef, true);
+        }
+
+        public void AddFireMode()
+        {
+            this.fireMode = new CompFireModesSaveable(weaponDef, true);
+        }
+
     }
 }

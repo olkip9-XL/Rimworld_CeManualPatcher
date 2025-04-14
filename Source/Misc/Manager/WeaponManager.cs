@@ -14,7 +14,9 @@ namespace CeManualPatcher.Manager
     {
 
         public static ThingDef curWeaponDef = null;
-        public static WeaponManager instance;
+        public static WeaponManager instance { get; private set; }
+
+        private CEPatchManager patchManager => CEPatchManager.instance;
 
         //字段
         private List<WeaponPatch> weaponPatches = new List<WeaponPatch>();
@@ -30,27 +32,26 @@ namespace CeManualPatcher.Manager
 
         public WeaponPatch GetWeaponPatch(ThingDef thingDef)
         {
-            WeaponPatch result = weaponPatches.Find(x => x?.Def == thingDef);
+            WeaponPatch result = weaponPatches.Find(x => x?.weaponDef == thingDef);
 
             if (result == null)
             {
-                result = new WeaponPatch(thingDef);
-                weaponPatches.Add(result);
+                try
+                {
+                    result = new WeaponPatch(thingDef);
+                    weaponPatches.Add(result);
+                }
+                catch (Exception e)
+                {
+                    Log.Error($"[CeManualPatcher] WeaponManager Trying create patch for item {thingDef?.defName ?? "Null"}: {e}");
+                }
             }
 
-            needApply = true;
             return result;
         }
-
-
-        public override void Apply(ThingDef thing)
+        public bool HasWeaponPatch(ThingDef thingDef)
         {
-            weaponPatches.Find(x => x.Def == thing)?.Apply();
-        }
-
-        public override void ApplyAll()
-        {
-            weaponPatches.ForEach(x => x.Apply());
+            return weaponPatches.Any(x => x?.weaponDef == thingDef);
         }
 
         public override void DoWindowContents(Rect rect)
@@ -62,26 +63,28 @@ namespace CeManualPatcher.Manager
 
             rect_WeaponInfo.DoWindowContents(rightRect);
             rect_WeaponList.DoWindowContents(leftRect);
-
-            if (needApply)
-            {
-                Apply(curWeaponDef);
-                needApply = false;
-            }
         }
 
         public override void ExposeData()
         {
             Scribe_Collections.Look(ref weaponPatches, "weaponPatches", LookMode.Deep);
+            if (Scribe.mode == LoadSaveMode.LoadingVars)
+            {
+                if (weaponPatches == null)
+                {
+                    weaponPatches = new List<WeaponPatch>();
+                }
+            }
         }
 
         public override void Reset(ThingDef thing)
         {
-            WeaponPatch weaponPatch = weaponPatches.Find(x => x.Def == thing);
+            WeaponPatch weaponPatch = weaponPatches.Find(x => x.weaponDef == thing);
             if (weaponPatch != null)
             {
                 weaponPatch.Reset();
                 weaponPatches.Remove(weaponPatch);
+                patchManager.Reset(thing);
             }
         }
 
@@ -89,11 +92,23 @@ namespace CeManualPatcher.Manager
         {
             weaponPatches.ForEach(x => x.Reset());
             weaponPatches.Clear();
+            patchManager.ResetAll();
         }
 
         public override void PostLoadInit()
         {
-            this.weaponPatches.ForEach(x => x.PostLoadInit());
+            foreach(var item in this.weaponPatches)
+            {
+                try
+                {
+                    item.PostLoadInit();
+                }
+                catch (Exception e)
+                {
+                    Log.Error($"[CeManualPatcher] WeaponManager PostLoadInit error on item {item.weaponDef?.defName ?? "Null"} : {e}");
+                }
+            }
+
         }
     }
 }

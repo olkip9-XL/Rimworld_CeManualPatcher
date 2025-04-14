@@ -26,21 +26,14 @@ namespace CeManualPatcher
         internal WeaponManager weaponManager = new WeaponManager();
 
         //CEPatcher
-        internal List<CEPatcher> patchers = new List<CEPatcher>();
-
-
-        //test
-        public TestSaveable testSaveable;
-
+        internal CEPatchManager patchManager = new CEPatchManager();
         public override void ExposeData()
         {
             base.ExposeData();
 
-            //Scribe_Deep.Look(ref ammoManager, "ammoManager");
-            //Scribe_Deep.Look(ref weaponManager, "weaponManager");
-            //Scribe_Collections.Look(ref patchers, "patchers", LookMode.Deep);
-
-            Scribe_Deep.Look(ref testSaveable, "testSaveable");
+            Scribe_Deep.Look(ref ammoManager, "ammoManager");
+            Scribe_Deep.Look(ref weaponManager, "weaponManager");
+            Scribe_Deep.Look(ref patchManager, "patchManager");
 
             if (Scribe.mode == LoadSaveMode.LoadingVars)
             {
@@ -52,27 +45,21 @@ namespace CeManualPatcher
                 {
                     weaponManager = new WeaponManager();
                 }
-                if (patchers == null)
+                if (patchManager == null)
                 {
-                    patchers = new List<CEPatcher>();
+                    patchManager = new CEPatchManager();
                 }
+
             }
         }
 
         public void PostLoad()
         {
             //init
-            //ammoManager?.PostLoadInit();
-            //weaponManager?.PostLoadInit();
-            //patchers?.ForEach(x => x.PostLoadInit());
+            patchManager?.PostLoadInit();
 
-
-            ////apply
-            //ammoManager?.ApplyAll();
-            //weaponManager?.ApplyAll();
-            //patchers?.ForEach(x => x.ApplyCEPatch());
-
-            testSaveable.PostLoadInit();
+            ammoManager?.PostLoadInit();
+            weaponManager?.PostLoadInit();
         }
 
     }
@@ -93,7 +80,6 @@ namespace CeManualPatcher
         }
         public override void DoSettingsWindowContents(Rect inRect)
         {
-            //inRect.height -= 20f;
             inRect.y += 20f;
             inRect.height -= 20f;
 
@@ -101,6 +87,12 @@ namespace CeManualPatcher
 
             foreach (MP_SettingTab tab in Enum.GetValues(typeof(MP_SettingTab)))
             {
+                //skip for now
+                if(tab == MP_SettingTab.Bionic)
+                {
+                    continue;
+                }
+
                 tabRecords.Add(new TabRecord(tab.GetLabel(), delegate
                 {
                     this.curTab = tab;
@@ -112,34 +104,48 @@ namespace CeManualPatcher
             inRect.y += 10f;
             inRect.height -= 10f;
 
-            //switch (curTab)
-            //{
-            //    case MP_SettingTab.Weapon:
-            //        settings.weaponManager.DoWindowContents(inRect);
-            //        break;
-            //    case MP_SettingTab.Ammo:
-            //        settings.ammoManager.DoWindowContents(inRect);
-            //        break;
-            //    case MP_SettingTab.Bionic:
-            //        break;
-            //}
-
-            Listing_Standard listing = new Listing_Standard();
-            listing.Begin(inRect);
-
-            if (settings.testSaveable == null)
+            switch (curTab)
             {
-                ThingDef weaponDef = DefDatabase<ThingDef>.GetNamed("Gun_AssaultRifle");
-                settings.testSaveable = new TestSaveable(weaponDef);
+                case MP_SettingTab.Weapon:
+                    settings.weaponManager.DoWindowContents(inRect);
+                    break;
+                case MP_SettingTab.Ammo:
+                    settings.ammoManager.DoWindowContents(inRect);
+                    break;
+                case MP_SettingTab.Bionic:
+                    break;
             }
 
-            foreach (var item in settings.testSaveable.verbWarppers)
-            {
-                listing.TestField(item);
-            }
-
-            listing.End();
         }
     
+
+        private void DebugLogAllButtonImage(Rect rect)
+        {
+            float width = 30f;
+
+            float curY = rect.y;
+            float curX = rect.x;
+
+            //TexButton tex = new TexButton();
+
+            //显示TexButton类下的所有按钮
+            foreach (var field in typeof(Widgets).GetFields())
+            {
+                if (field.FieldType == typeof(Texture2D))
+                {
+                    Rect buttonRect = new Rect(curX, curY, width, width);
+                    Widgets.ButtonImage(buttonRect, (Texture2D)field.GetValue(null));
+
+                    TooltipHandler.TipRegion(buttonRect, field.Name);
+
+                    curX += width + 5f;
+                    if (curX > rect.xMax - width)
+                    {
+                        curX = rect.x;
+                        curY += width + 5f;
+                    }
+                }
+            }
+        }
     }
 }

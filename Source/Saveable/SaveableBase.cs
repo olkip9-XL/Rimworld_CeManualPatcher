@@ -9,16 +9,17 @@ namespace CeManualPatcher.Saveable
 {
     internal abstract class SaveableBase : IExposable
     {
-        protected SaveableBase originalData;
-
+        protected ThingDef thingDef;
         public SaveableBase() { }
-        public SaveableBase(ThingDef thingDef, bool isOriginal = false)
-        {
-
-        }
-        public abstract void Apply(ThingDef thingDef);
-        public abstract void Reset(ThingDef thingDef);
+       
+        protected abstract void Apply();
+        public abstract void Reset();
         public abstract void ExposeData();
-        public abstract void PostLoadInit(ThingDef thingDef);
+        public virtual void PostLoadInit(ThingDef thingDef)
+        {
+            this.thingDef = thingDef;
+        }
+
+        protected abstract void InitOriginalData();
     }
 }

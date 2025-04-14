@@ -63,23 +63,24 @@
     <Compile Include="Extension\BodyDefExtension.cs" />
     <Compile Include="Extension\GasTypeExtensions.cs" />
     <Compile Include="Extension\ListingStandardExtension.cs" />
-    <Compile Include="Extension\List_StatBaseSaveableExtension.cs" />
-    <Compile Include="Extension\List_ToolCESaveableExtension.cs" />
     <Compile Include="Extension\MP_SettingTabExtension.cs" />
     <Compile Include="Extension\ProjectilePropertiesCeExtension.cs" />
     <Compile Include="Extension\RectExtension.cs" />
     <Compile Include="Extension\stringExtension.cs" />
     <Compile Include="Extension\ThingDefExtension.cs" />
-    <Compile Include="FieldInfoWarpper.cs" />
-    <Compile Include="Manager\AmmoManager.cs" />
-    <Compile Include="Manager\MP_DefManagerBase.cs" />
-    <Compile Include="Manager\WeaponManager.cs" />
+    <Compile Include="Misc\Manager\AmmoManager.cs" />
+    <Compile Include="Misc\Manager\CEPatchManager.cs" />
+    <Compile Include="Misc\Manager\MP_DefManagerBase.cs" />
+    <Compile Include="Misc\Manager\WeaponManager.cs" />
     <Compile Include="Misc\Ammo\MP_Ammo.cs" />
     <Compile Include="Misc\Ammo\MP_AmmoCategory.cs" />
     <Compile Include="Misc\Ammo\MP_AmmoSet.cs" />
     <Compile Include="Misc\MP_Options.cs" />
+    <Compile Include="Misc\MP_Texture.cs" />
     <Compile Include="Misc\Patch\PatchBase.cs" />
+    <Compile Include="Misc\PropUtility.cs" />
     <Compile Include="Misc\WidgetsUtility.cs" />
+    <Compile Include="Misc\XMLUtility.cs" />
     <Compile Include="ModPostLoad.cs" />
     <Compile Include="ModSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -89,6 +90,7 @@
     <Compile Include="RenderRect\RenderRectBase.cs" />
     <Compile Include="RenderRect\Weapon\Rect_WeaponInfo.cs" />
     <Compile Include="Misc\Patch\AmmoPatch.cs" />
+    <Compile Include="Saveable\Ammo\AmmoDefSaveable.cs" />
     <Compile Include="Saveable\Ammo\ProjectileDefSaveable.cs" />
     <Compile Include="Saveable\Ammo\SecondaryDamageSaveable.cs" />
     <Compile Include="Saveable\Ammo\SecondaryExplosionSaveable.cs" />
@@ -100,7 +102,6 @@
     <Compile Include="Saveable\Weapon\ToolCESaveable.cs" />
     <Compile Include="Saveable\Weapon\VerbPropertiesCESaveable.cs" />
     <Compile Include="Misc\Patch\WeaponPatch.cs" />
-    <Compile Include="TestSaveable.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

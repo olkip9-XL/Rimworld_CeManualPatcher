@@ -9,231 +9,185 @@ using Verse;
 using System.Reflection;
 
 using CeManualPatcher.Saveable.Ammo;
+using System.Collections.ObjectModel;
+using CeManualPatcher.Misc;
 
 namespace CeManualPatcher.Saveable
 {
-    struct SecondaryDamageExpo
-    {
-        public string defName;
-        public int damageAmount;
-    }
 
-    struct ThingDefCountClassExpo
-    {
-        public string defName;
-        public int count;
-    }
     internal class ProjectileDefSaveable : SaveableBase
     {
         //字段
+        public static ReadOnlyCollection<string> propNames = new List<string>()
+        {
+                "armorPenetrationSharp",
+                "armorPenetrationBlunt",
+                "explosionRadius",
+                "suppressionFactor",
+        }.AsReadOnly();
+        private Dictionary<string, string> propDic = new Dictionary<string, string>();
+
         private string damageDefString;
-        public DamageDef damageDef
+        private DamageDef damageDef
         {
             get => DefDatabase<DamageDef>.GetNamed(damageDefString, false);
-            set => damageDefString = value.defName;
+            set => damageDefString = value?.defName ?? "null";
+        }
+        private GasType? postExplosionGasType;
+
+        private int damageAmountBase;
+
+        private FieldInfo fieldInfo_damageAmountBase => typeof(ProjectileProperties).GetField("damageAmountBase", BindingFlags.NonPublic | BindingFlags.Instance);
+
+        private SecondaryExplosionSaveable secondaryExplosion;
+
+        private SecondaryDamageSaveable secondaryDamage;
+
+        private ThingDefCountClassSaveable fragments;
+
+        private string label;
+
+        //private
+        private ProjectilePropertiesCE projectile
+        {
+            get
+            {
+                if (thingDef == null || thingDef.projectile == null)
+                {
+                    return null;
+                }
+                return thingDef.projectile as ProjectilePropertiesCE;
+            }
         }
 
-        public int damageAmountBase;
-        public float armorPenetrationSharp;
-        public float armorPenetrationBlunt;
-        public float explosionRadius;
-        public float suppressionFactor;
-        public GasType? postExplosionGasType;
-        public SecondaryExplosionSaveable secondaryExplosion;
+        //original
+        private ProjectilePropertiesCE originalData;
+        private string originalLabel;
 
-        private List<SecondaryDamageExpo> secondaryDamagesExpo = new List<SecondaryDamageExpo>();
-        public List<SecondaryDamage> secondaryDamages = new List<SecondaryDamage>();
-
-        private List<ThingDefCountClassExpo> fragmentsExpo = new List<ThingDefCountClassExpo>();
-        public List<ThingDefCountClass> fragments = new List<ThingDefCountClass>();
-
-        //public SecondaryDamageSaveable secondaryDamage;
-
-        //public ThingDefCountClassSaveable fragments;
-        private ProjectileDefSaveable Original => originalData as ProjectileDefSaveable;
-
-        public ProjectileDefSaveable()
+        public ProjectileDefSaveable() { }
+        public ProjectileDefSaveable(ThingDef thingDef)
         {
-        }
-
-        public ProjectileDefSaveable(ThingDef thingDef, bool isOriginal = false)
-        {
-            if(thingDef == null || 
-                thingDef.projectile == null ||
-                !(thingDef.projectile is ProjectilePropertiesCE))
+            this.thingDef = thingDef;
+            if (projectile == null)
             {
                 return;
             }
 
-            ProjectilePropertiesCE projectilePropertiesCE = thingDef.projectile as ProjectilePropertiesCE;
+            InitOriginalData();
 
-            this.damageDef = projectilePropertiesCE.damageDef;
-            this.damageAmountBase  = typeof(ProjectileProperties).GetField("damageAmountBase" , BindingFlags.NonPublic | BindingFlags.Instance).GetValue(projectilePropertiesCE) as int? ?? 0;
-            this.armorPenetrationSharp = projectilePropertiesCE.armorPenetrationSharp;
-            this.armorPenetrationBlunt = projectilePropertiesCE.armorPenetrationBlunt;
-            this.explosionRadius = projectilePropertiesCE.explosionRadius;
-            this.suppressionFactor = projectilePropertiesCE.suppressionFactor;
-            this.postExplosionGasType = projectilePropertiesCE.postExplosionGasType;
+            this.secondaryDamage = new SecondaryDamageSaveable(thingDef);
 
-            this.secondaryDamages.Clear();
-            this.secondaryDamages.AddRange(projectilePropertiesCE.secondaryDamage);
-
-            if (thingDef.HasComp<CompFragments>())
-            {
-                this.fragments.Clear();
-                this.fragments.AddRange(thingDef.GetCompProperties<CompProperties_Fragments>().fragments);
-            }
-
-            if(thingDef.HasComp<CompExplosiveCE>())
+            if (thingDef.HasComp<CompExplosiveCE>())
             {
                 this.secondaryExplosion = new SecondaryExplosionSaveable(thingDef);
             }
 
-            //this.secondaryDamage = new SecondaryDamageSaveable(thingDef);
-            //this.fragments = new ThingDefCountClassSaveable(thingDef);
-
-            if(!isOriginal)
+            if(thingDef.HasComp<CompFragments>())
             {
-                this.originalData = new ProjectileDefSaveable(thingDef, true);
+                this.fragments = new ThingDefCountClassSaveable(thingDef);
             }
         }
 
-        public override void Apply(ThingDef thingDef)
+        protected override void Apply()
         {
-            if (thingDef == null ||
-              thingDef.projectile == null ||
-              !(thingDef.projectile is ProjectilePropertiesCE))
+            if (projectile == null)
             {
                 return;
             }
 
-            ProjectilePropertiesCE projectilePropertiesCE = thingDef.projectile as ProjectilePropertiesCE;
-
-            projectilePropertiesCE.damageDef = this.damageDef;
-            typeof(ProjectileProperties).GetField("damageAmountBase", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(projectilePropertiesCE, this.damageAmountBase);
-            projectilePropertiesCE.armorPenetrationSharp = this.armorPenetrationSharp;
-            projectilePropertiesCE.armorPenetrationBlunt = this.armorPenetrationBlunt;
-            projectilePropertiesCE.explosionRadius = this.explosionRadius;
-            projectilePropertiesCE.suppressionFactor = this.suppressionFactor;
-            projectilePropertiesCE.postExplosionGasType = this.postExplosionGasType;
-
-            projectilePropertiesCE.secondaryDamage.Clear();
-            projectilePropertiesCE.secondaryDamage.AddRange(this.secondaryDamages);
-
-            if(thingDef.HasComp<CompFragments>())
+            foreach (var item in propNames)
             {
-                CompProperties_Fragments compProps = thingDef.GetCompProperties<CompProperties_Fragments>();
-                compProps.fragments.Clear();
-                compProps.fragments.AddRange(this.fragments);
+                PropUtility.SetPropValueString(projectile, item, this.propDic[item]);
             }
 
-            if(thingDef.HasComp<CompExplosiveCE>())
-            {
-                this.secondaryExplosion?.Apply(thingDef);
-            }
+            projectile.damageDef = damageDef;
+            projectile.postExplosionGasType = postExplosionGasType;
+            fieldInfo_damageAmountBase.SetValue(projectile, damageAmountBase);
 
-            //this.secondaryDamage?.Apply(thingDef);
-            //this.fragments?.Apply(thingDef);
+            thingDef.label = this.label;
         }
 
         public override void ExposeData()
         {
-            if (Scribe.mode == LoadSaveMode.Saving)
+            if (Scribe.mode == LoadSaveMode.Saving && projectile != null)
             {
-                secondaryDamagesExpo.Clear();
-                foreach (var damage in secondaryDamages)
+                foreach (var item in propNames)
                 {
-                    secondaryDamagesExpo.Add(new SecondaryDamageExpo
-                    {
-                        defName = damage.def.defName,
-                        damageAmount = damage.amount
-                    });
+                    propDic[item] = PropUtility.GetPropValue(projectile, item).ToString();
                 }
 
-                fragmentsExpo.Clear();
-                foreach (var fragment in fragments)
-                {
-                    fragmentsExpo.Add(new ThingDefCountClassExpo
-                    {
-                        defName = fragment.thingDef.defName,
-                        count = fragment.count
-                    });
-                }
+                this.damageDef = projectile.damageDef;
+                this.postExplosionGasType = projectile.postExplosionGasType;
+                this.damageAmountBase = (int)fieldInfo_damageAmountBase.GetValue(projectile);
+
+                this.label = thingDef.label;
             }
 
-            Scribe_Values.Look(ref damageDefString, "damageDefString");
-            Scribe_Values.Look(ref damageAmountBase, "damageAmountBase");
-            Scribe_Values.Look(ref armorPenetrationSharp, "armorPenetrationSharp");
-            Scribe_Values.Look(ref armorPenetrationBlunt, "armorPenetrationBlunt");
-            Scribe_Values.Look(ref explosionRadius, "explosionRadius");
-            Scribe_Values.Look(ref suppressionFactor, "suppressionFactor");
+            Scribe_Collections.Look(ref propDic, "propDic", LookMode.Value, LookMode.Value);
+            if (Scribe.mode == LoadSaveMode.LoadingVars)
+            {
+                if (propDic == null)
+                    propDic = new Dictionary<string, string>();
+            }
+            Scribe_Values.Look(ref label, "label");
+            Scribe_Values.Look(ref damageDefString, "damageDef");
             Scribe_Values.Look(ref postExplosionGasType, "postExplosionGasType");
+            Scribe_Values.Look(ref damageAmountBase, "damageAmountBase");
 
-            Scribe_Collections.Look(ref secondaryDamagesExpo, "secondaryDamages", LookMode.Value);
-            if(Scribe.mode == LoadSaveMode.LoadingVars && secondaryDamagesExpo == null)
-            {
-                secondaryDamagesExpo = new List<SecondaryDamageExpo>();
-            }
-
-            Scribe_Collections.Look(ref fragmentsExpo, "fragments", LookMode.Value);
-            if (Scribe.mode == LoadSaveMode.LoadingVars && fragmentsExpo == null)
-            {
-                fragmentsExpo = new List<ThingDefCountClassExpo>();
-            }
-
-            Scribe_Deep.Look(ref secondaryExplosion, "secondaryExplosion");
+            Scribe_Deep.Look(ref secondaryDamage, "secondaryDamage");
             Scribe_Deep.Look(ref fragments, "fragments");
+            Scribe_Deep.Look(ref secondaryExplosion, "secondaryExplosion");
         }
 
-        public override void Reset(ThingDef thingDef)
+        public override void Reset()
         {
-            if (Original == null)
+            if (projectile == null)
             {
                 return;
             }
 
-            this.secondaryExplosion?.Reset(thingDef);
+            PropUtility.CopyPropValue(originalData, projectile);
 
-            Original.Apply(thingDef);
+            thingDef.label = originalLabel;
+
+            //damageAmountBase
+            fieldInfo_damageAmountBase.SetValue(projectile, fieldInfo_damageAmountBase.GetValue(originalData));
+
+            this.secondaryExplosion?.Reset();
+            this.secondaryDamage?.Reset();
+            this.fragments?.Reset();
         }
 
         public override void PostLoadInit(ThingDef thingDef)
         {
-            if(!secondaryDamagesExpo.NullOrEmpty())
+            this.thingDef = thingDef;
+            if (projectile == null)
             {
-                secondaryDamages.Clear();
-                foreach (var damage in secondaryDamagesExpo)
-                {
-                    DamageDef damageDef = DefDatabase<DamageDef>.GetNamed(damage.defName, false);
-                    if (damageDef != null)
-                    {
-                        secondaryDamages.Add(new SecondaryDamage()
-                        {
-                            def = damageDef,
-                            amount = damage.damageAmount
-                        });
-                    }
-                }
+                return;
             }
 
-            if(!fragmentsExpo.NullOrEmpty())
-            {
-                fragments.Clear();
-                foreach (var fragment in fragmentsExpo)
-                {
-                    ThingDef thing = DefDatabase<ThingDef>.GetNamed(fragment.defName, false);
-                    if (thing != null)
-                    {
-                        fragments.Add(new ThingDefCountClass()
-                        {
-                            thingDef = thing,
-                            count = fragment.count
-                        });
-                    }
-                }
-            }
+            InitOriginalData();
 
-            this.originalData = new ProjectileDefSaveable(thingDef, true);
+            secondaryExplosion?.PostLoadInit(thingDef);
+            secondaryDamage?.PostLoadInit(thingDef);
+            fragments?.PostLoadInit(thingDef);
+
+            this.Apply();
+        }
+
+        protected override void InitOriginalData()
+        {
+            if (projectile == null)
+            {
+                return;
+            }
+            originalData = new ProjectilePropertiesCE();
+            PropUtility.CopyPropValue(projectile, originalData);
+
+            this.originalLabel = thingDef.label;
+
+            //damageAmountBase
+            fieldInfo_damageAmountBase.SetValue(originalData, fieldInfo_damageAmountBase.GetValue(projectile));
         }
     }
 }

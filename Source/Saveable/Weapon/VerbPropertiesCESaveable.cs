@@ -1,4 +1,5 @@
 ﻿using CombatExtended;
+using RimWorld;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,153 +7,222 @@ using System.Text;
 using System.Threading.Tasks;
 using Verse;
 
+using System.Reflection;
+using System.Collections.ObjectModel;
+using CeManualPatcher.Misc;
+
 namespace CeManualPatcher.Saveable
 {
     internal class VerbPropertiesCESaveable : SaveableBase
     {
-        //From CE
+        public static ReadOnlyCollection<string> propNames = new List<string>()
+        {
+                "ammoConsumedPerShotCount",
+                "recoilAmount",
+                "indirectFirePenalty",
+                "circularError",
+                "ticksToTruePosition",
+                "ejectsCasings",
+                "ignorePartialLoSBlocker",
+                "interruptibleBurst",
+                "hasStandardCommand",
+                "warmupTime",
+                "range",
+                "burstShotCount",
+                "ticksBetweenBurstShots",
+                "muzzleFlashScale"
+        }.AsReadOnly();
+        private Dictionary<string, string> propDic = new Dictionary<string, string>();
+
         public RecoilPattern recoilPattern = RecoilPattern.None;
 
-        public int ammoConsumedPerShotCount = 1;
+        private string defaultProjectileString;
+        private ThingDef defaultProjectile
+        {
+            get => DefDatabase<ThingDef>.GetNamed(defaultProjectileString, false);
+            set => defaultProjectileString = value?.defName ?? "null";
+        }
 
-        public float recoilAmount = 0f;
+        private string soundCastString = "";
+        private SoundDef soundCast
+        {
+            get => DefDatabase<SoundDef>.GetNamed(soundCastString, false);
+            set => soundCastString = value?.defName ?? "null";
+        }
 
-        public float indirectFirePenalty = 0f;
+        private string soundCastTailString = "";
+        private SoundDef soundCastTail
+        {
+            get => DefDatabase<SoundDef>.GetNamed(soundCastTailString, false);
+            set => soundCastTailString = value?.defName ?? "null";
+        }
 
-        public float circularError = 0f;
+        private string bipodString = "";
 
-        public int ticksToTruePosition = 5;
+        private BipodCategoryDef bipodDef
+        {
+            get => DefDatabase<BipodCategoryDef>.GetNamed(bipodString, false);
+            set => bipodString = value?.defName ?? "null";
+        }
 
-        public bool ejectsCasings = true;
 
-        public bool ignorePartialLoSBlocker = false;
-
-        public bool interruptibleBurst = true;
-
-        //From Vanilla
-        public bool hasStandardCommand = true;
-
-        public ThingDef defaultProjectile = null;
-
-        public float warmupTime = 0f;
-
-        public float range = 0f;
-
-        public int burstShotCount;
-
-        public int ticksBetweenBurstShots;
-
-        public SoundDef soundCast = null;
-
-        public SoundDef soundCastTail = null;
-
-        public float muzzleFlashScale = 0f;
+        private Type verbClass;
 
         //私有
-        private VerbPropertiesCESaveable Original => (VerbPropertiesCESaveable)originalData;
-        internal VerbPropertiesCESaveable() { }
-        internal VerbPropertiesCESaveable(VerbPropertiesCE verbPropertiesCE, bool isOrignal = false)
+        private VerbPropertiesCE verbPropertiesCE
         {
-            //CE
-            this.recoilPattern = verbPropertiesCE.recoilPattern;
-            this.ammoConsumedPerShotCount = verbPropertiesCE.ammoConsumedPerShotCount;
-            this.recoilAmount = verbPropertiesCE.recoilAmount;
-            this.indirectFirePenalty = verbPropertiesCE.indirectFirePenalty;
-            this.circularError = verbPropertiesCE.circularError;
-            this.ticksToTruePosition = verbPropertiesCE.ticksToTruePosition;
-            this.ejectsCasings = verbPropertiesCE.ejectsCasings;
-            this.ignorePartialLoSBlocker = verbPropertiesCE.ignorePartialLoSBlocker;
-            this.interruptibleBurst = verbPropertiesCE.interruptibleBurst;
-
-            //vanilla
-            this.hasStandardCommand = verbPropertiesCE.hasStandardCommand;
-            this.defaultProjectile = verbPropertiesCE.defaultProjectile;
-            this.warmupTime = verbPropertiesCE.warmupTime;
-            this.range = verbPropertiesCE.range;
-            this.burstShotCount = verbPropertiesCE.burstShotCount;
-            this.ticksBetweenBurstShots = verbPropertiesCE.ticksBetweenBurstShots;
-            this.soundCast = verbPropertiesCE.soundCast;
-            this.soundCastTail = verbPropertiesCE.soundCastTail;
-            this.muzzleFlashScale = verbPropertiesCE.muzzleFlashScale;
-
-
-            if (!isOrignal)
-                this.originalData = new VerbPropertiesCESaveable(verbPropertiesCE, true);
+            get
+            {
+                if (thingDef == null)
+                {
+                    return null;
+                }
+                if (thingDef.Verbs.NullOrEmpty())
+                {
+                    return null;
+                }
+                return thingDef.Verbs[0] as VerbPropertiesCE;
+            }
         }
 
-        public override void Apply(ThingDef thingDef)
+        private VerbProperties originalData;
+        private BipodCategoryDef originalBipodDef;
+
+        internal VerbPropertiesCESaveable() { }
+        internal VerbPropertiesCESaveable(ThingDef thingDef, bool forceAdd = false)
         {
-            VerbPropertiesCE verbProperties = thingDef.Verbs[0] as VerbPropertiesCE;
-            if (verbProperties == null)
+            this.thingDef = thingDef;
+            if (verbPropertiesCE == null && !forceAdd)
             {
-                Log.Error("VerbPropertiesCE not found for thing " + thingDef.defName);
                 return;
             }
 
-            //CE
-            verbProperties.recoilPattern = this.recoilPattern;
-            verbProperties.ammoConsumedPerShotCount = this.ammoConsumedPerShotCount;
-            verbProperties.recoilAmount = this.recoilAmount;
-            verbProperties.indirectFirePenalty = this.indirectFirePenalty;
-            verbProperties.circularError = this.circularError;
-            verbProperties.ticksToTruePosition = this.ticksToTruePosition;
-            verbProperties.ejectsCasings = this.ejectsCasings;
-            verbProperties.ignorePartialLoSBlocker = this.ignorePartialLoSBlocker;
-            verbProperties.interruptibleBurst = this.interruptibleBurst;
-
-            //vanilla
-            verbProperties.hasStandardCommand = this.hasStandardCommand;
-            verbProperties.defaultProjectile = this.defaultProjectile;
-            verbProperties.warmupTime = this.warmupTime;
-            verbProperties.range = this.range;
-            verbProperties.burstShotCount = this.burstShotCount;
-            verbProperties.ticksBetweenBurstShots = this.ticksBetweenBurstShots;
-            verbProperties.soundCast = this.soundCast;
-            verbProperties.soundCastTail = this.soundCastTail;
-            verbProperties.muzzleFlashScale = this.muzzleFlashScale;
+            InitOriginalData();
         }
+        protected override void Apply()
+        {
+            if (verbPropertiesCE == null)
+                return;
 
+            //apply
+            foreach (var item in propNames)
+            {
+                PropUtility.SetPropValueString(verbPropertiesCE, item, this.propDic[item]);
+            }
+
+            verbPropertiesCE.defaultProjectile = this.defaultProjectile;
+            verbPropertiesCE.recoilPattern = this.recoilPattern;
+            verbPropertiesCE.verbClass = this.verbClass;
+            verbPropertiesCE.soundCast = this.soundCast;
+            verbPropertiesCE.soundCastTail = this.soundCastTail;
+
+            SetBipod(this.bipodDef);
+        }
         public override void ExposeData()
         {
-            //CE
-            Scribe_Values.Look(ref this.recoilPattern, "recoilPattern", RecoilPattern.None);
-            Scribe_Values.Look(ref this.ammoConsumedPerShotCount, "ammoConsumedPerShotCount", 1);
-            Scribe_Values.Look(ref this.recoilAmount, "recoilAmount", 0f);
-            Scribe_Values.Look(ref this.indirectFirePenalty, "indirectFirePenalty", 0f);
-            Scribe_Values.Look(ref this.circularError, "circularError", 0f);
-            Scribe_Values.Look(ref this.ticksToTruePosition, "ticksToTruePosition", 5);
-            Scribe_Values.Look(ref this.ejectsCasings, "ejectsCasings", true);
-            Scribe_Values.Look(ref this.ignorePartialLoSBlocker, "ignorePartialLoSBlocker", false);
-            Scribe_Values.Look(ref this.interruptibleBurst, "interruptibleBurst", true);
+            if (Scribe.mode == LoadSaveMode.Saving && verbPropertiesCE != null)
+            {
+                //保存数据
+                if (propDic == null)
+                {
+                    propDic = new Dictionary<string, string>();
+                }
+                propDic.Clear();
+                foreach (var item in propNames)
+                {
+                    this.propDic[item] = PropUtility.GetPropValue(verbPropertiesCE, item).ToString();
+                }
 
-            //vanilla
-            Scribe_Values.Look(ref this.hasStandardCommand, "hasStandardCommand", true);
-            Scribe_Defs.Look(ref this.defaultProjectile, "defaultProjectile");
-            Scribe_Values.Look(ref this.warmupTime, "warmupTime", 0f);
-            Scribe_Values.Look(ref this.range, "range", 0f);
-            Scribe_Values.Look(ref this.burstShotCount, "burstShotCount", 0);
-            Scribe_Values.Look(ref this.ticksBetweenBurstShots, "ticksBetweenBurstShots", 0);
-            Scribe_Defs.Look(ref this.soundCast, "soundCast");
-            Scribe_Defs.Look(ref this.soundCastTail, "soundCastTail");
-            Scribe_Values.Look(ref this.muzzleFlashScale, "muzzleFlashScale", 0f);
+                this.defaultProjectile = verbPropertiesCE.defaultProjectile;
+                this.recoilPattern = verbPropertiesCE.recoilPattern;
+                this.verbClass = verbPropertiesCE.verbClass;
+
+                this.soundCast = verbPropertiesCE.soundCast;
+                this.soundCastTail = verbPropertiesCE.soundCastTail;
+
+                this.bipodDef = GetBipod();
+            }
+
+            Scribe_Values.Look(ref defaultProjectileString, "defaultProjectile");
+            Scribe_Values.Look(ref recoilPattern, "recoilPattern");
+
+            Scribe_Collections.Look(ref propDic, "propDic", LookMode.Value, LookMode.Value);
+            if (Scribe.mode == LoadSaveMode.LoadingVars)
+            {
+                if (propDic == null)
+                {
+                    propDic = new Dictionary<string, string>();
+                }
+            }
+
+            Scribe_Values.Look(ref verbClass, "verbClass", null);
+
+            Scribe_Values.Look(ref soundCastString, "soundCast");
+            Scribe_Values.Look(ref soundCastTailString, "soundCastTail");
+            Scribe_Values.Look(ref bipodString, "bipodDef");
         }
-
-        public override void Reset(ThingDef thingDef)
+        public override void Reset()
         {
-            if (this.Original == null)
+            if (verbPropertiesCE == null)
+                return;
+
+            thingDef.Verbs[0] = this.originalData;
+
+            SetBipod(originalBipodDef);
+
+            InitOriginalData();
+        }
+        public override void PostLoadInit(ThingDef thingDef)
+        {
+            this.thingDef = thingDef;
+
+            if (thingDef.Verbs.NullOrEmpty())
+                return;
+
+
+            InitOriginalData();
+
+            if (!thingDef.Verbs.NullOrEmpty() && !(thingDef.Verbs[0] is VerbPropertiesCE))
+            {
+                thingDef.Verbs[0] = PropUtility.ConvertToChild<VerbProperties, VerbPropertiesCE>(thingDef.Verbs[0]);
+            }
+
+            this.Apply();
+        }
+        protected override void InitOriginalData()
+        {
+            this.originalData = new VerbProperties();
+            if (verbPropertiesCE != null)
+                this.originalData = new VerbPropertiesCE();
+
+            PropUtility.CopyPropValue(thingDef.Verbs[0], this.originalData);
+
+            this.originalBipodDef = GetBipod();
+        }
+        
+        private void SetBipod(BipodCategoryDef bipodDef)
+        {
+            if(thingDef== null && thingDef.weaponTags==null)
             {
                 return;
             }
 
-            Original.Apply(thingDef);
+            thingDef.weaponTags.RemoveWhere(x => MP_Options.BipodId.Contains(x));
+            if(bipodDef != null)
+                thingDef.weaponTags.Add(bipodDef.bipod_id);
         }
 
-        public override void PostLoadInit(ThingDef thingDef)
+        private BipodCategoryDef GetBipod()
         {
-            if (!thingDef.Verbs.NullOrEmpty())
+            if (thingDef == null && thingDef.weaponTags.NullOrEmpty())
             {
-                this.originalData = new VerbPropertiesCESaveable(thingDef.Verbs[0] as VerbPropertiesCE, true);
+                return null;
             }
+
+            string bipodId = thingDef.weaponTags.FirstOrDefault(x => MP_Options.BipodId.Contains(x));
+
+            return MP_Options.bipodCategoryDefs.FirstOrDefault(x => x.bipod_id == bipodId);
         }
+    
     }
 }

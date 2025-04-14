@@ -1,6 +1,8 @@
-﻿using CombatExtended;
+﻿using CeManualPatcher.Misc;
+using CombatExtended;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,76 +12,123 @@ namespace CeManualPatcher.Saveable
 {
     internal class CompFireModesSaveable : SaveableBase
     {
-        public int aimedBurstShotCount = -1;
-
-        public bool aiUseBurstMode = false;
-
-        public bool noSingleShot = false;
-
-        public bool noSnapshot = false;
+        //字段
+        public static ReadOnlyCollection<string> propNames = new List<string>()
+        {
+               "aimedBurstShotCount",
+                "aiUseBurstMode",
+                "noSingleShot",
+                "noSnapshot",
+        }.AsReadOnly();
+        private Dictionary<string, string> propDic = new Dictionary<string, string>();
 
         public AimMode aiAimMode = AimMode.AimedShot;
 
-        private CompFireModesSaveable Original => originalData as CompFireModesSaveable;
-        public CompFireModesSaveable() { }
 
-        public CompFireModesSaveable(ThingDef thingDef, bool isOriginal = false) : base(thingDef, isOriginal)
+        //private
+        private CompProperties_FireModes compProps
         {
-            if(thingDef == null || !thingDef.HasComp<CompFireModes>())
+            get
             {
-                return;
+                if (thingDef == null || !thingDef.HasComp<CompFireModes>())
+                {
+                    return null;
+                }
+                return thingDef.GetCompProperties<CompProperties_FireModes>();
             }
-
-            CompProperties_FireModes props = thingDef.GetCompProperties<CompProperties_FireModes>();
-
-            aimedBurstShotCount = props.aimedBurstShotCount;
-            aiUseBurstMode = props.aiUseBurstMode;
-            noSingleShot = props.noSingleShot;
-            noSnapshot = props.noSnapshot;
-            aiAimMode = props.aiAimMode;
-
-            if (!isOriginal)
-                originalData = new CompFireModesSaveable(thingDef, true);
         }
 
-        public override void Apply(ThingDef thingDef)
+        private CompProperties_FireModes originalData;
+        public CompFireModesSaveable() { }
+
+        public CompFireModesSaveable(ThingDef thingDef, bool forceAdd = false)
         {
-            if (thingDef == null || !thingDef.HasComp<CompFireModes>())
+            this.thingDef = thingDef;
+            if (compProps == null && !forceAdd)
             {
                 return;
             }
-            CompProperties_FireModes props = thingDef.GetCompProperties<CompProperties_FireModes>();
-            
-            props.aimedBurstShotCount = aimedBurstShotCount;
-            props.aiUseBurstMode = aiUseBurstMode;
-            props.noSingleShot = noSingleShot;
-            props.noSnapshot = noSnapshot;
-            props.aiAimMode = aiAimMode;
+
+            InitOriginalData();
+        }
+
+        protected override void Apply()
+        {
+            if (compProps == null)
+            {
+                return;
+            }
+
+            foreach (var item in propNames)
+            {
+                PropUtility.SetPropValueString(compProps, item, this.propDic[item]);
+            }
+
+            compProps.aiAimMode = aiAimMode;
         }
 
         public override void ExposeData()
         {
-            Scribe_Values.Look(ref aimedBurstShotCount, "aimedBurstShotCount", -1);
-            Scribe_Values.Look(ref aiUseBurstMode, "aiUseBurstMode", false);
-            Scribe_Values.Look(ref noSingleShot, "noSingleShot", false);
-            Scribe_Values.Look(ref noSnapshot, "noSnapshot", false);
+            if (Scribe.mode == LoadSaveMode.Saving && compProps!=null)
+            {
+                foreach (var item in propNames)
+                {
+                    propDic[item] = PropUtility.GetPropValue(compProps, item).ToString();
+                }
+                this.aiAimMode = compProps.aiAimMode;
+            }
+            Scribe_Collections.Look(ref propDic, "compFireModes", LookMode.Value, LookMode.Value);
             Scribe_Values.Look(ref aiAimMode, "aiAimMode", AimMode.AimedShot);
+
+            if (Scribe.mode == LoadSaveMode.LoadingVars)
+            {
+                if (propDic == null)
+                {
+                    propDic = new Dictionary<string, string>();
+                }
+            }
+
         }
 
-        public override void Reset(ThingDef thingDef)
+        public override void Reset()
         {
-            if(Original == null || thingDef == null)
+            if (compProps == null)
             {
                 return;
             }
 
-            Original.Apply(thingDef);
+            if(originalData == null)
+            {
+                thingDef.comps.RemoveWhere(x => x is CompProperties_FireModes);
+            }
+            else
+            {
+                PropUtility.CopyPropValue(originalData, compProps);
+            }
         }
 
         public override void PostLoadInit(ThingDef thingDef)
         {
+            this.thingDef = thingDef;
 
-            this.originalData = new CompFireModesSaveable(thingDef, true);
+            InitOriginalData();
+
+            if(!thingDef.HasComp<CompFireModes>())
+            {
+                thingDef.comps.Add(new CompProperties_FireModes());
+            }
+
+            this.Apply();
+        }
+
+        protected override void InitOriginalData()
+        {
+            if (compProps == null)
+            {
+                return;
+            }
+            originalData = new CompProperties_FireModes();
+            PropUtility.CopyPropValue(compProps, originalData);
         }
     }
 }

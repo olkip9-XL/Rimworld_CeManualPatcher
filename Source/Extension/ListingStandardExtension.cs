@@ -15,27 +15,6 @@ namespace CeManualPatcher.Extension
 {
     public static class ListingStandardExtension
     {
-        public static void TextfieldX<T>(this Listing_Standard listing, string label, float fieldWidth, T value, Action<T> onChange, float indent = 0f, string tooltip = null, float min = 0f, float max = 1E+09f) where T : struct
-        {
-            Rect rect = listing.GetRect(Text.LineHeight);
-            rect.x += indent;
-            rect.width -= indent;
-
-            Rect fieldRect = rect.RightPartPixels(fieldWidth);
-
-            Widgets.Label(rect, label);
-          
-            WidgetsUtility.TextFieldOnChange(fieldRect, value, onChange, min, max);
-
-            Widgets.DrawHighlightIfMouseover(rect);
-            if (!tooltip.NullOrEmpty())
-            {
-                TooltipHandler.TipRegion(rect, tooltip);
-            }
-
-            listing.Gap(listing.verticalSpacing);
-        }
-
         public static void SearchBar(this Listing_Standard listing, ref string keyWords)
         {
             Rect rect = listing.GetRect(Text.LineHeight);
@@ -68,27 +47,6 @@ namespace CeManualPatcher.Extension
             }
             listing.Gap(listing.verticalSpacing);
         }
-        
-        public static void ChenkBoxX(this Listing_Standard listing, string label,  bool value, Action<bool> onChange, float indent = 0f, string tooltip = null)
-        {
-            Rect rect = listing.GetRect(Text.LineHeight);
-            rect.x += indent;
-            rect.width -= indent;
-
-            bool tempValue = value;
-            Widgets.CheckboxLabeled(rect, label, ref tempValue);
-            if(tempValue != value)
-            {
-                onChange(tempValue);
-            }
-            Widgets.DrawHighlightIfMouseover(rect);
-            if (!tooltip.NullOrEmpty())
-            {
-                TooltipHandler.TipRegion(rect, tooltip);
-            }
-            listing.Gap(listing.verticalSpacing);
-        }
-        
         public static void TextX(this Listing_Standard listing, string label,float inputWidth, ref string value, float indent = 0f, string tooltip = null)
         {
             Rect rect = listing.GetRect(Text.LineHeight);
@@ -107,31 +65,6 @@ namespace CeManualPatcher.Extension
             }
             listing.Gap(listing.verticalSpacing);
         }
-
-        //专用
-        public static void StatDefX(this Listing_Standard listing, StatModifier statModifier, float inputWidth, Action<float> onChange, Action onDelete, float indent = 0f, string tooltip = null)
-        {
-            Rect rect = listing.GetRect(Text.LineHeight);
-            rect.x += indent;
-            rect.width -= indent;
-
-            Rect buttonRect = rect.RightPartPixels(rect.height);
-            Rect fieldRect = new Rect { x = rect.x + rect.width - rect.height - 6f - inputWidth, y = rect.y, width = inputWidth, height = rect.height };
-
-            Widgets.Label(rect, statModifier.stat.LabelCap);
-
-            WidgetsUtility.TextFieldOnChange(fieldRect, statModifier.value, onChange);
-
-            if (Widgets.ButtonImage(buttonRect, TexButton.Delete))
-            {
-                onDelete();
-            }
-
-            Widgets.DrawHighlightIfMouseover(rect);
-
-            listing.Gap(listing.verticalSpacing);
-        }
-
         public static void DamageRow(this Listing_Standard listing, string damageLabel, float buttonWidth, Action onClick, int damageAmount, float fieldWidth, Action<int> onChange, Action onDelete = null, float indent = 0f)
         {
             Rect rect = listing.GetRect(Text.LineHeight);
@@ -149,7 +82,7 @@ namespace CeManualPatcher.Extension
                 onClick();
             }
 
-            WidgetsUtility.TextFieldOnChange(fieldRect, damageAmount, onChange);
+            WidgetsUtility.TextFieldOnChange(fieldRect, ref damageAmount, onChange);
 
             if(onDelete != null)
             {
@@ -162,48 +95,130 @@ namespace CeManualPatcher.Extension
             listing.Gap(listing.verticalSpacing);
         }
 
-        public static void TestField(this Listing_Standard listing, FieldInfoWarpper warpper, float indent = 0f, string tooltip = null, float min = 0f, float max = 1E+09f)
+        //*********************************************
+        public static void FieldLine<T>(this Listing_Standard listing, string label, ref T value, float fieldWidth = 100f, string tooltip = null, float indent = 0, float min = float.MinValue, float max = float.MaxValue) where T : struct
         {
             Rect rect = listing.GetRect(Text.LineHeight);
             rect.x += indent;
             rect.width -= indent;
 
-            Rect fieldRect = rect.RightPartPixels(warpper.fieldWidth);
+            Widgets.Label(rect, label);
 
-            if (warpper.FieldType == typeof(int))
+            if (value.GetType() == typeof(bool))
             {
-                Widgets.Label(rect, warpper.Label);
-                int tempValue = (int)warpper.Value;
-                WidgetsUtility.TextFieldOnChange(fieldRect, tempValue, newValue => warpper.ValueSetter(newValue), min, max);
-            }
-            else if (warpper.FieldType == typeof(float))
-            {
-                Widgets.Label(rect, warpper.Label);
-                float tempValue = (float)warpper.Value;
-                WidgetsUtility.TextFieldOnChange(fieldRect, tempValue, newValue => warpper.ValueSetter(newValue), min, max);
-            }
-            else if (warpper.FieldType == typeof(bool))
-            {
-                bool tempValue = (bool)warpper.Value;
-                Widgets.CheckboxLabeled(rect, warpper.Label, ref tempValue);
-                warpper.ValueSetter(tempValue);
+                Rect fieldRect = rect.RightPartPixels(rect.height);
+                bool temp = (bool)(object)value;
+
+                Widgets.Checkbox(new Vector2(fieldRect.x, fieldRect.y), ref temp);
+                value = (T)(object)temp;
             }
             else
             {
-                Widgets.Label(rect, warpper.Label);
-                if (Widgets.ButtonText(fieldRect, warpper.ValueLabelGetter(warpper.Value)))
+                Rect fieldRect = rect.RightPartPixels(fieldWidth);
+                string buffer = value.ToString();
+
+                Widgets.TextFieldNumeric(fieldRect, ref value, ref buffer, min, max);
+
+                if (buffer.NullOrEmpty())
                 {
-                    warpper.ValueSetter(warpper.instance);
+                    value = default(T);
                 }
             }
 
             Widgets.DrawHighlightIfMouseover(rect);
+
             if (!tooltip.NullOrEmpty())
             {
                 TooltipHandler.TipRegion(rect, tooltip);
             }
 
             listing.Gap(listing.verticalSpacing);
+        }
+        public static void ButtonTextLine(this Listing_Standard listing, string label, string buttonLabel, Action onClick, float fieldWidth = 100f, string tooltip = null, float indent = 0)
+        {
+            Rect rect = listing.GetRect(Text.LineHeight);
+            rect.x += indent;
+            rect.width -= indent;
+
+            Widgets.Label(rect, label);
+            Rect fieldRect = rect.RightPartPixels(fieldWidth);
+            if (Widgets.ButtonText(fieldRect, buttonLabel))
+            {
+                onClick();
+            }
+            Widgets.DrawHighlightIfMouseover(rect);
+            if (!tooltip.NullOrEmpty())
+            {
+                TooltipHandler.TipRegion(rect, tooltip);
+            }
+            listing.Gap(listing.verticalSpacing);
+        }
+        public static void ButtonImageLine(this Listing_Standard listing, string label, Texture2D buttonImage, Action onClick,  string tooltip = null, float indent = 0)
+        {
+            Rect rect = listing.GetRect(Text.LineHeight);
+            rect.x += indent;
+            rect.width -= indent;
+
+            Widgets.Label(rect, label);
+            Rect fieldRect = rect.RightPartPixels(rect.height);
+            if (Widgets.ButtonImage(fieldRect, buttonImage))
+            {
+                onClick();
+            }
+            Widgets.DrawHighlightIfMouseover(rect);
+            if (!tooltip.NullOrEmpty())
+            {
+                TooltipHandler.TipRegion(rect, tooltip);
+            }
+            listing.Gap(listing.verticalSpacing);
+        }
+        public static void FieldLineReflexion(this Listing_Standard listing, string label, string fieldName, object instance, Action<object> onChange, float fieldWidth = 100f, string tooltip = null, float indent = 0, float min =float.MinValue, float max = float.MaxValue)
+        {
+            FieldInfo fieldInfo = instance.GetType().GetField(fieldName);
+            if(fieldInfo == null)
+            {
+                Log.Error($"Field {fieldName} not found in {instance.GetType()}");
+                return;
+            }
+
+            Type type = fieldInfo.FieldType;
+            object value = fieldInfo.GetValue(instance);
+
+            if(type == typeof(int))
+            {
+                int intValue = (int)value;
+                listing.FieldLine(label, ref intValue, fieldWidth, tooltip, indent, min, max);
+                if(intValue != (int)value)
+                {
+                    onChange(intValue);
+                    fieldInfo.SetValue(instance, intValue);
+                }
+            }
+            else if (type == typeof(float))
+            {
+                float floatValue = (float)value;
+                listing.FieldLine(label, ref floatValue, fieldWidth, tooltip, indent, min, max);
+                if (floatValue != (float)value)
+                {
+                    onChange(floatValue);
+                    fieldInfo.SetValue(instance, floatValue);
+                }
+            }
+            else if (type == typeof(bool))
+            {
+                bool boolValue = (bool)value;
+                listing.FieldLine(label, ref boolValue, fieldWidth, tooltip, indent);
+                if(boolValue != (bool)value)
+                {
+                    onChange(boolValue);
+                    fieldInfo.SetValue(instance, boolValue);
+                }
+            }
+            else
+            {
+                Log.Error($"Unsupported type {type} for field {fieldName}");
+            }
+
         }
 
     }

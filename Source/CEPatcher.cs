@@ -1,36 +1,38 @@
-﻿using CeManualPatcher.Saveable;
+﻿using CeManualPatcher.Manager;
+using CeManualPatcher.Misc;
+using CeManualPatcher.Saveable;
 using CombatExtended;
 using RimWorld;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 using Verse;
 
 namespace CeManualPatcher
 {
     public class CEPatcher : IExposable
     {
-        public ThingDef thingDef;
+        private string thingDefString;
+        public ThingDef thingDef
+        {
+            get => DefDatabase<ThingDef>.GetNamed(thingDefString, false);
+            set => thingDefString = value?.defName ?? "null";
+        }
+
+        private CEPatchManager patchManager => CEPatchManager.instance;
+        private WeaponManager weaponManager => WeaponManager.instance;
 
         //patch data
-        internal VerbPropertiesCESaveable verb_patch;
+        internal List<StatModifier> stats = new List<StatModifier>();
+        internal VerbPropertiesCE verbProperties;
+        internal List<Tool> tools = new List<Tool>();
+        internal CompProperties_AmmoUser ammoUser;
+        internal CompProperties_FireModes fireMode;
 
-        internal List<StatSaveable> stat_patches = new List<StatSaveable>();
-
-        internal List<ToolCESaveable> tool_patches = new List<ToolCESaveable>();
-
-        internal CompAmmoUserSaveable ammoUser_patch;
-
-        internal CompFireModesSaveable fireMode_patch;
-
-        //original data
-        VerbProperties verb;
-
-        List<StatModifier> stats = new List<StatModifier>();
-
-        List<Tool> tools = new List<Tool>();
 
         public CEPatcher() { }
         public CEPatcher(ThingDef thingDef)
@@ -40,116 +42,10 @@ namespace CeManualPatcher
             if (thingDef == null)
                 return;
 
-            //init original data
-            InitOriginalData();
-        }
+            weaponManager.Reset(thingDef);
+            weaponManager.GetWeaponPatch(thingDef);
 
-
-        private void InitOriginalData() {
-            //statBases
-            if (thingDef.statBases != null)
-            {
-                this.stats.Clear();
-                this.stats.AddRange(thingDef.statBases);
-
-                //vanilla stat
-                foreach (var item in this.stats)
-                {
-                    stat_patches.Add(new StatSaveable(item));
-                }
-
-                //CE stat
-                List<StatDef> patchStats = new List<StatDef>()
-                {
-                    StatDefOf.WorkToMake,
-                    StatDefOf.Mass,
-                    StatDefOf.RangedWeapon_Cooldown,
-
-                    CE_StatDefOf.SightsEfficiency,
-                    CE_StatDefOf.ShotSpread,
-                    CE_StatDefOf.SwayFactor,
-                    CE_StatDefOf.Bulk,
-                };
-
-                foreach (StatDef item in patchStats)
-                {
-                    StatSaveable statSaveable = new StatSaveable()
-                    {
-                        StatDef = item,
-                    };
-                    this.stat_patches.Add(statSaveable);
-                }
-
-            }
-
-            //verbs
-            if (!thingDef.Verbs.NullOrEmpty() && !(thingDef.Verbs[0] is VerbPropertiesCE))
-            {
-                this.verb = thingDef.Verbs[0];
-
-                this.verb_patch = new VerbPropertiesCESaveable()
-                {
-                    //set vanilla data
-                    hasStandardCommand = this.verb.hasStandardCommand,
-                    defaultProjectile = MP_ProjectileDefOf.Bullet_556x45mmNATO_FMJ,
-                    warmupTime = this.verb.warmupTime,
-                    range = this.verb.range,
-                    burstShotCount = this.verb.burstShotCount,
-                    ticksBetweenBurstShots = this.verb.ticksBetweenBurstShots,
-                    soundCast = this.verb.soundCast,
-                    soundCastTail = this.verb.soundCastTail,
-                    muzzleFlashScale = this.verb.muzzleFlashScale
-                };
-            }
-
-            //tools
-            if (thingDef.tools != null && thingDef.tools.Any(x => !(x is ToolCE)))
-            {
-                this.tools.Clear();
-                this.tools.AddRange(thingDef.tools);
-
-                this.tool_patches.Clear();
-
-                foreach (var item in this.tools)
-                {
-                    if (item is ToolCE toolCE)
-                    {
-                        tool_patches.Add(new ToolCESaveable(toolCE));
-                    }
-                    else
-                    {
-                        tool_patches.Add(new ToolCESaveable()
-                        {
-                            id = item.id,
-                            label = item.label,
-                            power = item.power,
-                            cooldownTime = item.cooldownTime,
-                            linkedBodyPartsGroup = item.linkedBodyPartsGroup,
-                            alwaysTreatAsWeapon = item.alwaysTreatAsWeapon,
-                            chanceFactor = item.chanceFactor,
-                        });
-                    }
-                }
-
-            }
-
-
-            //comps
-            if (thingDef.comps != null)
-            {
-                if (!thingDef.HasComp<CompAmmoUser>())
-                {
-                    ammoUser_patch = new CompAmmoUserSaveable()
-                    {
-                        ammoSet = MP_AmmoSetDefOf.AmmoSet_556x45mmNATO,
-                    };
-                }
-
-                if (!thingDef.HasComp<CompFireModes>())
-                {
-                    fireMode_patch = new CompFireModesSaveable();
-                }
-            }
+            InitNewData();
         }
         public void ApplyCEPatch()
         {
@@ -157,96 +53,392 @@ namespace CeManualPatcher
             {
                 return;
             }
-            //statBases
-            
-            if(thingDef.statBases != null)
+
+            //add
+            if (verbProperties != null)
             {
-                thingDef.statBases = new List<StatModifier>();
-                stat_patches.ForEach(x => x?.Apply(thingDef));
+                weaponManager.GetWeaponPatch(thingDef).AddVerb();
+            }
+
+            if (ammoUser != null)
+            {
+                weaponManager.GetWeaponPatch(thingDef).AddAmmoUser();
+            }
+
+            if (fireMode != null)
+            {
+                weaponManager.GetWeaponPatch(thingDef).AddFireMode();
+            }
+
+            ReplaceData();
+        }
+
+        private void ReplaceData()
+        {
+            //statBases
+
+            if (thingDef.statBases != null)
+            {
+                thingDef.statBases = this.stats;
+                HandleStats();
             }
 
             //verbs
-            if (!thingDef.Verbs.NullOrEmpty() && !(thingDef.Verbs[0] is VerbPropertiesCE))
+            if (!thingDef.Verbs.NullOrEmpty())
             {
-                thingDef.Verbs[0] = new VerbPropertiesCE();
-
-                verb_patch?.Apply(thingDef);
+                thingDef.Verbs[0] = this.verbProperties;
             }
+
             //tools
-            if (!thingDef.tools.NullOrEmpty())
+            if (thingDef.tools != null)
             {
-                thingDef.tools = new List<Tool>();
-
-                tool_patches.ForEach(x => x?.Apply(thingDef));
+                thingDef.tools = this.tools;
             }
+
             //comps
             if (thingDef.comps != null)
             {
-                if(!thingDef.HasComp<CompAmmoUser>())
+                if (!thingDef.HasComp<CompAmmoUser>() && ammoUser != null)
                 {
-                    thingDef.comps.Add(new CompProperties_AmmoUser());
-                    ammoUser_patch?.Apply(thingDef);
+                    thingDef.comps.Add(ammoUser);
                 }
-
-                if (!thingDef.HasComp<CompFireModes>())
+                if (!thingDef.HasComp<CompFireModes>() && fireMode != null)
                 {
-                    thingDef.comps.Add(new CompProperties_FireModes());
-                    fireMode_patch?.Apply(thingDef);
+                    thingDef.comps.Add(fireMode);
                 }
             }
         }
 
-        public void ResetCEPatch()
+        private void HandleStats()
+        {
+            StatModifier statModifier = this.stats.FirstOrDefault(x => x.stat == CE_StatDefOf.Recoil);
+            if(statModifier != null && this.verbProperties!= null)
+            {
+                this.verbProperties.recoilAmount = statModifier.value;
+            }
+
+            statModifier = this.stats.FirstOrDefault(x => x.stat == CE_StatDefOf.TicksBetweenBurstShots);
+            if(statModifier != null && this.verbProperties != null)
+            {
+                this.verbProperties.ticksBetweenBurstShots = (int)statModifier.value;
+            }
+
+            statModifier = this.stats.FirstOrDefault(x => x.stat == CE_StatDefOf.BurstShotCount);
+            if (statModifier != null && this.verbProperties != null)
+            {
+                this.verbProperties.burstShotCount = (int)statModifier.value;
+            }
+
+            statModifier = this.stats.FirstOrDefault(x => x.stat == CE_StatDefOf.MagazineCapacity);
+            if (statModifier != null && this.ammoUser != null)
+            {
+                this.ammoUser.magazineSize = (int)statModifier.value;
+            }
+
+            statModifier = this.stats.FirstOrDefault(x => x.stat == CE_StatDefOf.ReloadSpeed);
+            if (statModifier != null && this.ammoUser != null)
+            {
+                this.ammoUser.reloadTime = (int)statModifier.value;
+            }
+
+            statModifier = this.stats.FirstOrDefault(x => x.stat == CE_StatDefOf.AmmoGenPerMagOverride);
+            if (statModifier != null && this.ammoUser != null)
+            {
+                this.ammoUser.AmmoGenPerMagOverride = (int)statModifier.value;
+            }
+
+            statModifier = this.stats.FirstOrDefault(x => x.stat == CE_StatDefOf.BipodStats);
+            if(statModifier != null && this.verbProperties != null)
+            {
+                thingDef.weaponTags.Add("Bipod_LMG");
+            }
+
+        }
+        public void ExposeData()
+        {
+            Scribe_Values.Look(ref thingDefString, "thingDef");
+        }
+        public void PostLoadInit()
         {
             if (thingDef == null)
             {
                 return;
             }
+        }
+
+        private void InitNewData()
+        {
             //statBases
             if (thingDef.statBases != null)
             {
-                thingDef.statBases = this.stats;
+                this.stats = new List<StatModifier>();
+                foreach (var stat in thingDef.statBases)
+                {
+                    if (MP_Options.exceptStatDefs.Contains(stat.stat))
+                    {
+                        continue;
+                    }
+
+                    StatModifier statModifier = new StatModifier();
+                    PropUtility.CopyPropValue(stat, statModifier);
+                    this.stats.Add(statModifier);
+                }
+
+                // Add CE stats, default AR
+                stats.Add(new StatModifier() { stat = CE_StatDefOf.Bulk, value =  10.03f});
+
+                if (!thingDef.Verbs.NullOrEmpty())
+                {
+                    stats.Add(new StatModifier() { stat = CE_StatDefOf.TicksBetweenBurstShots, value =4 });
+                    stats.Add(new StatModifier() { stat = CE_StatDefOf.BurstShotCount, value = 6 });
+                    stats.Add(new StatModifier() { stat = CE_StatDefOf.SightsEfficiency, value =1 });
+                    stats.Add(new StatModifier() { stat = CE_StatDefOf.SwayFactor, value = 1.33f });
+                    stats.Add(new StatModifier() { stat = CE_StatDefOf.ShotSpread, value = 0.07f });
+                    stats.Add(new StatModifier() { stat = CE_StatDefOf.Recoil, value = 1.5f });
+
+                    stats.Add(new StatModifier() { stat = CE_StatDefOf.MagazineCapacity , value=30f });
+                    stats.Add(new StatModifier() { stat = CE_StatDefOf.ReloadSpeed, value =4f });
+                    stats.Add(new StatModifier() { stat = CE_StatDefOf.AmmoGenPerMagOverride });
+                }
             }
+
             //verbs
-            if (!thingDef.Verbs.NullOrEmpty() && thingDef.Verbs[0] is VerbPropertiesCE)
+            if (!thingDef.Verbs.NullOrEmpty())
             {
-                thingDef.Verbs[0] = this.verb;
+                this.verbProperties = PropUtility.ConvertToChild<VerbProperties, VerbPropertiesCE>(thingDef.Verbs[0]);
+
+                if (this.verbProperties.verbClass == typeof(Verb_Shoot))
+                    this.verbProperties.verbClass = typeof(Verb_ShootCE);
+
+                if (this.verbProperties.verbClass == typeof(Verb_ShootOneUse))
+                    this.verbProperties.verbClass = typeof(Verb_ShootCEOneUse);
+
+                if (this.verbProperties.verbClass == typeof(Verb_LaunchProjectile))
+                    this.verbProperties.verbClass = typeof(Verb_LaunchProjectileCE);
+
+                this.verbProperties.defaultProjectile = MP_ProjectileDefOf.Bullet_556x45mmNATO_FMJ;
             }
+
             //tools
-            if (!thingDef.tools.NullOrEmpty())
+            if (thingDef.tools != null)
             {
-                thingDef.tools = this.tools;
+                this.tools = new List<Tool>();
+                foreach (var tool in thingDef.tools)
+                {
+                    ToolCE toolCopy = PropUtility.ConvertToChild<Tool, ToolCE>(tool);
 
+                    List<ToolCapacityDef> capacities = new List<ToolCapacityDef>();
+                    capacities.AddRange(tool.capacities);
+                    toolCopy.capacities = capacities;
+
+                    this.tools.Add(toolCopy);
+                }
             }
+
             //comps
-            if (thingDef.comps != null)
+            if (thingDef.comps != null && !thingDef.Verbs.NullOrEmpty())
             {
-                if (ammoUser_patch != null)
+                this.ammoUser = new CompProperties_AmmoUser();
+                if (thingDef.HasComp<CompAmmoUser>())
                 {
-                    thingDef.comps.RemoveAll(x => x is CompProperties_AmmoUser);
+                    PropUtility.CopyPropValue(thingDef.GetCompProperties<CompProperties_AmmoUser>(), this.ammoUser);
                 }
-                if (fireMode_patch != null)
+                this.ammoUser.ammoSet = MP_AmmoSetDefOf.AmmoSet_556x45mmNATO;
+
+                this.fireMode = new CompProperties_FireModes();
+                if (thingDef.HasComp<CompFireModes>())
                 {
-                    thingDef.comps.RemoveAll(x => x is CompProperties_FireModes);
+                    PropUtility.CopyPropValue(thingDef.GetCompProperties<CompProperties_FireModes>(), this.fireMode);
+                }
+                if (fireMode.aimedBurstShotCount <= 0)
+                {
+                    fireMode.aimedBurstShotCount = 3;
                 }
             }
         }
 
-        public void ExposeData()
+        public void ExportToFile(string filePath)
         {
-            throw new NotImplementedException();
-        }
-        public void PostLoadInit()
-        {
-            //字段
-            verb_patch?.PostLoadInit(thingDef);
-            ammoUser_patch?.PostLoadInit(thingDef);
-            fireMode_patch?.PostLoadInit(thingDef);
-            stat_patches.ForEach(x => x?.PostLoadInit(thingDef));
-            tool_patches.ForEach(x => x?.PostLoadInit(thingDef));
+            // 创建XML文档
+            XmlDocument xmlDoc = new XmlDocument();
 
-            //original data
-            InitOriginalData();
+            // 声明XML头部
+            XmlDeclaration xmlDeclaration = xmlDoc.CreateXmlDeclaration("1.0", "utf-8", null);
+            xmlDoc.AppendChild(xmlDeclaration);
+
+            // 创建根节点 <Patch>
+            XmlElement patchElement = xmlDoc.CreateElement("Patch");
+            xmlDoc.AppendChild(patchElement);
+
+            // 创建子节点 <Operation>
+            XmlElement operationElement = xmlDoc.CreateElement("Operation");
+            operationElement.SetAttribute("Class", "PatchOperationSequence");
+            patchElement.AppendChild(operationElement);
+
+            // 添加 <operations> 节点
+            XmlElement operationsElement = xmlDoc.CreateElement("operations");
+            operationElement.AppendChild(operationsElement);
+
+            // 添加第一个 <li> 节点 "TOOLS FOR THE TOOL GOD"
+            XmlElement toolsLiElement = xmlDoc.CreateElement("li");
+            toolsLiElement.SetAttribute("Class", "PatchOperationReplace");
+            operationsElement.AppendChild(toolsLiElement);
+
+            XmlElement toolsXpath = xmlDoc.CreateElement("xpath");
+            toolsXpath.InnerText = $"/Defs/ThingDef[defName=\"{thingDefString}\"]/tools";
+            toolsLiElement.AppendChild(toolsXpath);
+
+            XmlElement toolsValue = xmlDoc.CreateElement("value");
+            toolsLiElement.AppendChild(toolsValue);
+
+            XmlElement tools = xmlDoc.CreateElement("tools");
+            toolsValue.AppendChild(tools);
+
+            foreach (var item in thingDef.tools)
+            {
+                if (item is ToolCE tool)
+                {
+                    XmlElement toolElement = xmlDoc.CreateElement("li");
+                    toolElement.SetAttribute("Class", "CombatExtended.ToolCE");
+                    tools.AppendChild(toolElement);
+
+                    ToolCE defaultTool = new ToolCE();
+
+                    AddChildElement(xmlDoc, toolElement, "label", tool.label);
+
+                    XmlElement capacityElement = xmlDoc.CreateElement("capacities");
+
+                    foreach (var capacity in tool.capacities)
+                    {
+                        AddChildElement(xmlDoc, capacityElement, "li", capacity.defName);
+                    }
+
+                    toolElement.AppendChild(capacityElement);
+
+                    foreach (var propName in ToolCESaveable.propNames)
+                    {
+                        if (PropUtility.GetPropValue(defaultTool, propName).ToString() != PropUtility.GetPropValue(item, propName).ToString())
+                        {
+                            AddChildElement(xmlDoc, toolElement, propName, PropUtility.GetPropValue(item, propName).ToString());
+                        }
+                    }
+
+                    if (tool.linkedBodyPartsGroup != null)
+                        AddChildElement(xmlDoc, toolElement, "linkedBodyPartsGroup", tool.linkedBodyPartsGroup.defName);
+                }
+            }
+
+            XmlElement cePatchElement = xmlDoc.CreateElement("li");
+            cePatchElement.SetAttribute("Class", "CombatExtended.PatchOperationMakeGunCECompatible");
+            operationsElement.AppendChild(cePatchElement);
+
+            AddChildElement(xmlDoc, cePatchElement, "defName", thingDef.defName);
+
+            //stat
+            XmlElement statBases = xmlDoc.CreateElement("statBases");
+            cePatchElement.AppendChild(statBases);
+
+            List<StatModifier> originalStats = weaponManager.GetWeaponPatch(thingDef).statBase.OriginalStats;
+            foreach (var item in thingDef.statBases)
+            {
+                StatModifier originalStatModifier = originalStats.FirstOrDefault(x => x.stat == item.stat);
+
+                if (originalStatModifier == null || Math.Abs(originalStatModifier.value - item.value) > float.Epsilon)
+                {
+                    AddChildElement(xmlDoc, statBases, item.stat.defName, item.value.ToString());
+                }
+            }
+
+            //verbProperties
+
+            if (!thingDef.Verbs.NullOrEmpty())
+            {
+                XmlElement verbPropertiesElement = xmlDoc.CreateElement("Properties");
+                cePatchElement.AppendChild(verbPropertiesElement);
+
+
+                VerbPropertiesCE defaultVerb = new VerbPropertiesCE();
+                VerbPropertiesCE currentVerb = thingDef.Verbs[0] as VerbPropertiesCE;
+
+                AddChildElement(xmlDoc, verbPropertiesElement, "verbClass", currentVerb.verbClass.ToString());
+
+                foreach (var propName in VerbPropertiesCESaveable.propNames)
+                {
+                    if (PropUtility.GetPropValue(defaultVerb, propName).ToString() != PropUtility.GetPropValue(currentVerb, propName).ToString())
+                    {
+                        AddChildElement(xmlDoc, verbPropertiesElement, propName, PropUtility.GetPropValue(currentVerb, propName).ToString());
+                    }
+                }
+
+                if (currentVerb.recoilPattern != defaultVerb.recoilPattern)
+                {
+                    AddChildElement(xmlDoc, verbPropertiesElement, "recoilPattern", currentVerb.recoilPattern.ToString());
+                }
+
+                if (currentVerb.defaultProjectile != defaultVerb.defaultProjectile)
+                {
+                    AddChildElement(xmlDoc, verbPropertiesElement, "defaultProjectile", currentVerb.defaultProjectile.defName);
+                }
+            }
+
+            //ammo user
+            if (thingDef.HasComp<CompAmmoUser>())
+            {
+                XmlElement ammoUserElement = xmlDoc.CreateElement("AmmoUser");
+                cePatchElement.AppendChild(ammoUserElement);
+
+                CompProperties_AmmoUser defaultAmmoUser = new CompProperties_AmmoUser();
+                CompProperties_AmmoUser currentAmmoUser = thingDef.GetCompProperties<CompProperties_AmmoUser>();
+
+                foreach (var propName in CompAmmoUserSaveable.propNames)
+                {
+                    if (PropUtility.GetPropValue(defaultAmmoUser, propName).ToString() != PropUtility.GetPropValue(currentAmmoUser, propName).ToString())
+                    {
+                        AddChildElement(xmlDoc, ammoUserElement, propName, PropUtility.GetPropValue(currentAmmoUser, propName).ToString());
+                    }
+                }
+
+                if (currentAmmoUser.ammoSet != defaultAmmoUser.ammoSet)
+                {
+                    AddChildElement(xmlDoc, ammoUserElement, "ammoSet", currentAmmoUser.ammoSet.defName);
+                }
+            }
+
+            //fire mode
+            if (thingDef.HasComp<CompFireModes>())
+            {
+                XmlElement fireModeElement = xmlDoc.CreateElement("FireModes");
+                cePatchElement.AppendChild(fireModeElement);
+
+                CompProperties_FireModes defaultFireMode = new CompProperties_FireModes();
+                CompProperties_FireModes currentFireMode = thingDef.GetCompProperties<CompProperties_FireModes>();
+
+                foreach (var propName in CompFireModesSaveable.propNames)
+                {
+                    if (PropUtility.GetPropValue(defaultFireMode, propName).ToString() != PropUtility.GetPropValue(currentFireMode, propName).ToString())
+                    {
+                        AddChildElement(xmlDoc, fireModeElement, propName, PropUtility.GetPropValue(currentFireMode, propName).ToString());
+                    }
+                }
+
+                if (currentFireMode.aiAimMode != defaultFireMode.aiAimMode)
+                {
+                    AddChildElement(xmlDoc, fireModeElement, "aiAimMode", currentFireMode.aiAimMode.ToString());
+                }
+            }
+
+            // 保存XML文件
+            xmlDoc.Save(filePath);
+
         }
+
+        // 辅助方法：添加子节点
+        static void AddChildElement(XmlDocument doc, XmlElement parent, string name, string value)
+        {
+            XmlElement element = doc.CreateElement(name);
+            element.InnerText = value;
+            parent.AppendChild(element);
+        }
+
     }
 }

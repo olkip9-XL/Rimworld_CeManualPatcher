@@ -1,4 +1,5 @@
-﻿using CombatExtended;
+﻿using CeManualPatcher.Misc;
+using CombatExtended;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,54 +9,77 @@ using Verse;
 
 namespace CeManualPatcher.Saveable.Ammo
 {
- 
+    class SecondaryDamageExpo : IExposable
+    {
+        public string defName;
+        public int damageAmount;
 
+        public void ExposeData()
+        {
+            Scribe_Values.Look(ref defName, "defName");
+            Scribe_Values.Look(ref damageAmount, "damageAmount");
+        }
+    }
     internal class SecondaryDamageSaveable : SaveableBase
     {
         private List<SecondaryDamageExpo> secondaryDamagesExpo = new List<SecondaryDamageExpo>();
-        public List<SecondaryDamage> secondaryDamages = new List<SecondaryDamage>();
 
-        private SecondaryDamageSaveable Original => base.originalData as SecondaryDamageSaveable;
+
+        //private
+        private List<SecondaryDamage> originalData = new List<SecondaryDamage>();
+
+        private List<SecondaryDamage> secondaryDamages
+        {
+            get
+            {
+                if (thingDef == null || thingDef.projectile == null || !(thingDef.projectile is ProjectilePropertiesCE))
+                {
+                    return null;
+                }
+
+                return (thingDef.projectile as ProjectilePropertiesCE).secondaryDamage;
+            }
+        }
+
         public SecondaryDamageSaveable() : base()
         {
         }
 
-        public SecondaryDamageSaveable(ThingDef thingDef, bool isOriginal = false) : base(thingDef, isOriginal)
+        public SecondaryDamageSaveable(ThingDef thingDef)
         {
-            if (IsNull(thingDef))
+            this.thingDef = thingDef;
+            if (secondaryDamages.NullOrEmpty())
             {
                 return;
             }
-            ProjectilePropertiesCE projectilePropertiesCE = thingDef.projectile as ProjectilePropertiesCE;
-            
-            this.secondaryDamages.Clear();
-            this.secondaryDamages.AddRange(projectilePropertiesCE.secondaryDamage);
 
-            if (!isOriginal)
-            {
-                originalData = new SecondaryDamageSaveable(thingDef, true);
-            }
+            InitOriginalData();
         }
-
-        private bool IsNull(ThingDef thingDef)
+        protected override void Apply()
         {
-            return thingDef?.projectile == null || !(thingDef?.projectile is ProjectilePropertiesCE);
-        }
-
-        public override void Apply(ThingDef thingDef)
-        {
-            if (thingDef == null || thingDef.projectile == null || !(thingDef.projectile is ProjectilePropertiesCE))
+            if(secondaryDamages == null)
             {
                 return;
             }
-            ProjectilePropertiesCE projectilePropertiesCE = thingDef.projectile as ProjectilePropertiesCE;
-            projectilePropertiesCE.secondaryDamage.Clear();
-            projectilePropertiesCE.secondaryDamage.AddRange(this.secondaryDamages);
+
+            secondaryDamages.Clear();
+            foreach(var item in secondaryDamagesExpo)
+            {
+                DamageDef damageDef = DefDatabase<DamageDef>.GetNamed(item.defName);
+                if (damageDef != null)
+                {
+                    secondaryDamages.Add(new SecondaryDamage()
+                    {
+                        def = damageDef,
+                        amount = item.damageAmount
+                    });
+                }
+            }
         }
 
         public override void ExposeData()
         {
-            if(Scribe.mode == LoadSaveMode.Saving)
+            if (Scribe.mode == LoadSaveMode.Saving)
             {
                 secondaryDamagesExpo.Clear();
                 foreach (var damage in secondaryDamages)
@@ -68,39 +92,59 @@ namespace CeManualPatcher.Saveable.Ammo
                 }
             }
 
-            Scribe_Collections.Look(ref secondaryDamagesExpo, "secondaryDamagesExpo", LookMode.Value);
+            Scribe_Collections.Look(ref secondaryDamagesExpo, "secondaryDamagesExpo", LookMode.Deep);
+            if(Scribe.mode == LoadSaveMode.LoadingVars)
+            {
+                if (secondaryDamagesExpo == null)
+                {
+                    secondaryDamagesExpo = new List<SecondaryDamageExpo>();
+                }
+            }
         }
 
-        public override void Reset(ThingDef thingDef)
+        public override void Reset()
         {
-            if (Original == null)
+            if(secondaryDamages == null)
             {
                 return;
             }
 
-            Original.Apply(thingDef);
+            ProjectilePropertiesCE projectile = thingDef.projectile as ProjectilePropertiesCE;
+
+            //projectile.secondaryDamage = this.originalData;
+            projectile.secondaryDamage.Clear();
+            projectile.secondaryDamage.AddRange(originalData);
+
+            InitOriginalData();
         }
 
         public override void PostLoadInit(ThingDef thingDef)
         {
-            if(this.secondaryDamagesExpo != null)
+           this.thingDef = thingDef;
+            if (secondaryDamages == null)
             {
-                this.secondaryDamages.Clear();
-                foreach (var damage in this.secondaryDamagesExpo)
-                {
-                    DamageDef damageDef = DefDatabase<DamageDef>.GetNamed(damage.defName);
-                    if (damageDef != null)
-                    {
-                        this.secondaryDamages.Add(new SecondaryDamage()
-                        {
-                            def = damageDef,
-                            amount = damage.damageAmount
-                        });
-                    }
-                }
+                return;
             }
+            InitOriginalData();
+            this.Apply();
+        }
 
-            this.originalData = new SecondaryDamageSaveable(thingDef, true);
+        protected override void InitOriginalData()
+        {
+            if (secondaryDamages == null)
+            {
+                return;
+            }
+            originalData.Clear();
+            originalData = new List<SecondaryDamage>();
+            foreach (var item in secondaryDamages)
+            {
+                SecondaryDamage temp = new SecondaryDamage();
+
+                PropUtility.CopyPropValue(item, temp);
+
+                originalData.Add(temp);
+            }
         }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Verse;
 
 namespace CeManualPatcher.Extension
 {
@@ -13,11 +14,11 @@ namespace CeManualPatcher.Extension
             switch (tab)
             {
                 case MP_SettingTab.Weapon:
-                    return "Weapon";
+                    return "MP_Weapon".Translate();
                 case MP_SettingTab.Ammo:
-                    return "Ammo";
+                    return "MP_Ammo".Translate();
                 case MP_SettingTab.Bionic:
-                    return "Bionic";
+                    return "MP_Bionic".Translate();
                 default:
                     return "Unknown";
             }

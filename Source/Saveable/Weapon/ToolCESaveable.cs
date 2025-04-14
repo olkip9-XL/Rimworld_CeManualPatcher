@@ -1,6 +1,8 @@
-﻿using CombatExtended;
+﻿using CeManualPatcher.Misc;
+using CombatExtended;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,193 +10,103 @@ using Verse;
 
 namespace CeManualPatcher.Saveable
 {
-    struct ExtraDamageExpo
+    class ExtraDamageExpo : IExposable
     {
         public float amount;
         public string defString;
+        public void ExposeData()
+        {
+            Scribe_Values.Look(ref amount, "amount");
+            Scribe_Values.Look(ref defString, "defString");
+        }
     }
 
     internal class ToolCESaveable : SaveableBase
     {
-        //CE
-        internal float armorPenetrationBlunt;
-        internal float armorPenetrationSharp;
+        public static ReadOnlyCollection<string> propNames = new List<string>()
+        {
+                "armorPenetrationBlunt",
+                "armorPenetrationSharp",
+                "power",
+                "cooldownTime",
+                "alwaysTreatAsWeapon",
+                "chanceFactor"
+        }.AsReadOnly();
+        private Dictionary<string, string> propDic = new Dictionary<string, string>();
 
-        //vanilla
-        internal float power;
-        internal float cooldownTime;
-        //internal SurpriseAttackProps surpriseAttack;
         private List<string> capacitiesString = new List<string>();
-        internal List<ToolCapacityDef> capacities = new List<ToolCapacityDef>();
-
-        internal BodyPartGroupDef linkedBodyPartsGroup;
-        internal bool alwaysTreatAsWeapon;
-        internal float chanceFactor;
+        private string linkedBodyPartsGroupString;
+        internal BodyPartGroupDef linkedBodyPartsGroup
+        {
+            get=>DefDatabase<BodyPartGroupDef>.GetNamed(linkedBodyPartsGroupString, false);
+            set => linkedBodyPartsGroupString = value?.defName ?? "null";
+        }
 
         private List<ExtraDamageExpo> surpriseAttackSave = new List<ExtraDamageExpo>();
-        internal List<ExtraDamage> surpriseAttack = new List<ExtraDamage>();
 
-        internal string label;
+        private string label;
         internal string id;
-        internal bool needDelete = false;
-        private ToolCESaveable Original => base.originalData as ToolCESaveable;
-
-        public ToolCESaveable()
+        private ToolCE tool
         {
-        }
-
-        public ToolCESaveable(ToolCE toolCE, bool isOrginal = false)
-        {
-            id = toolCE.id;
-            label = toolCE.label;
-
-            armorPenetrationBlunt = toolCE.armorPenetrationBlunt;
-            armorPenetrationSharp = toolCE.armorPenetrationSharp;
-            power = toolCE.power;
-            cooldownTime = toolCE.cooldownTime;
-
-            if (toolCE.surpriseAttack != null)
+            get
             {
-                surpriseAttack.Clear();
-                surpriseAttack.AddRange(toolCE.surpriseAttack.extraMeleeDamages);
-            }
-
-            capacities.Clear();
-            capacities.AddRange(toolCE.capacities);
-
-            linkedBodyPartsGroup = toolCE.linkedBodyPartsGroup;
-            alwaysTreatAsWeapon = toolCE.alwaysTreatAsWeapon;
-            chanceFactor = toolCE.chanceFactor;
-
-            if (!isOrginal)
-            {
-                originalData = new ToolCESaveable(toolCE, true);
+                if (thingDef == null)
+                {
+                    return null;
+                }
+                if (thingDef.tools.NullOrEmpty())
+                {
+                    return null;
+                }
+                return thingDef.tools.FirstOrDefault(t => t.id == id) as ToolCE;
             }
         }
 
-        public override void Apply(ThingDef thingDef)
-        {
-            ToolCE tool = thingDef.tools.FirstOrDefault(t => t.id == id) as ToolCE;
+        public ToolCESaveable() { }
 
+        public ToolCESaveable(ThingDef thingDef, string id)
+        {
+            this.id = id;
+            this.thingDef = thingDef;
             if (tool == null)
             {
-                if (needDelete)
-                {
-                    return;
-                }
-                tool = new ToolCE();
-                tool.id = id;
-                tool.label = label;
-                thingDef.tools.Add(tool);
-
-                if (Original != null)
-                    Original.needDelete = true;
-            }
-
-            if (needDelete)
-            {
-                thingDef.tools.Remove(tool);
                 return;
             }
-            else
-            {
-                tool.armorPenetrationBlunt = armorPenetrationBlunt;
-                tool.armorPenetrationSharp = armorPenetrationSharp;
-                tool.power = power;
-                tool.cooldownTime = cooldownTime;
-
-                if (tool.surpriseAttack != null)
-                {
-                    tool.surpriseAttack.extraMeleeDamages.Clear();
-                    tool.surpriseAttack.extraMeleeDamages.AddRange(surpriseAttack);
-                }
-
-                tool.capacities.Clear();
-                tool.capacities.AddRange(capacities);
-
-                tool.linkedBodyPartsGroup = linkedBodyPartsGroup;
-                tool.alwaysTreatAsWeapon = alwaysTreatAsWeapon;
-                tool.chanceFactor = chanceFactor;
-            }
+            InitOriginalData();
         }
-        public override void ExposeData()
-        {
-            if (Scribe.mode == LoadSaveMode.Saving)
-            {
-                this.capacitiesString.Clear();
-                this.capacities.ForEach(x => this.capacitiesString.Add(x.defName));
 
-                this.surpriseAttackSave.Clear();
-                this.surpriseAttack.ForEach(x =>
+        protected override void Apply()
+        {
+            if (tool == null)
+            {
+                thingDef.tools.Add(new ToolCE()
                 {
-                    surpriseAttackSave.Add(new ExtraDamageExpo()
-                    {
-                        amount = x.amount,
-                        defString = x.def.defName
-                    });
+                    id = this.id,
+                    label = this.label
                 });
             }
 
-            Scribe_Values.Look(ref armorPenetrationBlunt, "armorPenetrationBlunt");
-            Scribe_Values.Look(ref armorPenetrationSharp, "armorPenetrationSharp");
-            Scribe_Values.Look(ref power, "power");
-            Scribe_Values.Look(ref cooldownTime, "cooldownTime");
-
-            Scribe_Collections.Look(ref capacitiesString, "capacities", LookMode.Value);
-            if (Scribe.mode == LoadSaveMode.LoadingVars && capacitiesString == null)
+            foreach (var item in propNames)
             {
-                this.capacitiesString = new List<string>();
-            }
-            Scribe_Collections.Look(ref surpriseAttackSave, "surpriseAttack", LookMode.Value);
-            if (Scribe.mode == LoadSaveMode.LoadingVars && surpriseAttackSave == null)
-            {
-                this.surpriseAttackSave = new List<ExtraDamageExpo>();
+                PropUtility.SetPropValueString(tool, item, propDic[item]);
             }
 
-            Scribe_Defs.Look(ref linkedBodyPartsGroup, "linkedBodyPartsGroup");
-            Scribe_Values.Look(ref alwaysTreatAsWeapon, "alwaysTreatAsWeapon");
-            Scribe_Values.Look(ref chanceFactor, "chanceFactor");
-
-            Scribe_Values.Look(ref label, "label");
-            Scribe_Values.Look(ref id, "id");
-            Scribe_Values.Look(ref needDelete, "needDelete");
-        }
-        public override void Reset(ThingDef thingDef)
-        {
-            if (Original == null || Original == null)
+            foreach (var item in this.capacitiesString)
             {
-                return;
-            }
-
-            this.needDelete = true;
-
-            Original.Apply(thingDef);
-        }
-
-        public override void PostLoadInit(ThingDef thingDef)
-        {
-            this.capacities.Clear();
-            if (this.capacitiesString != null)
-            {
-                foreach (var item in this.capacitiesString)
+                var def = DefDatabase<ToolCapacityDef>.GetNamed(item, false);
+                if (def != null)
                 {
-                    var def = DefDatabase<ToolCapacityDef>.GetNamed(item, false);
-                    if (def != null)
-                    {
-                        this.capacities.Add(def);
-                    }
+                    tool.capacities.Add(def);
                 }
             }
-
-            this.surpriseAttack.Clear();
-            if (this.surpriseAttackSave != null)
+            if (tool.surpriseAttack != null)
             {
                 foreach (var item in this.surpriseAttackSave)
                 {
                     var def = DefDatabase<DamageDef>.GetNamed(item.defString, false);
                     if (def != null)
                     {
-                        this.surpriseAttack.Add(new ExtraDamage()
+                        tool.surpriseAttack.extraMeleeDamages.Add(new ExtraDamage()
                         {
                             amount = item.amount,
                             def = def
@@ -203,13 +115,79 @@ namespace CeManualPatcher.Saveable
                 }
             }
 
-            ToolCE tool = thingDef.tools.FirstOrDefault(t => t.id == id) as ToolCE;
-            if (tool != null)
+            tool.linkedBodyPartsGroup = this.linkedBodyPartsGroup;
+        }
+        public override void ExposeData()
+        {
+            if (Scribe.mode == LoadSaveMode.Saving &&
+                tool != null)
             {
-                this.originalData = new ToolCESaveable(tool);
+                //save
+                foreach (var item in propNames)
+                {
+                    propDic[item] = PropUtility.GetPropValue(tool, item).ToString();
+                }
+
+                this.capacitiesString.Clear();
+                tool.capacities?.ForEach(x => this.capacitiesString.Add(x.defName));
+                if (tool.capacities.NullOrEmpty())
+                {
+                    Log.Error($"[CeManualPatcher] Capacities (Damage types) is Empty, this could cause some errors, thing: {thingDef.defName}, tool: {tool.label}");
+                }
+
+                this.surpriseAttackSave.Clear();
+                tool.surpriseAttack?.extraMeleeDamages.ForEach(x =>
+                {
+                    surpriseAttackSave.Add(new ExtraDamageExpo()
+                    {
+                        amount = x.amount,
+                        defString = x.def.defName
+                    });
+                });
+
+                this.linkedBodyPartsGroup = tool.linkedBodyPartsGroup;
+
+                this.label = tool.label;
             }
 
-        }
+            Scribe_Values.Look(ref id, "id");
+            Scribe_Values.Look(ref label, "label");
 
+            Scribe_Values.Look(ref linkedBodyPartsGroupString, "linkedBodyPartsGroup");
+
+            Scribe_Collections.Look(ref capacitiesString, "capacities", LookMode.Value);
+            Scribe_Collections.Look(ref surpriseAttackSave, "surpriseAttack", LookMode.Deep);
+            Scribe_Collections.Look(ref propDic, "propDic", LookMode.Value, LookMode.Value);
+            if (Scribe.mode == LoadSaveMode.LoadingVars)
+            {
+                if (this.capacitiesString == null)
+                {
+                    this.capacitiesString = new List<string>();
+                }
+
+                if (this.surpriseAttackSave == null)
+                {
+                    this.surpriseAttackSave = new List<ExtraDamageExpo>();
+                }
+                if (this.propDic == null)
+                {
+                    this.propDic = new Dictionary<string, string>();
+                }
+            }
+        }
+        public override void Reset()
+        {
+            //do nothing
+        }
+        public override void PostLoadInit(ThingDef thingDef)
+        {
+            this.thingDef = thingDef;
+            InitOriginalData();
+            this.Apply();
+        }
+        protected override void InitOriginalData()
+        {
+            //do nothing
+        }
     }
 }

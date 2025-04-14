@@ -25,9 +25,9 @@ namespace CeManualPatcher.Misc
                     switch (name)
                     {
                         case "Grenades":
-                            return "Grenades";
+                            return "MP_Grenades".Translate();
                         default:
-                            return "Uncategorized";
+                            return "MP_Uncategorized".Translate();
                     }
                 }
             }

@@ -1,4 +1,5 @@
 ﻿using CeManualPatcher.Manager;
+using CeManualPatcher.Misc;
 using CeManualPatcher.RenderRect.Ammo;
 using CombatExtended;
 using System;
@@ -13,19 +14,15 @@ namespace CeManualPatcher.Dialogs
 {
     internal class Dialog_SetDefaultProjectile : Window
     {
-        ThingDef curWeaponDef;
 
-        CEPatcher cePatcher;
+        VerbPropertiesCE verbProperties;
+        CompProperties_AmmoUser ammoUser;
 
         private Rect_AmmoList rect_AmmoList = new Rect_AmmoList();
-        public Dialog_SetDefaultProjectile(ThingDef weaponDef)
+        public Dialog_SetDefaultProjectile(VerbPropertiesCE verbProps, CompProperties_AmmoUser compProps)
         {
-            this.curWeaponDef = weaponDef;
-        }
-
-        public Dialog_SetDefaultProjectile(CEPatcher cePatcher)
-        {
-            this.cePatcher = cePatcher;
+            this.verbProperties = verbProps;
+            this.ammoUser = compProps;
         }
 
         public override Vector2 InitialSize
@@ -66,23 +63,14 @@ namespace CeManualPatcher.Dialogs
         {
             base.OnAcceptKeyPressed();
 
-            if(cePatcher != null)
+            if(verbProperties != null)
             {
-                cePatcher.verb_patch.defaultProjectile = AmmoManager.curAmmoSet.ammoList[0].projectile;
-
-                cePatcher.ammoUser_patch.ammoSet = AmmoManager.curAmmoSet.ammoSetDef;
+                verbProperties.defaultProjectile = AmmoManager.curAmmoSet.ammoList[0].projectile;
             }
 
-            if(curWeaponDef != null)
+            if(ammoUser != null)
             {
-                //set default projectile
-                WeaponManager.instance.GetWeaponPatch(curWeaponDef).verbProperties.defaultProjectile = AmmoManager.curAmmoSet.ammoList[0].projectile;
-
-                //set ammo set
-                if (curWeaponDef.HasComp(typeof(CompAmmoUser)))
-                {
-                    WeaponManager.instance.GetWeaponPatch(curWeaponDef).ammoUser.ammoSet = AmmoManager.curAmmoSet.ammoSetDef;
-                }
+                ammoUser.ammoSet = AmmoManager.curAmmoSet.ammoSetDef;
             }
 
             this.Close();

@@ -1,6 +1,8 @@
-﻿using RimWorld;
+﻿using CeManualPatcher.Misc;
+using RimWorld;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,92 +12,111 @@ namespace CeManualPatcher.Saveable
 {
     internal class StatSaveable : SaveableBase
     {
+        private Dictionary<string, float> modifierDic = new Dictionary<string, float>();
 
-        private string _statDefName;
-        public StatDef StatDef
+        //private
+        private List<StatModifier> statBases
         {
-            get => DefDatabase<StatDef>.GetNamed(_statDefName);
-            set => _statDefName = value.defName;
+            get
+            {
+                if (thingDef == null)
+                {
+                    return null;
+                }
+                return thingDef.statBases;
+            }
         }
 
-        public float value;
-
-        public bool needDelete = false;
-        private StatSaveable Original => base.originalData as StatSaveable;
+        private List<StatModifier> originalData = new List<StatModifier>();
+        public List<StatModifier> OriginalStats => originalData;
 
         public StatSaveable() { }
-
-        public StatSaveable(StatModifier statModifier, bool isOriginal = false)
+        public StatSaveable(ThingDef thingDef)
         {
-            if (statModifier == null)
+            this.thingDef = thingDef;
+            if (statBases.NullOrEmpty())
             {
                 return;
             }
-            StatDef = statModifier.stat;
-            value = statModifier.value;
 
-            if (!isOriginal)
-                originalData = new StatSaveable(statModifier, true);
-        }
-
-        public override void Apply(ThingDef thingDef)
-        {
-            if (thingDef == null)
-            {
-                return;
-            }
-            var statModifier = thingDef.statBases.Find(x => x.stat == StatDef);
-            if (statModifier == null)
-            {
-                if (needDelete)
-                {
-                    return;
-                }
-                statModifier = new StatModifier();
-                statModifier.stat = StatDef;
-                thingDef.statBases.Add(statModifier);
-                if (Original != null)
-                    Original.needDelete = true;
-            }
-
-            if (needDelete)
-            {
-                thingDef.statBases.Remove(statModifier);
-                return;
-            }
-            else
-            {
-                statModifier.value = value;
-            }
+            InitOriginalData();
         }
 
         public override void ExposeData()
         {
-            Scribe_Values.Look(ref _statDefName, "statDefName");
-            Scribe_Values.Look(ref value, "value");
-            Scribe_Values.Look(ref needDelete, "needDelete");
+            if (Scribe.mode == LoadSaveMode.Saving &&
+                this.thingDef != null)
+            {
+                foreach (var statModifier in this.thingDef.statBases)
+                {
+                    if (statModifier.stat != null)
+                    {
+                        modifierDic[statModifier.stat.defName] = statModifier.value;
+                    }
+                }
+            }
+
+            Scribe_Collections.Look(ref modifierDic, "stats", LookMode.Value, LookMode.Value);
+            if (Scribe.mode == LoadSaveMode.LoadingVars)
+            {
+                if (modifierDic == null)
+                {
+                    modifierDic = new Dictionary<string, float>();
+                }
+            }
         }
 
-        public override void Reset(ThingDef thingDef)
+        public override void Reset()
         {
-            if (thingDef == null || Original == null)
-            {
+            if (thingDef == null)
                 return;
+
+            thingDef.statBases = this.originalData;
+            InitOriginalData();
+        }
+
+        protected override void Apply()
+        {
+            if (thingDef == null)
+                return;
+            thingDef.statBases.Clear();
+            foreach (var item in modifierDic)
+            {
+                StatModifier statModifier = new StatModifier()
+                {
+                    stat = DefDatabase<StatDef>.GetNamed(item.Key, false),
+                    value = item.Value,
+                };
+                if (statModifier.stat != null)
+                    thingDef.statBases.Add(statModifier);
             }
-            this.value = Original.value;
-
-            this.needDelete = Original.needDelete;
-
-            Original.Apply(thingDef);
         }
 
         public override void PostLoadInit(ThingDef thingDef)
         {
-            StatModifier statModifier = thingDef.statBases.First(x => x.stat == this.StatDef);
-            if(statModifier != null)
+            this.thingDef = thingDef;
+            if (statBases.NullOrEmpty())
             {
-                this.originalData = new StatSaveable(statModifier, true);
+                return;
+            }
+
+            InitOriginalData();
+            this.Apply();
+        }
+
+        protected override void InitOriginalData()
+        {
+            this.originalData = new List<StatModifier>();
+            foreach (var statModifier in statBases)
+            {
+                this.originalData.Add(new StatModifier()
+                {
+                    stat = statModifier.stat,
+                    value = statModifier.value,
+                });
             }
         }
+
+
     }
 }

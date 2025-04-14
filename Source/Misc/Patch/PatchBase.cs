@@ -9,10 +9,9 @@ namespace CeManualPatcher
 {
     public abstract class PatchBase : IExposable
     {
-        public abstract void Apply();
+        //public abstract void Apply();
         public abstract void Reset();
         public abstract void PostLoadInit();   
-        
         public abstract void ExposeData();
     }
 }

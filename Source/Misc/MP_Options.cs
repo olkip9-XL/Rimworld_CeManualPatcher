@@ -1,5 +1,6 @@
 ﻿using CeManualPatcher.Extension;
 using CeManualPatcher.Misc;
+using CombatExtended;
 using RimWorld;
 using System;
 using System.Collections.Generic;
@@ -86,11 +87,35 @@ namespace CeManualPatcher
                     x.category == StatCategoryDefOf.Weapon_Melee ||
                     x.category == StatCategoryDefOf.StuffStatFactors
                     ));
+
+                    statDefsInt.RemoveWhere(x => exceptStatDefs.Contains(x));
                 }
                 return statDefsInt;
             }
         }
 
+        private static List<StatDef> exceptStatDefsInt = null;
+        public static List<StatDef> exceptStatDefs
+        {
+            get
+            {
+                if (exceptStatDefsInt == null)
+                {
+                    exceptStatDefsInt = new List<StatDef>()
+                    {
+                        StatDefOf.AccuracyTouch,
+                        StatDefOf.AccuracyShort,
+                        StatDefOf.AccuracyMedium,
+                        StatDefOf.AccuracyLong,
+                        StatDefOf.ShootingAccuracyFactor_Touch,
+                        StatDefOf.ShootingAccuracyFactor_Short,
+                        StatDefOf.ShootingAccuracyFactor_Medium,
+                        StatDefOf.ShootingAccuracyFactor_Long,
+                    };
+                }
+                return exceptStatDefsInt;
+            }
+        }
 
         private static List<BodyPartGroupDef> bodyPartGroupDefsInt = null;
         public static List<BodyPartGroupDef> bodyPartGroupDefs
@@ -181,7 +206,7 @@ namespace CeManualPatcher
                 if (allDamageDefsInt == null)
                 {
                     allDamageDefsInt = new List<DamageDef>();
-                   allDamageDefsInt.AddRange(DefDatabase<DamageDef>.AllDefsListForReading);
+                    allDamageDefsInt.AddRange(DefDatabase<DamageDef>.AllDefsListForReading);
                 }
                 return allDamageDefsInt.AsReadOnly();
             }
@@ -193,11 +218,54 @@ namespace CeManualPatcher
                 if (allDamageDefsEXInt == null)
                 {
                     allDamageDefsEXInt = new List<DamageDef>();
-                    allDamageDefsEXInt.AddRange(allDamageDefs.Where(x=> x.soundExplosion != null));
+                    allDamageDefsEXInt.AddRange(allDamageDefs.Where(x => x.soundExplosion != null));
                 }
                 return allDamageDefsEXInt.AsReadOnly();
             }
         }
 
+
+
+        private static List<Type> VerbClassesInt = null;
+        public static List<Type> VerbClasses
+        {
+            get
+            {
+                if (VerbClassesInt == null)
+                {
+                    VerbClassesInt = new List<Type>()
+                    {
+                        typeof(Verb_Shoot),
+                        typeof(Verb_ShootOneUse),
+                        typeof(CombatExtended.Verb_ShootCE),
+                        typeof(CombatExtended.Verb_ShootCEOneUse),
+                        typeof(CombatExtended.Verb_LaunchProjectileCE),
+                        typeof(CombatExtended.Verb_ShootCEOneUseStatic),
+                        typeof(CombatExtended.Verb_ShootMortarCE),
+                        typeof(CombatExtended.Verb_ShootFlareCE),
+                    };
+                }
+                return VerbClassesInt;
+            }
+        }
+
+        private static List<string> bipodIdInt = null;
+        public static List<string> BipodId
+        {
+            get
+            {
+                if (bipodIdInt == null)
+                {
+                    bipodIdInt = new List<string>();
+                    foreach (var item in DefDatabase<BipodCategoryDef>.AllDefs)
+                    {
+                        bipodIdInt.Add(item.bipod_id);
+                    }
+                }
+                return bipodIdInt;
+            }
+        }
+
+        public static List<BipodCategoryDef> bipodCategoryDefs => DefDatabase<BipodCategoryDef>.AllDefsListForReading;
     }
 }

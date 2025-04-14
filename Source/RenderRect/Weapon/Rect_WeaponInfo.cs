@@ -4,6 +4,7 @@ using CeManualPatcher.Manager;
 using CeManualPatcher.Misc;
 using CeManualPatcher.Saveable;
 using CombatExtended;
+using CombatExtended.Compatibility;
 using KTrie;
 using RimWorld;
 using System;
@@ -19,39 +20,44 @@ namespace CeManualPatcher
 {
     internal class Rect_WeaponInfo : RenderRectBase
     {
-        public ThingDef curWeaponDef => WeaponManager.curWeaponDef;
 
-        public static List<string> avaliableStatDefNames = new List<string>
-        {
-            //item
-            "Bulk",
-            "WornBulk",
-            "StuffEffectMultiplierToughness",
-            "ToughnessRating",
+        //public static List<string> avaliableStatDefNames = new List<string>
+        //{
+        //    //item
+        //    "Bulk",
+        //    "WornBulk",
+        //    "StuffEffectMultiplierToughness",
+        //    "ToughnessRating",
 
-            //ranged weapon
-            "ShotSpread",
-            "SwayFactor",
-            "SightsEfficiency",
-            "AimingAccuracy",
-            "ReloadSpeed",
-            "MuzzleFlash",
-            "MagazineCapacity",
-            "AmmoGenPerMagOverride",
-            "NightVisionEfficiency_Weapon",
-            "TicksBetweenBurstShots",
-            "BurstShotCount",
-            "Recoil",
-            "ReloadTime",
-            "OneHandedness",
-            "BipodStats"
-        };
+        //    //ranged weapon
+        //    "ShotSpread",
+        //    "SwayFactor",
+        //    "SightsEfficiency",
+        //    "AimingAccuracy",
+        //    "ReloadSpeed",
+        //    "MuzzleFlash",
+        //    "MagazineCapacity",
+        //    "AmmoGenPerMagOverride",
+        //    "NightVisionEfficiency_Weapon",
+        //    "TicksBetweenBurstShots",
+        //    "BurstShotCount",
+        //    "Recoil",
+        //    "ReloadTime",
+        //    "OneHandedness",
+        //    "BipodStats"
+        //};
 
         //scroll
         private float innerHeight = 0f;
         private Vector2 scrollPosition = Vector2.zero;
 
-        WeaponManager manager => WeaponManager.instance;
+        //private static Dictionary<Tool, bool> labelStats = new Dictionary<Tool, bool>();
+
+        private static WeaponManager manager => WeaponManager.instance;
+
+        private static CEPatchManager patchManager => CEPatchManager.instance;
+        private static ThingDef curWeaponDef => WeaponManager.curWeaponDef;
+
         public override void DoWindowContents(Rect rect)
         {
             if (curWeaponDef == null)
@@ -59,21 +65,63 @@ namespace CeManualPatcher
                 return;
             }
 
-            WidgetsUtility.ScrollView(rect, ref scrollPosition, ref innerHeight, (listing) =>
+            Listing_Standard listing = new Listing_Standard();
+            listing.Begin(rect);
+
+            DrawHead(listing);
+
+            WidgetsUtility.ScrollView(listing.GetRect(rect.height - listing.CurHeight - Text.LineHeight), ref scrollPosition, ref innerHeight, (innerListing) =>
             {
-                DrawHead(listing);
-                DrawStat(listing);
-                DrawVebs(listing);
-                DrawTools(listing);
-                DrawComps(listing);
+                DrawStat(innerListing, curWeaponDef.statBases);
+                DrawVebs(innerListing, curWeaponDef.Verbs.FirstOrDefault(), curWeaponDef.GetCompProperties<CompProperties_AmmoUser>(), curWeaponDef.weaponTags);
+                DrawTools(innerListing, curWeaponDef.tools);
+                DrawComps(innerListing,
+                    curWeaponDef.GetCompProperties<CompProperties_FireModes>(),
+                    curWeaponDef.GetCompProperties<CompProperties_AmmoUser>(),
+                    curWeaponDef.Verbs.FirstOrDefault());
             });
+
+            //control pannel
+            DrawControlPannel(listing);
+
+            listing.End();
         }
+
+        private void DrawControlPannel(Listing_Standard listing)
+        {
+            Rect rect = listing.GetRect(Text.LineHeight);
+
+            Rect resetAllRect = rect.LeftPartPixels(100f);
+            if (Widgets.ButtonText(resetAllRect, "MP_ResetAll".Translate()))
+            {
+                manager.ResetAll();
+            }
+
+            Rect exportCEPatchRect = rect.RightPartPixels(120f);
+            if (Widgets.ButtonText(exportCEPatchRect, "MP_Export".Translate()))
+            {
+                patchManager.ExportAll();
+            }
+        }
+
         private void DrawHead(Listing_Standard listing)
         {
             Rect rect = listing.GetRect(30f);
 
+            //sign
+            Rect rect0 = rect.LeftPartPixels(3f);
+
+            if (CEPatchManager.instance.HasPatcher(curWeaponDef))
+            {
+                Widgets.DrawBoxSolid(rect0, Color.blue);
+            }
+            else if (manager.HasWeaponPatch(curWeaponDef))
+            {
+                Widgets.DrawBoxSolid(rect0, new Color(85f / 256f, 177f / 256f, 85f / 256f));
+            }
+
             //icon
-            Rect rect1 = rect.LeftPartPixels(30f);
+            Rect rect1 = rect0.RightAdjoin(30f, 0);
             Widgets.ThingIcon(rect1, curWeaponDef);
 
             //label
@@ -84,122 +132,127 @@ namespace CeManualPatcher
 
             //reset button
             Rect rect3 = rect2.RightPartPixels(rect.height);
-            if (Widgets.ButtonImage(rect3, TexButton.Banish))
+            if (Widgets.ButtonImage(rect3, MP_Texture.Reset))
             {
                 manager.Reset(curWeaponDef);
             }
 
-            //add CE patch button
-            Rect rect4= rect3.LeftAdjoin(rect.height);
-            if (Widgets.ButtonImage(rect4, TexButton.Add))
+            //CE patch button
+            Rect rect4 = rect3.LeftAdjoin(rect.height);
+
+            if (!IsCECompactied(curWeaponDef))
             {
-                Find.WindowStack.Add(new Dialog_MakeCEPatch(curWeaponDef));
+                if (Widgets.ButtonImage(rect4, MP_Texture.CEPatch))
+                {
+                    Find.WindowStack.Add(new Dialog_MakeCEPatch(curWeaponDef));
+                }
             }
 
-            //reset CE patch
-            Rect rect5 = rect4.LeftAdjoin(rect.height);
-            if (Widgets.ButtonImage(rect5, TexButton.Banish))
-            {
-                Mod_CEManualPatcher.settings.patchers.First(x => x.thingDef == curWeaponDef)?.ResetCEPatch();
-            }
             listing.Gap(listing.verticalSpacing);
         }
 
-        private void DrawStat(Listing_Standard listing)
+        private bool IsCECompactied(ThingDef thingDef)
+        {
+            if (!thingDef.Verbs.NullOrEmpty() && !(thingDef.Verbs[0] is VerbPropertiesCE))
+            {
+                return false;
+            }
+
+            if (thingDef.tools != null && thingDef.tools.Any(x => !(x is ToolCE)))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public static void DrawStat(Listing_Standard listing, List<StatModifier> stats)
         {
             listing.GapLine(6f);
 
             Rect headRect = listing.GetRect(Text.LineHeight);
             Rect addRect = headRect.RightPartPixels(headRect.height);
-            Widgets.Label(headRect, "<b>Stat</b>");
+            Widgets.Label(headRect, "<b>" + "MP_StatBase".Translate() + "</b>");
 
             if (Widgets.ButtonImage(addRect, TexButton.Add))
             {
                 List<StatDef> list = new List<StatDef>();
                 list.AddRange(MP_Options.statDefs);
-                list = list.Where(x => !curWeaponDef.statBases.Any(y => y.stat == x)).ToList();
+                list = list.Where(x => !stats.Any(y => y.stat == x)).ToList();
 
                 FloatMenuUtility.MakeMenu(list,
                     (StatDef x) => x.label,
                     (StatDef x) => delegate ()
                     {
-                        manager.GetWeaponPatch(curWeaponDef).statBase.AddStat(x);
+                        manager.GetWeaponPatch(curWeaponDef);
+                        stats.Add(new StatModifier()
+                        {
+                            stat = x,
+                            value = 0f,
+                        });
                     });
             }
 
-            foreach (var item in curWeaponDef.statBases)
+            foreach (var item in stats)
             {
-                listing.StatDefX(item, 100f, newValue =>
+                Rect rect = listing.GetRect(Text.LineHeight);
+                rect.x += 20f;
+                rect.width -= 20f;
+
+                Widgets.Label(rect, item.stat.LabelCap);
+
+                //delete 
+                Rect rect1 = rect.RightPartPixels(rect.height);
+                if (Widgets.ButtonImage(rect1, TexButton.Delete))
                 {
-                    manager.GetWeaponPatch(curWeaponDef).statBase.AddStat(item.stat, newValue);
-                }, () =>
+                    manager.GetWeaponPatch(curWeaponDef);
+                    stats.RemoveWhere(x => x.stat == item.stat);
+                    break;
+                }
+
+                //field
+                Rect fieldRect = rect1.LeftAdjoin(100f);
+                WidgetsUtility.TextFieldOnChange<float>(fieldRect, ref item.value, newValue =>
                 {
-                    manager.GetWeaponPatch(curWeaponDef).statBase.DeleteStat(item.stat);
-                }, indent: 20f);
+                    manager.GetWeaponPatch(curWeaponDef);
+                });
+
+                TooltipHandler.TipRegion(rect, item.stat.description);
+                Widgets.DrawHighlightIfMouseover(rect);
             }
         }
 
-        private void DrawVebs(Listing_Standard listing)
+        public static void DrawVebs(Listing_Standard listing, VerbProperties verb, CompProperties_AmmoUser ammoUser, List<string> weaponTags)
         {
-            if (curWeaponDef.Verbs == null ||
-                curWeaponDef.Verbs.Count == 0
-                )
+            if (verb == null)
             {
                 return;
             }
 
             listing.GapLine(6f);
-            listing.Label("<b>VerbProperties</b>");
+            listing.Label("<b>" + "MP_Verb".Translate() + "</b>");
 
+            VerbPropertiesCE props = verb as VerbPropertiesCE;
 
-            if (!(curWeaponDef.Verbs[0] is VerbPropertiesCE))
+            if (props == null)
             {
-                listing.Label("not CE compatiable, verbClass is " + curWeaponDef.Verbs[0].verbClass.ToString());
+                listing.Label("Not CE compatiable, Verb is " + verb.GetType().ToString() + " VerbClass is " + verb.verbClass.ToString());
                 return;
             }
 
-            VerbPropertiesCE props = curWeaponDef.Verbs[0] as VerbPropertiesCE;
-
-            //test
-
-            FieldInfoWarpper warpper = new FieldInfoWarpper(props, "ammoConsumedPerShotCount")
+            //verbClass
+            listing.ButtonX("MP_VerbClass".Translate(), 250f, props.verbClass.ToString(), () =>
             {
-                LabelGetter= () => "MP_ammoConsumedPerShotCount".Translate(),
-            };
+                FloatMenuUtility.MakeMenu(MP_Options.VerbClasses,
+                    (Type x) => x.ToString(),
+                    (Type x) => delegate ()
+                    {
+                        manager.GetWeaponPatch(curWeaponDef);
+                        props.verbClass = x;
+                    });
+            }, indent: 20f);
 
-            FieldInfoWarpper warpper2 = new FieldInfoWarpper(props, "recoilPattern")
-            {
-                LabelGetter = () => "MP_recoilPattern".Translate(),
-                ValueSetter = (newValue) =>
-                {
-                    List<RecoilPattern> list = Enum.GetValues(typeof(RecoilPattern)).Cast<RecoilPattern>().ToList();
-
-                    FloatMenuUtility.MakeMenu(list,
-                        (RecoilPattern x) => x.ToString(),
-                        (RecoilPattern x) => delegate ()
-                        {
-                            typeof(VerbPropertiesCE).GetField("recoilPattern", BindingFlags.Public | BindingFlags.Instance).SetValue(props, x);
-                        });
-                },
-                ValueLabelGetter = (obj) =>
-                {
-                    RecoilPattern recoilPattern = (RecoilPattern)obj;
-                    return recoilPattern.ToString() + "test";
-                }
-            };
-
-            FieldInfoWarpper warpper3 = new FieldInfoWarpper(props, "ejectsCasings")
-            {
-                LabelGetter = () => "MP_EjectsCasings".Translate(),
-            };
-
-            listing.TestField(warpper, indent:20f);
-            listing.TestField(warpper2, indent:20f);
-            listing.TestField(warpper3, indent:20f);
-
-            //end
-
-            listing.ButtonX("recoilPattern", 100f, props.recoilPattern.ToString(), () =>
+            listing.ButtonX("MP_RecoilPattern".Translate(), 100f, props.recoilPattern.ToString(), () =>
             {
                 List<RecoilPattern> list = Enum.GetValues(typeof(RecoilPattern)).Cast<RecoilPattern>().ToList();
 
@@ -207,107 +260,90 @@ namespace CeManualPatcher
                     (RecoilPattern x) => x.ToString(),
                     (RecoilPattern x) => delegate ()
                     {
-                        manager.GetWeaponPatch(curWeaponDef).verbProperties.recoilPattern = x;
+                        manager.GetWeaponPatch(curWeaponDef);
+                        props.recoilPattern = x;
                     });
 
             }, indent: 20f);
 
-            listing.TextfieldX("ammoConsumedPerShotCount", 100f, props.ammoConsumedPerShotCount, newValue =>
+            //if (props.defaultProjectile != null)
+            listing.ButtonX("MP_DefaultProjectile".Translate(), 250f, props.defaultProjectile?.LabelCap ?? "null", () =>
             {
-                manager.GetWeaponPatch(curWeaponDef).verbProperties.ammoConsumedPerShotCount = newValue;
+                manager.GetWeaponPatch(curWeaponDef);
+                Dialog_SetDefaultProjectile dialog = new Dialog_SetDefaultProjectile(props, ammoUser);
+                Find.WindowStack.Add(dialog);
             }, indent: 20f);
 
-            listing.TextfieldX("recoilAmount", 100f, props.recoilAmount, newValue =>
+            //Sounds
+            listing.ButtonX("MP_SoundCast".Translate(), 150f, props.soundCast?.defName ?? "null", () =>
             {
-                manager.GetWeaponPatch(curWeaponDef).verbProperties.recoilAmount = newValue;
+                FloatMenuUtility.MakeMenu(MP_Options.soundCast,
+                    (SoundDef x) => x.defName,
+                    (SoundDef x) => delegate ()
+                    {
+                        manager.GetWeaponPatch(curWeaponDef);
+                        props.soundCast = x;
+                    });
             }, indent: 20f);
 
-            listing.TextfieldX("indirectFirePenalty", 100f, props.indirectFirePenalty, newValue =>
+            listing.ButtonX("MP_SoundCastTail".Translate(), 150f, props.soundCastTail?.defName ?? "null", () =>
             {
-                manager.GetWeaponPatch(curWeaponDef).verbProperties.indirectFirePenalty = newValue;
+                FloatMenuUtility.MakeMenu(MP_Options.soundCastTail,
+                    (SoundDef x) => x.defName,
+                    (SoundDef x) => delegate ()
+                    {
+                        manager.GetWeaponPatch(curWeaponDef);
+                        props.soundCastTail = x;
+                    });
             }, indent: 20f);
 
-            listing.TextfieldX("circularError", 100f, props.circularError, newValue =>
-            {
-                manager.GetWeaponPatch(curWeaponDef).verbProperties.circularError = newValue;
-            }, indent: 20f);
-
-            listing.TextfieldX("ticksToTruePosition", 100f, props.ticksToTruePosition, newValue =>
-            {
-                manager.GetWeaponPatch(curWeaponDef).verbProperties.ticksToTruePosition = newValue;
-            }, indent: 20f);
-
-            listing.ChenkBoxX("ejectsCasings", props.ejectsCasings, newValue =>
-            {
-                manager.GetWeaponPatch(curWeaponDef).verbProperties.ejectsCasings = newValue;
-            }, indent: 20f);
-
-            listing.ChenkBoxX("ignorePartialLoSBlocker", props.ignorePartialLoSBlocker, newValue =>
-            {
-                manager.GetWeaponPatch(curWeaponDef).verbProperties.ignorePartialLoSBlocker = newValue;
-            }, indent: 20f);
-
-            listing.ChenkBoxX("interruptibleBurst", props.interruptibleBurst, newValue =>
-            {
-                manager.GetWeaponPatch(curWeaponDef).verbProperties.interruptibleBurst = newValue;
-            }, indent: 20f);
-
-            listing.ChenkBoxX("hasStandardCommand", props.hasStandardCommand, newValue =>
-            {
-                manager.GetWeaponPatch(curWeaponDef).verbProperties.hasStandardCommand = newValue;
-            }, indent: 20f);
-
-            if (props.defaultProjectile != null)
-                listing.ButtonX("defaultProjectile", 200f, props.defaultProjectile.ToString(), () =>
+            //bipod
+            if (weaponTags != null)
+                listing.ButtonX("MP_Bipod".Translate(), 100f, GetBipod()?.label ?? "MP_Null".Translate(), () =>
                 {
-                    Dialog_SetDefaultProjectile dialog = new Dialog_SetDefaultProjectile(curWeaponDef);
-                    Find.WindowStack.Add(dialog);
-                }, indent: 20f);
-            listing.TextfieldX("warmupTime", 100f, props.warmupTime, newValue =>
-            {
-                manager.GetWeaponPatch(curWeaponDef).verbProperties.warmupTime = newValue;
-            }, indent: 20f);
-            listing.TextfieldX("range", 100f, props.range, newValue =>
-            {
-                manager.GetWeaponPatch(curWeaponDef).verbProperties.range = newValue;
-            }, indent: 20f);
-            listing.TextfieldX("burstShotCount", 100f, props.burstShotCount, newValue =>
-            {
-                manager.GetWeaponPatch(curWeaponDef).verbProperties.burstShotCount = newValue;
-            }, indent: 20f);
-            listing.TextfieldX("ticksBetweenBurstShots", 100f, props.ticksBetweenBurstShots, newValue =>
-            {
-                manager.GetWeaponPatch(curWeaponDef).verbProperties.ticksBetweenBurstShots = newValue;
-            }, indent: 20f);
-            if (props.soundCast != null)
-                listing.ButtonX("soundCast", 200f, props.soundCast.ToString(), () =>
-                {
-                    FloatMenuUtility.MakeMenu(MP_Options.soundCast,
-                        (SoundDef x) => x.defName,
-                        (SoundDef x) => delegate ()
+                    List<BipodCategoryDef> list = new List<BipodCategoryDef>();
+
+                    list.Add(null);
+                    list.AddRange(MP_Options.bipodCategoryDefs);
+
+                    FloatMenuUtility.MakeMenu(list,
+                        (BipodCategoryDef x) => x?.label ?? "MP_Null".Translate(),
+                        (BipodCategoryDef x) => delegate ()
                         {
-                            manager.GetWeaponPatch(curWeaponDef).verbProperties.soundCast = x;
-                        });
-
-                }, indent: 20f);
-            if (props.soundCastTail != null)
-                listing.ButtonX("soundCastTail", 200f, props.soundCastTail.ToString(), () =>
-                {
-                    FloatMenuUtility.MakeMenu(MP_Options.soundCastTail,
-                        (SoundDef x) => x.defName,
-                        (SoundDef x) => delegate ()
-                        {
-                            manager.GetWeaponPatch(curWeaponDef).verbProperties.soundCastTail = x;
+                            manager.GetWeaponPatch(curWeaponDef);
+                            SetBipod(x);
                         });
                 }, indent: 20f);
-            listing.TextfieldX("muzzleFlashScale", 100f, props.muzzleFlashScale, newValue =>
+
+            BipodCategoryDef GetBipod()
             {
-                manager.GetWeaponPatch(curWeaponDef).verbProperties.muzzleFlashScale = newValue;
-            }, indent: 20f);
+                if (weaponTags.NullOrEmpty())
+                    return null;
+
+                string bipodId = weaponTags.FirstOrDefault(x => MP_Options.BipodId.Contains(x));
+                return DefDatabase<BipodCategoryDef>.AllDefs.FirstOrDefault(x => x.bipod_id == bipodId);
+            }
+
+            void SetBipod(BipodCategoryDef bipodDef)
+            {
+                if (weaponTags.NullOrEmpty())
+                    return;
+                weaponTags.RemoveWhere(x => MP_Options.BipodId.Contains(x));
+                if (bipodDef != null)
+                    weaponTags.Add(bipodDef.bipod_id);
+            }
+
+            foreach (var item in VerbPropertiesCESaveable.propNames)
+            {
+                listing.FieldLineReflexion($"MP_Verbproperties.{item}".Translate(), item, props, newValue =>
+                {
+                    manager.GetWeaponPatch(curWeaponDef);
+                }, indent: 20f);
+            }
         }
-        private void DrawTools(Listing_Standard listing)
+        public static void DrawTools(Listing_Standard listing, List<Tool> tools)
         {
-            if (curWeaponDef.tools == null)
+            if (tools.NullOrEmpty())
             {
                 return;
             }
@@ -317,101 +353,103 @@ namespace CeManualPatcher
             //head
             Rect rect = listing.GetRect(Text.LineHeight);
             Rect addRect = rect.RightPartPixels(rect.height);
-            Widgets.Label(rect, "<b>Tools</b>");
+            Widgets.Label(rect, "<b>" + "MP_Tools".Translate() + "</b>");
             if (Widgets.ButtonImage(addRect, TexButton.Add))
             {
-                Find.WindowStack.Add(new Dialog_AddTool());
+                manager.GetWeaponPatch(curWeaponDef);
+                Find.WindowStack.Add(new Dialog_AddTool(tools));
             }
 
-            foreach (var item in curWeaponDef.tools)
+            foreach (var item in tools)
             {
                 listing.Gap(6f);
 
                 Rect subRect = listing.GetRect(Text.LineHeight);
-                Widgets.Label(subRect, $"{item.label} ({item.id})");
+
+                //label
+                WidgetsUtility.LabelChange(subRect, ref item.label, item.GetHashCode(), onClick: () =>
+                {
+                    manager.GetWeaponPatch(curWeaponDef);
+                });
 
                 if (!(item is ToolCE))
                 {
-                    listing.Label("not CE compatiable, tool class is " + item.ToString());
+                    listing.Label("Not CE compatiable, tool class is " + item.GetType().ToString());
                     continue;
                 }
 
                 ToolCE toolCE = item as ToolCE;
 
-                ToolCESaveable GetTool()
-                {
-                    return manager.GetWeaponPatch(curWeaponDef).tools.Find(x => x.id == item.id);
-                }
-
                 //删除按钮
                 Rect removeRect = subRect.RightPartPixels(subRect.height);
                 if (Widgets.ButtonImage(removeRect, TexButton.Delete))
                 {
-                    //manager.GetWeaponPatch(curWeaponDef).tools.Find(x => x.id == item.id).needDelete = true;
-                    GetTool().needDelete = true;
-                    continue;
+                    manager.GetWeaponPatch(curWeaponDef);
+                    tools.Remove(item);
+                    return;
                 }
 
+                string idString = $"id: {item.id}";
+                Rect idRect = removeRect.LeftAdjoin(Text.CalcSize(idString).x);
+                Widgets.Label(idRect, idString);
+
                 //内容
-                listing.TextfieldX("armorPenetrationBlunt", 100f, toolCE.armorPenetrationBlunt, newValue =>
-                {
-                    manager.GetWeaponPatch(curWeaponDef).tools.GetById(toolCE.id).armorPenetrationBlunt = newValue;
-                }, indent: 20f);
-                listing.TextfieldX("armorPenetrationSharp", 100f, toolCE.armorPenetrationSharp, newValue =>
-                {
-                    manager.GetWeaponPatch(curWeaponDef).tools.Find(x => x.id == item.id).armorPenetrationSharp = newValue;
-                }, indent: 20f);
-                listing.TextfieldX("power", 100f, toolCE.power, newValue =>
-                {
-                    manager.GetWeaponPatch(curWeaponDef).tools.Find(x => x.id == item.id).power = newValue;
-                }, indent: 20f);
-                listing.TextfieldX("cooldownTime", 100f, item.cooldownTime, newValue =>
-                {
-                    manager.GetWeaponPatch(curWeaponDef).tools.Find(x => x.id == item.id).cooldownTime = newValue;
-                }, indent: 20f);
-                
-                DrawCapacities(listing, toolCE);
-                DrawSurpriseAttack(listing, toolCE);
-                listing.ButtonX("linkedBodyPartsGroup", 100f, item.linkedBodyPartsGroup?.label ?? "null", () =>
-                {
-                    FloatMenuUtility.MakeMenu(MP_Options.bodyPartGroupDefs,
-                        (BodyPartGroupDef x) => $"{x.LabelCap} ({x.defName})",
-                        (BodyPartGroupDef x) => delegate ()
-                        {
-                            manager.GetWeaponPatch(curWeaponDef).tools.Find(y => y.id == item.id).linkedBodyPartsGroup = x;
-                            Messages.Message(x.defName, MessageTypeDefOf.SilentInput);
-                        });
-                }, indent: 20f);
-                listing.ChenkBoxX("alwaysTreatAsWeapon", item.alwaysTreatAsWeapon, newValue =>
-                {
-                    manager.GetWeaponPatch(curWeaponDef).tools.Find(x => x.id == item.id).alwaysTreatAsWeapon = newValue;
-                }, indent: 20f);
-                listing.TextfieldX("chanceFactor", 100f, item.chanceFactor, newValue =>
-                {
-                    manager.GetWeaponPatch(curWeaponDef).tools.Find(x => x.id == item.id).chanceFactor = newValue;
-                }, indent: 20f);
+                DrawToolContent(listing, toolCE);
             }
         }
+        public static void DrawToolContent(Listing_Standard listing, ToolCE tool, float indent = 20f)
+        {
+            if (tool == null)
+            {
+                return;
+            }
 
-        private void DrawCapacities(Listing_Standard listing, ToolCE tool)
+            //内容
+            DrawCapacities(listing, tool);
+            //DrawSurpriseAttack(listing, tool);
+            listing.ButtonX("MP_LinkedBodyPartsGroup".Translate(), 100f, tool.linkedBodyPartsGroup?.label ?? "null", () =>
+            {
+                FloatMenuUtility.MakeMenu(MP_Options.bodyPartGroupDefs,
+                    (BodyPartGroupDef x) => $"{x.LabelCap} ({x.defName})",
+                    (BodyPartGroupDef x) => delegate ()
+                    {
+                        manager.GetWeaponPatch(curWeaponDef);
+                        tool.linkedBodyPartsGroup = x;
+                        Messages.Message(x.defName, MessageTypeDefOf.SilentInput);
+                    });
+            }, indent: indent);
+
+            foreach (var fieldName in ToolCESaveable.propNames)
+            {
+                listing.FieldLineReflexion($"MP_Tools.{fieldName}".Translate(), fieldName, tool, newValue =>
+                {
+                    manager.GetWeaponPatch(curWeaponDef);
+                }, indent: indent);
+            }
+        }
+        private static void DrawCapacities(Listing_Standard listing, ToolCE tool)
         {
             Rect rect = listing.GetRect(Text.LineHeight);
             rect.x += 20f;
             rect.width -= 20f;
-            Widgets.Label(rect, "capacities");
+            Widgets.Label(rect, "MP_Capacities".Translate());
 
-            Rect rect1= rect.RightPartPixels(rect.height);
+            Widgets.DrawHighlightIfMouseover(rect);
+
+            //添加按钮
+            Rect rect1 = rect.RightPartPixels(rect.height);
             if (Widgets.ButtonImage(rect1, TexButton.Add))
             {
-                FloatMenuUtility.MakeMenu(MP_Options.toolCapacityDefs,
+                FloatMenuUtility.MakeMenu(MP_Options.toolCapacityDefs.Except(tool.capacities),
                     (ToolCapacityDef x) => x.label,
                     (ToolCapacityDef x) => delegate ()
                     {
-                        GetToolPatch(tool.id).capacities.Add(x);
+                        manager.GetWeaponPatch(curWeaponDef);
+                        tool.capacities.Add(x);
                     });
             }
 
-            foreach(var item in tool.capacities)
+            foreach (var item in tool.capacities)
             {
                 listing.Gap(6f);
                 Rect subRect = listing.GetRect(Text.LineHeight);
@@ -419,18 +457,20 @@ namespace CeManualPatcher
                 subRect.width -= 40f;
 
                 Widgets.Label(subRect, item.label);
+                Widgets.DrawHighlightIfMouseover(subRect);
                 //删除按钮
                 Rect removeRect = subRect.RightPartPixels(subRect.height);
                 if (Widgets.ButtonImage(removeRect, TexButton.Delete))
                 {
-                    GetToolPatch(tool.id).capacities.Remove(item);
+                    manager.GetWeaponPatch(curWeaponDef);
+                    tool.capacities.Remove(item);
                     break;
                 }
             }
         }
-        private void DrawSurpriseAttack(Listing_Standard listing, ToolCE tool)
+        private static void DrawSurpriseAttack(Listing_Standard listing, ToolCE tool)
         {
-            if(tool.surpriseAttack == null)
+            if (tool.surpriseAttack == null)
             {
                 return;
             }
@@ -445,12 +485,12 @@ namespace CeManualPatcher
                     (DamageDef x) => x.label,
                     (DamageDef x) => delegate ()
                     {
-                        ExtraDamage temp = new ExtraDamage()
+                        manager.GetWeaponPatch(curWeaponDef);
+                        tool.surpriseAttack.extraMeleeDamages.Add(new ExtraDamage()
                         {
-                            def=x,
+                            def = x,
                             amount = 0,
-                        };
-                        GetToolPatch(tool.id).surpriseAttack.Add(temp);
+                        });
                     });
             }
 
@@ -463,90 +503,60 @@ namespace CeManualPatcher
                 Rect removeRect = subRect.RightPartPixels(subRect.height);
                 if (Widgets.ButtonImage(removeRect, TexButton.Delete))
                 {
-                    GetToolPatch(tool.id).surpriseAttack.Remove(item);
+                    manager.GetWeaponPatch(curWeaponDef);
+                    tool.surpriseAttack.extraMeleeDamages.Remove(item);
                     break;
                 }
             }
         }
-
-        private ToolCESaveable GetToolPatch(string id)
-        {
-            return manager.GetWeaponPatch(curWeaponDef).tools.Find(x => x.id == id);
-        }
-        private void DrawComps(Listing_Standard listing)
+        public static void DrawComps(Listing_Standard listing, CompProperties_FireModes fireModes, CompProperties_AmmoUser ammoUser, VerbProperties verb)
         {
             //CompFireModes
-            if (curWeaponDef.HasComp<CompFireModes>())
+            if (fireModes != null)
             {
-                CompProperties_FireModes props = curWeaponDef.GetCompProperties<CompProperties_FireModes>();
-
                 listing.GapLine(6f);
-                listing.Label("<b>Fire Mode</b>");
+                listing.Label("<b>" + "MP_FireModes".Translate() + "</b>");
 
-                listing.TextfieldX("aimedBurstShotCount", 100f, props.aimedBurstShotCount, newValue =>
-                {
-                    manager.GetWeaponPatch(curWeaponDef).fireMode.aimedBurstShotCount = newValue;
-                }, indent: 20f);
-                listing.ChenkBoxX("aiUseBurstMode", props.aiUseBurstMode, newValue =>
-                {
-                    manager.GetWeaponPatch(curWeaponDef).fireMode.aiUseBurstMode = newValue;
-                }, indent: 20f);
-                listing.ChenkBoxX("noSingleShot", props.noSingleShot, newValue =>
-                {
-                    manager.GetWeaponPatch(curWeaponDef).fireMode.noSingleShot = newValue;
-                }, indent: 20f);
-                listing.ChenkBoxX("noSnapshot", props.noSnapshot, newValue =>
-                {
-                    manager.GetWeaponPatch(curWeaponDef).fireMode.noSnapshot = newValue;
-                }, indent: 20f);
-                listing.ButtonX("aiAimMode", 100f, props.aiAimMode.ToString(), () =>
+                listing.ButtonX("MP_AiAimMode".Translate(), 100f, fireModes.aiAimMode.ToString(), () =>
                 {
                     List<AimMode> list = Enum.GetValues(typeof(AimMode)).Cast<AimMode>().ToList();
                     FloatMenuUtility.MakeMenu(list,
                         (AimMode x) => x.ToString(),
                         (AimMode x) => delegate ()
                         {
-                            manager.GetWeaponPatch(curWeaponDef).fireMode.aiAimMode = x;
+                            manager.GetWeaponPatch(curWeaponDef);
+                            fireModes.aiAimMode = x;
                         });
                 }, indent: 20f);
+
+                foreach (var item in CompFireModesSaveable.propNames)
+                {
+                    listing.FieldLineReflexion($"MP_FireModes.{item}".Translate(), item, fireModes, newValue =>
+                    {
+                        manager.GetWeaponPatch(curWeaponDef);
+                    }, indent: 20f);
+                }
             }
 
             //CompAmmoUser
-            if (curWeaponDef.HasComp<CompAmmoUser>())
+            if (ammoUser != null)
             {
-                CompProperties_AmmoUser props = curWeaponDef.GetCompProperties<CompProperties_AmmoUser>();
                 listing.GapLine(6f);
-                listing.Label("<b>Ammo User</b>");
+                listing.Label("<b>" + "MP_AmmoUser".Translate() + "</b>");
 
-                listing.TextfieldX("magazineSize", 100f, props.magazineSize, newValue =>
+                listing.ButtonX("MP_AmmoSet".Translate(), 200f, ammoUser.ammoSet?.LabelCap ?? "null", () =>
                 {
-                    manager.GetWeaponPatch(curWeaponDef).ammoUser.magazineSize = newValue;
+                    manager.GetWeaponPatch(curWeaponDef);
+                    Find.WindowStack.Add(new Dialog_SetDefaultProjectile(verb as VerbPropertiesCE, ammoUser));
                 }, indent: 20f);
-                listing.TextfieldX("AmmoGenPerMagOverride", 100f, props.AmmoGenPerMagOverride, newValue =>
+
+                foreach (var item in CompAmmoUserSaveable.propNames)
                 {
-                    manager.GetWeaponPatch(curWeaponDef).ammoUser.AmmoGenPerMagOverride = newValue;
-                }, indent: 20f);
-                listing.TextfieldX("reloadTime", 100f, props.reloadTime, newValue =>
-                {
-                    manager.GetWeaponPatch(curWeaponDef).ammoUser.reloadTime = newValue;
-                }, indent: 20f);
-                listing.ChenkBoxX("reloadOneAtATime", props.reloadOneAtATime, newValue =>
-                {
-                    manager.GetWeaponPatch(curWeaponDef).ammoUser.reloadOneAtATime = newValue;
-                }, indent: 20f);
-                listing.ChenkBoxX("throwMote", props.throwMote, newValue =>
-                {
-                    manager.GetWeaponPatch(curWeaponDef).ammoUser.throwMote = newValue;
-                }, indent: 20f);
-                listing.ButtonX("ammoSet", 200f, props.ammoSet.LabelCap, () =>
-                {
-                    Dialog_SetDefaultProjectile dialog = new Dialog_SetDefaultProjectile(curWeaponDef);
-                    Find.WindowStack.Add(dialog);
-                }, indent: 20f);
-                listing.TextfieldX("loadedAmmoBulkFactor", 100f, props.loadedAmmoBulkFactor, newValue =>
-                {
-                    manager.GetWeaponPatch(curWeaponDef).ammoUser.loadedAmmoBulkFactor = newValue;
-                }, indent: 20f);
+                    listing.FieldLineReflexion($"MP_AmmoUser.{item}".Translate(), item, ammoUser, newValue =>
+                    {
+                        manager.GetWeaponPatch(curWeaponDef);
+                    }, indent: 20f);
+                }
             }
         }
     }

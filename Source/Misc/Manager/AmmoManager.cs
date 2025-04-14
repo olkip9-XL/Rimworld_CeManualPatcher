@@ -18,26 +18,31 @@ namespace CeManualPatcher.Manager
         public static AmmoManager instance;
 
         private List<AmmoPatch> ammoPatches = new List<AmmoPatch>();
+
         private Rect_AmmoList rect_AmmoList = new Rect_AmmoList();
         private Rect_AmmoInfo rect_AmmoInfo = new Rect_AmmoInfo();
 
-        private ThingDef curProjectile = null;
-        public AmmoPatch GetAmmoPatch(ThingDef thing)
+        public AmmoPatch GetAmmoPatch(MP_Ammo ammo)
         {
-            AmmoPatch result = ammoPatches.Find(x => x?.projectileDef == thing);
+            AmmoPatch result = ammoPatches.Find(x => x?.projectileDef == ammo.projectile);
             if (result == null)
             {
-                result = new AmmoPatch(thing);
-                ammoPatches.Add(result);
+                try
+                {
+                    result = new AmmoPatch(ammo.projectile, ammo.ammo);
+                    ammoPatches.Add(result);
+                }
+                catch (Exception e)
+                {
+                    Log.Error($"[CeManualPatcher] AmmoManager Trying create patch for item {ammo.projectile?.defName ?? "Null"}, ammo: {ammo.ammo?.defName ?? "Null"}: {e}");
+                }
             }
-            needApply = true;
-            curProjectile = thing;
             return result;
         }
 
         public bool HasAmmoPatch(MP_AmmoSet ammoSet)
         {
-            return ammoPatches.Any(x => ammoSet.ammoList.Any(y=> y.projectile == x.projectileDef));
+            return ammoPatches.Any(x => ammoSet.ammoList.Any(y => y.projectile == x.projectileDef));
         }
 
         public bool HasAmmoPatch(MP_Ammo ammo)
@@ -57,32 +62,19 @@ namespace CeManualPatcher.Manager
 
             rect_AmmoList.DoWindowContents(leftRect);
             rect_AmmoInfo.DoWindowContents(rightRect);
-
-            if(needApply)
-            {
-                Apply(curProjectile);
-                needApply = false;
-                curProjectile = null;
-            }
         }
 
-        public override void Apply(ThingDef thing)
-        {
-            AmmoPatch ammoPatch = this.ammoPatches.Find(x => x?.projectileDef == thing);
-            if(ammoPatch != null)
-            {
-                ammoPatch.Apply();
-            }
-        }
-
-        public override void ApplyAll()
-        {
-            ammoPatches.ForEach(x => x.Apply());
-        }
 
         public override void ExposeData()
         {
-            //todo 
+            Scribe_Collections.Look(ref ammoPatches, "ammoPatches", LookMode.Deep);
+            if (Scribe.mode == LoadSaveMode.LoadingVars)
+            {
+                if (ammoPatches == null)
+                {
+                    ammoPatches = new List<AmmoPatch>();
+                }
+            }
         }
 
         public override void Reset(ThingDef thing)
@@ -103,9 +95,16 @@ namespace CeManualPatcher.Manager
 
         public override void PostLoadInit()
         {
-            foreach (var item in ammoPatches)
+            foreach(var item in this.ammoPatches)
             {
-                item.PostLoadInit();
+                try
+                {
+                    item?.PostLoadInit();
+                }
+                catch (Exception e)
+                {
+                    Log.Error($"[CeManualPatcher] AmmoManager PostLoadInit error on item {item.projectileDef?.defName ?? "Null"}: {e}");
+                }
             }
         }
     }

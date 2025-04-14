@@ -75,10 +75,10 @@ namespace CeManualPatcher.RenderRect
             listingStandard.Begin(rect);
 
             //来源mod
-            listingStandard.ButtonX("source:", 150f, curSourceMod?.Name ?? "All", delegate
+            listingStandard.ButtonX("MP_Source".Translate(), 150f, curSourceMod?.Name ?? "MP_All".Translate(), delegate
             {
                 FloatMenuUtility.MakeMenu<ModContentPack>(ActiveMods,
-                    (mod) => mod?.Name ?? "All",
+                    (mod) => mod?.Name ?? "MP_All".Translate(),
                     (mod) => delegate
                     {
                         curSourceMod = mod;
@@ -128,7 +128,7 @@ namespace CeManualPatcher.RenderRect
                 Widgets.DrawHighlightSelected(rect);
             }
 
-            TooltipHandler.TipRegion(rect, $"{item.description}\n\nsource: {item.modContentPack.Name}");
+            TooltipHandler.TipRegion(rect, $"{item.description}\n\n{"MP_Source".Translate()} {item.modContentPack.Name}");
         }
     }
 }
