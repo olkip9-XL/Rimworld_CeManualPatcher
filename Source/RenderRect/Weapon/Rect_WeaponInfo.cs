@@ -20,38 +20,9 @@ namespace CeManualPatcher
 {
     internal class Rect_WeaponInfo : RenderRectBase
     {
-
-        //public static List<string> avaliableStatDefNames = new List<string>
-        //{
-        //    //item
-        //    "Bulk",
-        //    "WornBulk",
-        //    "StuffEffectMultiplierToughness",
-        //    "ToughnessRating",
-
-        //    //ranged weapon
-        //    "ShotSpread",
-        //    "SwayFactor",
-        //    "SightsEfficiency",
-        //    "AimingAccuracy",
-        //    "ReloadSpeed",
-        //    "MuzzleFlash",
-        //    "MagazineCapacity",
-        //    "AmmoGenPerMagOverride",
-        //    "NightVisionEfficiency_Weapon",
-        //    "TicksBetweenBurstShots",
-        //    "BurstShotCount",
-        //    "Recoil",
-        //    "ReloadTime",
-        //    "OneHandedness",
-        //    "BipodStats"
-        //};
-
         //scroll
         private float innerHeight = 0f;
         private Vector2 scrollPosition = Vector2.zero;
-
-        //private static Dictionary<Tool, bool> labelStats = new Dictionary<Tool, bool>();
 
         private static WeaponManager manager => WeaponManager.instance;
 
@@ -70,7 +41,7 @@ namespace CeManualPatcher
 
             DrawHead(listing);
 
-            WidgetsUtility.ScrollView(listing.GetRect(rect.height - listing.CurHeight - Text.LineHeight), ref scrollPosition, ref innerHeight, (innerListing) =>
+            WidgetsUtility.ScrollView(listing.GetRect(rect.height - listing.CurHeight - Text.LineHeight - 0.1f), ref scrollPosition, ref innerHeight, (innerListing) =>
             {
                 DrawStat(innerListing, curWeaponDef.statBases);
                 DrawVebs(innerListing, curWeaponDef.Verbs.FirstOrDefault(), curWeaponDef.GetCompProperties<CompProperties_AmmoUser>(), curWeaponDef.weaponTags);
@@ -406,7 +377,8 @@ namespace CeManualPatcher
 
             //内容
             DrawCapacities(listing, tool);
-            //DrawSurpriseAttack(listing, tool);
+            DrawSurpriseAttack(listing, tool);
+            DrawExtraMeleeDamage(listing, tool);
             listing.ButtonX("MP_LinkedBodyPartsGroup".Translate(), 100f, tool.linkedBodyPartsGroup?.label ?? "null", () =>
             {
                 FloatMenuUtility.MakeMenu(MP_Options.bodyPartGroupDefs,
@@ -470,13 +442,12 @@ namespace CeManualPatcher
         }
         private static void DrawSurpriseAttack(Listing_Standard listing, ToolCE tool)
         {
-            if (tool.surpriseAttack == null)
-            {
-                return;
-            }
+            Rect rect = listing.GetRect(Text.LineHeight);
+            rect.x += 20f;
+            rect.width -= 20f;
+            Widgets.DrawHighlightIfMouseover(rect);
 
-            Rect rect = listing.GetRect(listing.verticalSpacing);
-            Widgets.Label(rect, "Surprise Attack Damage");
+            Widgets.Label(rect, "MP_SurpriseAttackDamage".Translate());
 
             Rect rect1 = rect.RightPartPixels(rect.height);
             if (Widgets.ButtonImage(rect1, TexButton.Add))
@@ -486,29 +457,131 @@ namespace CeManualPatcher
                     (DamageDef x) => delegate ()
                     {
                         manager.GetWeaponPatch(curWeaponDef);
+
+                        if (tool.surpriseAttack == null)
+                        {
+                            tool.surpriseAttack = new SurpriseAttackProps();
+                            tool.surpriseAttack.extraMeleeDamages = new List<ExtraDamage>();
+                        }
+
                         tool.surpriseAttack.extraMeleeDamages.Add(new ExtraDamage()
                         {
                             def = x,
-                            amount = 0,
+                            amount = 1,
                         });
                     });
             }
 
+            if (tool.surpriseAttack == null)
+            {
+                return;
+            }
+
             foreach (var item in tool.surpriseAttack.extraMeleeDamages)
             {
-                listing.Gap(6f);
-                Rect subRect = listing.GetRect(Text.LineHeight);
-                Widgets.Label(subRect, item.def.LabelCap);
-                //删除按钮
-                Rect removeRect = subRect.RightPartPixels(subRect.height);
-                if (Widgets.ButtonImage(removeRect, TexButton.Delete))
+                if (DrawExtraDamageRow(listing, item, indent: 40f))
                 {
                     manager.GetWeaponPatch(curWeaponDef);
                     tool.surpriseAttack.extraMeleeDamages.Remove(item);
-                    break;
+                    return;
                 }
             }
+
+            listing.Gap(listing.verticalSpacing);
         }
+
+        private static void DrawExtraMeleeDamage(Listing_Standard listing, ToolCE tool)
+        {
+            Rect rect = listing.GetRect(Text.LineHeight);
+            rect.x += 20f;
+            rect.width -= 20f;
+            Widgets.DrawHighlightIfMouseover(rect);
+
+
+            Widgets.Label(rect, "MP_ExtraMeleeDamage".Translate());
+
+            Rect rect1 = rect.RightPartPixels(rect.height);
+            if (Widgets.ButtonImage(rect1, TexButton.Add))
+            {
+                FloatMenuUtility.MakeMenu(MP_Options.allDamageDefs,
+                    (DamageDef x) => x.label,
+                    (DamageDef x) => delegate ()
+                    {
+                        manager.GetWeaponPatch(curWeaponDef);
+
+                        if (tool.extraMeleeDamages == null)
+                        {
+                            tool.extraMeleeDamages = new List<ExtraDamage>();
+                        }
+
+                        tool.extraMeleeDamages.Add(new ExtraDamage()
+                        {
+                            def = x,
+                            amount = 1,
+                        });
+                    });
+            }
+
+            if (tool.extraMeleeDamages == null)
+            {
+                return;
+            }
+
+            foreach (var item in tool.extraMeleeDamages)
+            {
+                if( DrawExtraDamageRow(listing, item, indent:40f))
+                {
+                    manager.GetWeaponPatch(curWeaponDef);
+                    tool.extraMeleeDamages.Remove(item);
+                    return;
+                }
+            }
+
+            listing.Gap(listing.verticalSpacing);
+        }
+
+        private static bool DrawExtraDamageRow(Listing_Standard listing, ExtraDamage extraDamage,  float indent = 20f)
+        {
+            Rect rect = listing.GetRect(Text.LineHeight);
+            rect.x += indent;
+            rect.width -= indent;
+
+            Widgets.Label(rect, extraDamage.def.LabelCap);
+
+            Widgets.DrawHighlightIfMouseover(rect);
+
+            //删除按钮
+            Rect removeRect = rect.RightPartPixels(rect.height);
+            if (Widgets.ButtonImage(removeRect, TexButton.Delete))
+            {
+                return true;
+            }
+
+            //chance
+            string chanceLabel = "MP_DamageChance".Translate();
+            Rect rect1 = removeRect.LeftAdjoin(100f);
+            WidgetsUtility.TextFieldOnChange<float>(rect1, ref extraDamage.chance, newValue =>
+            {
+                manager.GetWeaponPatch(curWeaponDef);
+            });
+            Rect rect2 = rect1.LeftAdjoin(Text.CalcSize(chanceLabel).x);
+            Widgets.Label(rect2, chanceLabel);
+
+            //damage amount
+            string amountLabel = "MP_DamageAmount".Translate();
+            Rect rect3 = rect2.LeftAdjoin(100f);
+            WidgetsUtility.TextFieldOnChange<float>(rect3, ref extraDamage.amount, newValue =>
+            {
+                manager.GetWeaponPatch(curWeaponDef);
+            });
+            Rect rect4 = rect3.LeftAdjoin(Text.CalcSize(amountLabel).x);
+            Widgets.Label(rect4, amountLabel);
+
+            listing.Gap(listing.verticalSpacing);
+
+            return false;
+        }
+
         public static void DrawComps(Listing_Standard listing, CompProperties_FireModes fireModes, CompProperties_AmmoUser ammoUser, VerbProperties verb)
         {
             //CompFireModes

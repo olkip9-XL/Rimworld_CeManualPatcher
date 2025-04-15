@@ -118,7 +118,9 @@ namespace CeManualPatcher.RenderRect.Ammo
 
             listingStandard.SearchBar(ref keyWords);
 
-            WidgetsUtility.ScrollView(listingStandard.GetRect(rect.height - listingStandard.CurHeight), ref scrollPosition, ref viewHeight, listing =>
+            Rect innerRect = listingStandard.GetRect(rect.height - listingStandard.CurHeight - 0.1f);
+
+            WidgetsUtility.ScrollView(innerRect, ref scrollPosition, ref viewHeight, listing =>
             {
                 foreach (var item in filteredAmmoSet)
                 {

@@ -34,7 +34,7 @@ namespace CeManualPatcher
             Listing_Standard listingStandard = new Listing_Standard();
             listingStandard.Begin(rect);
 
-            WidgetsUtility.ScrollView(listingStandard.GetRect(rect.height - listingStandard.CurHeight - Text.LineHeight), ref scrollPosition, ref viewHeight, scrollListing =>
+            WidgetsUtility.ScrollView(listingStandard.GetRect(rect.height - listingStandard.CurHeight - Text.LineHeight - 0.1f), ref scrollPosition, ref viewHeight, scrollListing =>
             {
                 DrawHead(scrollListing);
 
@@ -73,6 +73,7 @@ namespace CeManualPatcher
             //无法编辑
             if (ammo?.projectile?.projectile?.damageDef == null)
             {
+                listing.Label("Projectile is Null or Damage is Null");
                 return;
             }
 
@@ -80,6 +81,8 @@ namespace CeManualPatcher
 
             if (props == null)
             {
+                listing.Label($"Not CE Projectile, Projectile Class is {ammo.projectile.projectile.GetType()}");
+                DrawNonCEProjectile(listing, ammo.projectile);
                 return;
             }
 
@@ -132,6 +135,11 @@ namespace CeManualPatcher
 
             //common
             listing.FieldLineReflexion("MP_DescSuppressionFactor".Translate(), "suppressionFactor", props, newValue =>
+            {
+                manager.GetAmmoPatch(ammo);
+            });
+
+            listing.FieldLineReflexion("MP_DescStoppingPower".Translate(), "stoppingPower", props, newValue =>
             {
                 manager.GetAmmoPatch(ammo);
             });
@@ -395,6 +403,48 @@ namespace CeManualPatcher
             else
             {
                 return MP_Options.allDamageDefs.Except(ammo.projectile.ExistDamages()).ToList();
+            }
+        }
+
+        private void DrawNonCEProjectile(Listing_Standard listing, ThingDef projectileDef)
+        {
+            if (projectileDef == null) return;
+
+            listing.GapLine(6f);
+
+            //head
+            Rect rect = listing.GetRect(Text.LineHeight);
+            Widgets.LabelWithIcon(rect, projectileDef.LabelCap, projectileDef.uiIcon);
+
+            ProjectileProperties props = projectileDef.projectile;
+            if (props == null) return;
+
+            //common
+            FieldInfo fieldInfo = typeof(ProjectileProperties).GetField("damageAmountBase", BindingFlags.NonPublic | BindingFlags.Instance);
+            listing.Label("CE_DescBaseDamage".Translate() + " : " + $"{fieldInfo.GetValue(props)}({props.damageDef.LabelCap})");
+
+            if (!props.extraDamages.NullOrEmpty())
+            {
+                foreach (var item in props.extraDamages)
+                {
+                    listing.Label($"\t{item.amount}({item.def.LabelCap})");
+                }
+            }
+
+            fieldInfo = typeof(ProjectileProperties).GetField("armorPenetrationBase", BindingFlags.NonPublic | BindingFlags.Instance);
+            listing.Label("CE_DescArmorPenetration".Translate() + " : " + fieldInfo.GetValue(props));
+            listing.Label("MP_DescStoppingPower".Translate() + "  " + props.stoppingPower);
+
+            //explosive
+            if (props.explosionRadius > 0)
+            {
+                listing.Label("CE_DescExplosionRadius".Translate() + " : " + props.explosionRadius);
+                listing.Label("MP_DescExplosionGas".Translate() + " : " + props.postExplosionGasType.GetLabel());
+            }
+            //non-explosive
+            else
+            {
+
             }
         }
     }

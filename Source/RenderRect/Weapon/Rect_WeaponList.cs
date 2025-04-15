@@ -59,7 +59,7 @@ namespace CeManualPatcher.RenderRect
                     list = list.Where(x => x.label.ToLower().Contains(keyWords.ToLower())).ToList();
                 }
 
-                if(curSourceMod != null)
+                if (curSourceMod != null)
                 {
                     list = list.Where(x => x.modContentPack == curSourceMod).ToList();
                 }
@@ -89,7 +89,8 @@ namespace CeManualPatcher.RenderRect
 
             List<ThingDef> allWeaponDefs = WeaponDefs;
 
-            Rect listRect = listingStandard.GetRect(rect.height - listingStandard.CurHeight);
+            Rect listRect = listingStandard.GetRect(rect.height - listingStandard.CurHeight - 0.1f);
+
             WidgetsUtility.ScrollView(listRect, ref scrollPosition, ref innerHeight, (listing) =>
             {
                 foreach (var item in allWeaponDefs)

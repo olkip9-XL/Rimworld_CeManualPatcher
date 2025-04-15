@@ -266,20 +266,16 @@ namespace CeManualPatcher
             XmlDeclaration xmlDeclaration = xmlDoc.CreateXmlDeclaration("1.0", "utf-8", null);
             xmlDoc.AppendChild(xmlDeclaration);
 
-            // 创建根节点 <Patch>
             XmlElement patchElement = xmlDoc.CreateElement("Patch");
             xmlDoc.AppendChild(patchElement);
 
-            // 创建子节点 <Operation>
             XmlElement operationElement = xmlDoc.CreateElement("Operation");
             operationElement.SetAttribute("Class", "PatchOperationSequence");
             patchElement.AppendChild(operationElement);
 
-            // 添加 <operations> 节点
             XmlElement operationsElement = xmlDoc.CreateElement("operations");
             operationElement.AppendChild(operationsElement);
 
-            // 添加第一个 <li> 节点 "TOOLS FOR THE TOOL GOD"
             XmlElement toolsLiElement = xmlDoc.CreateElement("li");
             toolsLiElement.SetAttribute("Class", "PatchOperationReplace");
             operationsElement.AppendChild(toolsLiElement);
@@ -306,14 +302,52 @@ namespace CeManualPatcher
 
                     AddChildElement(xmlDoc, toolElement, "label", tool.label);
 
+                    //capacities
                     XmlElement capacityElement = xmlDoc.CreateElement("capacities");
-
                     foreach (var capacity in tool.capacities)
                     {
                         AddChildElement(xmlDoc, capacityElement, "li", capacity.defName);
                     }
-
                     toolElement.AppendChild(capacityElement);
+
+
+                    //surprise attack
+                    if (tool.surpriseAttack != null && tool.surpriseAttack.extraMeleeDamages != null)
+                    {
+                        XmlElement surpriseAttackElement = xmlDoc.CreateElement("surpriseAttack");
+                        toolElement.AppendChild(surpriseAttackElement);
+
+                        XmlElement extraMeleeDamageElement = xmlDoc.CreateElement("extraMeleeDamages");
+                        surpriseAttackElement.AppendChild(extraMeleeDamageElement);
+
+                        foreach (var damage in tool.surpriseAttack.extraMeleeDamages)
+                        {
+                            XmlElement listElement = xmlDoc.CreateElement("li");
+
+                            AddChildElement(xmlDoc, listElement, "def", damage.def.defName);
+                            AddChildElement(xmlDoc, listElement, "amount", damage.amount.ToString());
+                            AddChildElement(xmlDoc, listElement, "chance", damage.chance.ToString());
+
+                            extraMeleeDamageElement.AppendChild(listElement);
+                        }
+                        toolElement.AppendChild(surpriseAttackElement);
+                    }
+                    //extra damage
+                    if (tool.extraMeleeDamages != null)
+                    {
+                        XmlElement extraDamageElement = xmlDoc.CreateElement("extraMeleeDamages");
+                        foreach (var damage in tool.surpriseAttack.extraMeleeDamages)
+                        {
+                            XmlElement listElement = xmlDoc.CreateElement("li");
+
+                            AddChildElement(xmlDoc, listElement, "def", damage.def.defName);
+                            AddChildElement(xmlDoc, listElement, "amount", damage.amount.ToString());
+                            AddChildElement(xmlDoc, listElement, "chance", damage.chance.ToString());
+
+                            extraDamageElement.AppendChild(listElement);
+                        }
+                        toolElement.AppendChild(extraDamageElement);
+                    }
 
                     foreach (var propName in ToolCESaveable.propNames)
                     {

@@ -37,7 +37,7 @@
   <MP_Verbproperties.ignorePartialLoSBlocker>ignorePartialLoSBlocker</MP_Verbproperties.ignorePartialLoSBlocker>
   <MP_Verbproperties.interruptibleBurst>interruptibleBurst</MP_Verbproperties.interruptibleBurst>
   <MP_Verbproperties.hasStandardCommand>有标准指令</MP_Verbproperties.hasStandardCommand>
-  <MP_Verbproperties.warmupTime>预热时间</MP_Verbproperties.warmupTime>
+  <MP_Verbproperties.warmupTime>瞄准时间</MP_Verbproperties.warmupTime>
   <MP_Verbproperties.range>射程</MP_Verbproperties.range>
   <MP_Verbproperties.burstShotCount>爆发性射击计数</MP_Verbproperties.burstShotCount>
   <MP_Verbproperties.ticksBetweenBurstShots>战斗射速</MP_Verbproperties.ticksBetweenBurstShots>
@@ -50,12 +50,20 @@
 
   <MP_Capacities>伤害类型</MP_Capacities>
 
+  <MP_SurpriseAttackDamage>暴击伤害</MP_SurpriseAttackDamage>
+
+  <MP_ExtraMeleeDamage>额外伤害</MP_ExtraMeleeDamage>
+
+  <MP_DamageChance>几率</MP_DamageChance>
+  <MP_DamageAmount>伤害量</MP_DamageAmount>
+
   <MP_Tools.armorPenetrationBlunt>钝器穿透</MP_Tools.armorPenetrationBlunt>
   <MP_Tools.armorPenetrationSharp>利器穿透</MP_Tools.armorPenetrationSharp>
   <MP_Tools.power>力量</MP_Tools.power>
   <MP_Tools.cooldownTime>冷却时间</MP_Tools.cooldownTime>
   <MP_Tools.alwaysTreatAsWeapon>总是作为武器</MP_Tools.alwaysTreatAsWeapon>
   <MP_Tools.chanceFactor>使用几率系数</MP_Tools.chanceFactor>
+  <MP_Tools.ensureLinkedBodyPartsGroupAlwaysUsable>保证武器部位总是可用</MP_Tools.ensureLinkedBodyPartsGroupAlwaysUsable>
 
 
   <!--Fire Modes-->
@@ -93,10 +101,15 @@
 
   <MP_DescSuppressionFactor>压制系数</MP_DescSuppressionFactor>
   <MP_DescExplosionGas>爆炸气体</MP_DescExplosionGas>
+  <MP_DescStoppingPower>停止力</MP_DescStoppingPower>
+  
+  <!--Ammo NonCE-->
+  
 
-  <MP_Accept>确定</MP_Accept>
 
   <!--Misc-->
   <MP_CEPatchExportMsg>CE补丁已导出至{0}</MP_CEPatchExportMsg>
+
+  <MP_Accept>确定</MP_Accept>
 
 </LanguageData>

@@ -14,10 +14,12 @@ namespace CeManualPatcher.Saveable
     {
         public float amount;
         public string defString;
+        public float chance;
         public void ExposeData()
         {
             Scribe_Values.Look(ref amount, "amount");
             Scribe_Values.Look(ref defString, "defString");
+            Scribe_Values.Look(ref chance, "chance");
         }
     }
 
@@ -30,7 +32,8 @@ namespace CeManualPatcher.Saveable
                 "power",
                 "cooldownTime",
                 "alwaysTreatAsWeapon",
-                "chanceFactor"
+                "chanceFactor",
+                "ensureLinkedBodyPartsGroupAlwaysUsable"
         }.AsReadOnly();
         private Dictionary<string, string> propDic = new Dictionary<string, string>();
 
@@ -43,6 +46,7 @@ namespace CeManualPatcher.Saveable
         }
 
         private List<ExtraDamageExpo> surpriseAttackSave = new List<ExtraDamageExpo>();
+        private List<ExtraDamageExpo> extraDamages = new List<ExtraDamageExpo>();
 
         private string label;
         internal string id;
@@ -88,9 +92,13 @@ namespace CeManualPatcher.Saveable
 
             foreach (var item in propNames)
             {
-                PropUtility.SetPropValueString(tool, item, propDic[item]);
+                if(propDic.ContainsKey(item))
+                {
+                    PropUtility.SetPropValueString(tool, item, propDic[item]);
+                }
             }
 
+            //capacities
             foreach (var item in this.capacitiesString)
             {
                 var def = DefDatabase<ToolCapacityDef>.GetNamed(item, false);
@@ -99,19 +107,45 @@ namespace CeManualPatcher.Saveable
                     tool.capacities.Add(def);
                 }
             }
-            if (tool.surpriseAttack != null)
+
+            //surprise attack
+            if (tool.surpriseAttack == null)
             {
-                foreach (var item in this.surpriseAttackSave)
+                tool.surpriseAttack = new SurpriseAttackProps();
+                tool.surpriseAttack.extraMeleeDamages = new List<ExtraDamage>();
+            }
+            tool.surpriseAttack.extraMeleeDamages.Clear();
+            foreach (var item in this.surpriseAttackSave)
+            {
+                var def = DefDatabase<DamageDef>.GetNamed(item.defString, false);
+                if (def != null)
                 {
-                    var def = DefDatabase<DamageDef>.GetNamed(item.defString, false);
-                    if (def != null)
+                    tool.surpriseAttack.extraMeleeDamages.Add(new ExtraDamage()
                     {
-                        tool.surpriseAttack.extraMeleeDamages.Add(new ExtraDamage()
-                        {
-                            amount = item.amount,
-                            def = def
-                        });
-                    }
+                        amount = item.amount,
+                        def = def,
+                        chance = item.chance
+                    });
+                }
+            }
+
+            //extra Melee Damages
+            if (tool.extraMeleeDamages == null)
+            {
+                tool.extraMeleeDamages = new List<ExtraDamage>();
+            }
+            tool.extraMeleeDamages.Clear();
+            foreach (var item in this.extraDamages)
+            {
+                var def = DefDatabase<DamageDef>.GetNamed(item.defString, false);
+                if (def != null)
+                {
+                    tool.extraMeleeDamages.Add(new ExtraDamage()
+                    {
+                        amount = item.amount,
+                        def = def,
+                        chance = item.chance
+                    });
                 }
             }
 
@@ -135,13 +169,27 @@ namespace CeManualPatcher.Saveable
                     Log.Error($"[CeManualPatcher] Capacities (Damage types) is Empty, this could cause some errors, thing: {thingDef.defName}, tool: {tool.label}");
                 }
 
+                //surprise attack
                 this.surpriseAttackSave.Clear();
                 tool.surpriseAttack?.extraMeleeDamages.ForEach(x =>
                 {
                     surpriseAttackSave.Add(new ExtraDamageExpo()
                     {
                         amount = x.amount,
-                        defString = x.def.defName
+                        defString = x.def.defName,
+                        chance = x.chance
+                    });
+                });
+
+                //extra Melee Damages
+                this.extraDamages.Clear();
+                tool.extraMeleeDamages?.ForEach(x =>
+                {
+                    extraDamages.Add(new ExtraDamageExpo()
+                    {
+                        amount = x.amount,
+                        defString = x.def.defName,
+                        chance = x.chance
                     });
                 });
 
@@ -157,6 +205,7 @@ namespace CeManualPatcher.Saveable
 
             Scribe_Collections.Look(ref capacitiesString, "capacities", LookMode.Value);
             Scribe_Collections.Look(ref surpriseAttackSave, "surpriseAttack", LookMode.Deep);
+            Scribe_Collections.Look(ref extraDamages, "extraDamages", LookMode.Deep);
             Scribe_Collections.Look(ref propDic, "propDic", LookMode.Value, LookMode.Value);
             if (Scribe.mode == LoadSaveMode.LoadingVars)
             {
@@ -172,6 +221,10 @@ namespace CeManualPatcher.Saveable
                 if (this.propDic == null)
                 {
                     this.propDic = new Dictionary<string, string>();
+                }
+                if (this.extraDamages == null)
+                {
+                    this.extraDamages = new List<ExtraDamageExpo>();
                 }
             }
         }

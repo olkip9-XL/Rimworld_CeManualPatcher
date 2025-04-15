@@ -24,6 +24,7 @@ namespace CeManualPatcher.Saveable
                 "armorPenetrationBlunt",
                 "explosionRadius",
                 "suppressionFactor",
+                "stoppingPower"
         }.AsReadOnly();
         private Dictionary<string, string> propDic = new Dictionary<string, string>();
 
@@ -82,7 +83,7 @@ namespace CeManualPatcher.Saveable
                 this.secondaryExplosion = new SecondaryExplosionSaveable(thingDef);
             }
 
-            if(thingDef.HasComp<CompFragments>())
+            if (thingDef.HasComp<CompFragments>())
             {
                 this.fragments = new ThingDefCountClassSaveable(thingDef);
             }
@@ -97,7 +98,10 @@ namespace CeManualPatcher.Saveable
 
             foreach (var item in propNames)
             {
-                PropUtility.SetPropValueString(projectile, item, this.propDic[item]);
+                if (propDic.ContainsKey(item))
+                {
+                    PropUtility.SetPropValueString(projectile, item, this.propDic[item]);
+                }
             }
 
             projectile.damageDef = damageDef;
