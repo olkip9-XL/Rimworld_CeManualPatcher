@@ -28,7 +28,7 @@ namespace CeManualPatcher.Extension
             listing.Gap(listing.verticalSpacing);
         }
 
-        public static void ButtonX(this Listing_Standard listing, string label, float buttonWidth, string buttonLabel, Action onClick, float indent = 0f, string tooltip= null)
+        public static void ButtonX(this Listing_Standard listing, string label, float buttonWidth, string buttonLabel, Action onClick, float indent = 0f, string tooltip = null)
         {
             Rect rect = listing.GetRect(Text.LineHeight);
             rect.x += indent;
@@ -47,7 +47,7 @@ namespace CeManualPatcher.Extension
             }
             listing.Gap(listing.verticalSpacing);
         }
-        public static void TextX(this Listing_Standard listing, string label,float inputWidth, ref string value, float indent = 0f, string tooltip = null)
+        public static void TextX(this Listing_Standard listing, string label, float inputWidth, ref string value, float indent = 0f, string tooltip = null)
         {
             Rect rect = listing.GetRect(Text.LineHeight);
             rect.x += indent;
@@ -72,7 +72,7 @@ namespace CeManualPatcher.Extension
             rect.width -= indent;
 
             Rect buttonRect = rect.LeftPartPixels(buttonWidth);
-            Rect fieldRect = new Rect(buttonRect.xMax+ 6f, rect.y, fieldWidth, rect.height);
+            Rect fieldRect = new Rect(buttonRect.xMax + 6f, rect.y, fieldWidth, rect.height);
             Rect deleteRect = rect.RightPartPixels(rect.height);
 
             Widgets.Label(rect, "Damage:");
@@ -84,7 +84,7 @@ namespace CeManualPatcher.Extension
 
             WidgetsUtility.TextFieldOnChange(fieldRect, ref damageAmount, onChange);
 
-            if(onDelete != null)
+            if (onDelete != null)
             {
                 if (Widgets.ButtonImage(deleteRect, TexButton.Delete))
                 {
@@ -134,6 +134,19 @@ namespace CeManualPatcher.Extension
 
             listing.Gap(listing.verticalSpacing);
         }
+
+        public static void FieldLineOnChange<T>(this Listing_Standard listing, string label, ref T value, Action<T> onChange, float fieldWidth = 100f, string tooltip = null, float indent = 0, float min = float.MinValue, float max = float.MaxValue) where T : struct
+        {
+            T temp = value;
+            FieldLine(listing, label, ref temp, fieldWidth, tooltip, indent, min, max);
+            if (temp.ToString() != value.ToString())
+            {
+                onChange(temp);
+                value = temp;
+            }
+        }
+
+
         public static void ButtonTextLine(this Listing_Standard listing, string label, string buttonLabel, Action onClick, float fieldWidth = 100f, string tooltip = null, float indent = 0)
         {
             Rect rect = listing.GetRect(Text.LineHeight);
@@ -153,7 +166,7 @@ namespace CeManualPatcher.Extension
             }
             listing.Gap(listing.verticalSpacing);
         }
-        public static void ButtonImageLine(this Listing_Standard listing, string label, Texture2D buttonImage, Action onClick,  string tooltip = null, float indent = 0)
+        public static void ButtonImageLine(this Listing_Standard listing, TaggedString label, Texture2D buttonImage, Action onClick, string tooltip = null, float indent = 0)
         {
             Rect rect = listing.GetRect(Text.LineHeight);
             rect.x += indent;
@@ -172,10 +185,10 @@ namespace CeManualPatcher.Extension
             }
             listing.Gap(listing.verticalSpacing);
         }
-        public static void FieldLineReflexion(this Listing_Standard listing, string label, string fieldName, object instance, Action<object> onChange, float fieldWidth = 100f, string tooltip = null, float indent = 0, float min =float.MinValue, float max = float.MaxValue)
+        public static void FieldLineReflexion(this Listing_Standard listing, TaggedString label, string fieldName, object instance, Action<object> onChange, float fieldWidth = 100f, string tooltip = null, float indent = 0, float min = float.MinValue, float max = float.MaxValue)
         {
             FieldInfo fieldInfo = instance.GetType().GetField(fieldName);
-            if(fieldInfo == null)
+            if (fieldInfo == null)
             {
                 Log.Error($"Field {fieldName} not found in {instance.GetType()}");
                 return;
@@ -184,11 +197,11 @@ namespace CeManualPatcher.Extension
             Type type = fieldInfo.FieldType;
             object value = fieldInfo.GetValue(instance);
 
-            if(type == typeof(int))
+            if (type == typeof(int))
             {
                 int intValue = (int)value;
                 listing.FieldLine(label, ref intValue, fieldWidth, tooltip, indent, min, max);
-                if(intValue != (int)value)
+                if (intValue != (int)value)
                 {
                     onChange(intValue);
                     fieldInfo.SetValue(instance, intValue);
@@ -198,7 +211,7 @@ namespace CeManualPatcher.Extension
             {
                 float floatValue = (float)value;
                 listing.FieldLine(label, ref floatValue, fieldWidth, tooltip, indent, min, max);
-                if (floatValue != (float)value)
+                if (Math.Abs(floatValue - (float)value) > float.Epsilon)
                 {
                     onChange(floatValue);
                     fieldInfo.SetValue(instance, floatValue);
@@ -208,7 +221,7 @@ namespace CeManualPatcher.Extension
             {
                 bool boolValue = (bool)value;
                 listing.FieldLine(label, ref boolValue, fieldWidth, tooltip, indent);
-                if(boolValue != (bool)value)
+                if (boolValue != (bool)value)
                 {
                     onChange(boolValue);
                     fieldInfo.SetValue(instance, boolValue);

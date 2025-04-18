@@ -103,9 +103,20 @@
   <MP_DescExplosionGas>爆炸气体</MP_DescExplosionGas>
   <MP_DescStoppingPower>停止力</MP_DescStoppingPower>
   
-  <!--Ammo NonCE-->
-  
+<!--Weapon tags-->
 
+  <MP_WeaponTags>武器标签</MP_WeaponTags>
+  
+  
+  <!--Apparel-->
+  
+  <MP_Apparel>服装和护甲</MP_Apparel>
+  
+  <MP_PartialArmorExt>部位护甲</MP_PartialArmorExt>
+  <MP_UseStaticValue>使用固定值</MP_UseStaticValue>
+  <MP_StaticValue>固定值</MP_StaticValue>
+  <MP_MultValue>倍数</MP_MultValue>
+  <MP_BodyPart>身体部位</MP_BodyPart>
 
   <!--Misc-->
   <MP_CEPatchExportMsg>CE补丁已导出至{0}</MP_CEPatchExportMsg>

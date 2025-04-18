@@ -32,7 +32,7 @@ namespace CeManualPatcher.Manager
 
         public WeaponPatch GetWeaponPatch(ThingDef thingDef)
         {
-            WeaponPatch result = weaponPatches.Find(x => x?.weaponDef == thingDef);
+            WeaponPatch result = weaponPatches.FirstOrDefault(x => x?.weaponDef == thingDef);
 
             if (result == null)
             {
@@ -56,7 +56,6 @@ namespace CeManualPatcher.Manager
 
         public override void DoWindowContents(Rect rect)
         {
-
             Rect rightRect = rect.RightPart(0.7f);
             Rect leftRect = rect.LeftPart(0.3f);
             leftRect.width -= 20f;
@@ -79,7 +78,7 @@ namespace CeManualPatcher.Manager
 
         public override void Reset(ThingDef thing)
         {
-            WeaponPatch weaponPatch = weaponPatches.Find(x => x.weaponDef == thing);
+            WeaponPatch weaponPatch = weaponPatches.Find(x => x?.weaponDef == thing);
             if (weaponPatch != null)
             {
                 weaponPatch.Reset();
@@ -90,7 +89,7 @@ namespace CeManualPatcher.Manager
 
         public override void ResetAll()
         {
-            weaponPatches.ForEach(x => x.Reset());
+            weaponPatches.ForEach(x => x?.Reset());
             weaponPatches.Clear();
             patchManager.ResetAll();
         }

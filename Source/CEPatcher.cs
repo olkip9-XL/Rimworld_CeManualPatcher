@@ -257,8 +257,17 @@ namespace CeManualPatcher
             }
         }
 
-        public void ExportToFile(string filePath)
+        public void ExportToFile(string dirPath)
         {
+            string folderPath = Path.Combine(dirPath, thingDef.modContentPack.Name);
+            folderPath = Path.Combine(folderPath, "Weapon");
+            if(!Directory.Exists(folderPath))
+            {
+                Directory.CreateDirectory(folderPath);
+            }
+
+            string filePath = Path.Combine(folderPath,thingDef.defName + ".xml");
+
             // 创建XML文档
             XmlDocument xmlDoc = new XmlDocument();
 
@@ -458,6 +467,16 @@ namespace CeManualPatcher
                 if (currentFireMode.aiAimMode != defaultFireMode.aiAimMode)
                 {
                     AddChildElement(xmlDoc, fireModeElement, "aiAimMode", currentFireMode.aiAimMode.ToString());
+                }
+            }
+            //weapontags
+            if (thingDef.weaponTags != null)
+            {
+                XmlElement weaponTagsElement = xmlDoc.CreateElement("weaponTags");
+                cePatchElement.AppendChild(weaponTagsElement);
+                foreach (var tag in thingDef.weaponTags)
+                {
+                    AddChildElement(xmlDoc, weaponTagsElement, "li", tag);
                 }
             }
 

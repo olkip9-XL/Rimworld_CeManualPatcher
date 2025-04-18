@@ -102,6 +102,20 @@
   <MP_DescExplosionGas>Explosion Gas</MP_DescExplosionGas>
   <MP_DescStoppingPower>Stopping Power</MP_DescStoppingPower>
 
+  <!--Weapon tags-->
+
+  <MP_WeaponTags>Weapon Tags</MP_WeaponTags>
+
+
+  <!--Apparel-->
+
+  <MP_Apparel>Apparel</MP_Apparel>
+
+  <MP_PartialArmorExt>Partial Armor</MP_PartialArmorExt>
+  <MP_UseStaticValue>Use Static Value</MP_UseStaticValue>
+  <MP_StaticValue>Static Value</MP_StaticValue>
+  <MP_MultValue>Multiplier</MP_MultValue>
+  <MP_BodyPart>Body Parts</MP_BodyPart>
 
   <!--Misc-->
   <MP_CEPatchExportMsg>CE Patch Exported To {0}</MP_CEPatchExportMsg>

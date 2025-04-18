@@ -2,7 +2,9 @@
 using CeManualPatcher.Extension;
 using CeManualPatcher.Manager;
 using CeManualPatcher.Misc;
+using CeManualPatcher.RenderRect;
 using CeManualPatcher.Saveable;
+using CeManualPatcher.Saveable.Weapon;
 using CombatExtended;
 using CombatExtended.Compatibility;
 using KTrie;
@@ -24,6 +26,10 @@ namespace CeManualPatcher
         private float innerHeight = 0f;
         private Vector2 scrollPosition = Vector2.zero;
 
+        //copy
+        private ThingDef copiedThing = null;
+
+
         private static WeaponManager manager => WeaponManager.instance;
 
         private static CEPatchManager patchManager => CEPatchManager.instance;
@@ -43,7 +49,12 @@ namespace CeManualPatcher
 
             WidgetsUtility.ScrollView(listing.GetRect(rect.height - listing.CurHeight - Text.LineHeight - 0.1f), ref scrollPosition, ref innerHeight, (innerListing) =>
             {
-                DrawStat(innerListing, curWeaponDef.statBases);
+                RenderRectUtility.DrawStats(innerListing, curWeaponDef.statBases, MP_Options.statDefs_Weapon, delegate
+                {
+                    manager.GetWeaponPatch(curWeaponDef);
+                });
+                DrawWeaponTags(innerListing, curWeaponDef.weaponTags);
+
                 DrawVebs(innerListing, curWeaponDef.Verbs.FirstOrDefault(), curWeaponDef.GetCompProperties<CompProperties_AmmoUser>(), curWeaponDef.weaponTags);
                 DrawTools(innerListing, curWeaponDef.tools);
                 DrawComps(innerListing,
@@ -56,6 +67,43 @@ namespace CeManualPatcher
             DrawControlPannel(listing);
 
             listing.End();
+        }
+
+        public static void DrawWeaponTags(Listing_Standard listing, List<string> weaponTags)
+        {
+            if (weaponTags == null)
+                return;
+
+            listing.GapLine(6f);
+
+            listing.Label("<b>" + "MP_WeaponTags".Translate() + "</b>");
+
+            //isOneHand
+            bool isOnehand = WeaponTagsSaveable.GetOneHandWeapon(curWeaponDef);
+            listing.FieldLineOnChange(CE_StatDefOf.OneHandedness.LabelCap, ref isOnehand, (x) =>
+            {
+                manager.GetWeaponPatch(curWeaponDef);
+                WeaponTagsSaveable.SetOneHandWeapon(curWeaponDef, x);
+            }, indent: 20f);
+
+            //bipod
+            BipodCategoryDef bipodCategoryDef = WeaponTagsSaveable.GetBipod(curWeaponDef);
+            listing.ButtonTextLine(CE_StatDefOf.BipodStats.LabelCap, WeaponTagsSaveable.GetBipod(curWeaponDef)?.label ?? "MP_Null".Translate(), () =>
+            {
+                List<BipodCategoryDef> list = new List<BipodCategoryDef>();
+
+                list.Add(null);
+                list.AddRange(MP_Options.bipodCategoryDefs);
+
+                FloatMenuUtility.MakeMenu(list,
+                    (BipodCategoryDef x) => x?.label ?? "MP_Null".Translate(),
+                    (BipodCategoryDef x) => delegate ()
+                    {
+                        manager.GetWeaponPatch(curWeaponDef);
+                        WeaponTagsSaveable.SetBipod(curWeaponDef, x);
+                    });
+            }, indent: 20f);
+
         }
 
         private void DrawControlPannel(Listing_Standard listing)
@@ -71,7 +119,8 @@ namespace CeManualPatcher
             Rect exportCEPatchRect = rect.RightPartPixels(120f);
             if (Widgets.ButtonText(exportCEPatchRect, "MP_Export".Translate()))
             {
-                patchManager.ExportAll();
+                //patchManager.ExportAll();
+                Mod_CEManualPatcher.settings.ExportPatch();
             }
         }
 
@@ -93,7 +142,8 @@ namespace CeManualPatcher
 
             //icon
             Rect rect1 = rect0.RightAdjoin(30f, 0);
-            Widgets.ThingIcon(rect1, curWeaponDef);
+            Widgets.DrawTextureFitted(rect1, curWeaponDef.uiIcon, 0.7f);
+            //Widgets.ThingIcon(rect1, curWeaponDef);
 
             //label
             Rect rect2 = rect.RightPartPixels(rect.width - 30f);
@@ -119,7 +169,89 @@ namespace CeManualPatcher
                 }
             }
 
+            //copy button
+            Rect rect5 = rect4.LeftAdjoin(rect.height);
+            if (Widgets.ButtonImage(rect5, TexButton.Copy))
+            {
+                copiedThing = curWeaponDef;
+                //Messages.Message("MP_Copy".Translate(curWeaponDef.defName), MessageTypeDefOf.NeutralEvent);
+            }
+
+            //paste button
+            Rect rect6 = rect5.LeftAdjoin(rect.height);
+
+            if (copiedThing != null)
+            {
+                if (Widgets.ButtonImage(rect6, TexButton.Paste))
+                {
+                    if (copiedThing != null)
+                    {
+                        manager.GetWeaponPatch(curWeaponDef);
+                        CopyThing();
+                        copiedThing = null;
+                        //Messages.Message("MP_Paste".Translate(curWeaponDef.defName), MessageTypeDefOf.NeutralEvent);
+                    }
+                }
+            }
+
             listing.Gap(listing.verticalSpacing);
+        }
+
+        private void CopyThing()
+        {
+            if (copiedThing == null || curWeaponDef == null || copiedThing == curWeaponDef)
+            {
+                return;
+            }
+
+            //stat
+            curWeaponDef.statBases = CopyUtility.CopyStats(copiedThing);
+
+            //verb
+            if (!curWeaponDef.Verbs.NullOrEmpty() && !copiedThing.Verbs.NullOrEmpty())
+            {
+                curWeaponDef.Verbs[0] = CopyUtility.CopyVerb(copiedThing);
+            }
+
+            //tools
+            if (curWeaponDef.tools != null && copiedThing.tools != null)
+            {
+                curWeaponDef.tools = CopyUtility.CopyTools(copiedThing);
+            }
+
+            //weapon tags
+            if (curWeaponDef.weaponTags != null && copiedThing.weaponTags != null)
+            {
+                curWeaponDef.weaponTags.Clear();
+                curWeaponDef.weaponTags.AddRange(copiedThing.weaponTags);
+            }
+
+            //comps
+            //AmmoUser
+            if (copiedThing.HasComp<CompAmmoUser>())
+            {
+                CompProperties_AmmoUser propCopy = curWeaponDef.GetCompProperties<CompProperties_AmmoUser>();
+                if (propCopy == null)
+                {
+                    propCopy = new CompProperties_AmmoUser();
+                    curWeaponDef.comps.Add(propCopy);
+                }
+                CopyUtility.CopyComp(copiedThing.GetCompProperties<CompProperties_AmmoUser>(), propCopy);
+            }
+
+            //FireModes
+            if (copiedThing.HasComp<CompFireModes>())
+            {
+                CompProperties_FireModes propCopy = curWeaponDef.GetCompProperties<CompProperties_FireModes>();
+                if (propCopy == null)
+                {
+                    propCopy = new CompProperties_FireModes();
+                    curWeaponDef.comps.Add(propCopy);
+                }
+                CopyUtility.CopyComp(copiedThing.GetCompProperties<CompProperties_FireModes>(), propCopy);
+            }
+
+
         }
 
         private bool IsCECompactied(ThingDef thingDef)
@@ -135,62 +267,6 @@ namespace CeManualPatcher
             }
 
             return true;
-        }
-
-        public static void DrawStat(Listing_Standard listing, List<StatModifier> stats)
-        {
-            listing.GapLine(6f);
-
-            Rect headRect = listing.GetRect(Text.LineHeight);
-            Rect addRect = headRect.RightPartPixels(headRect.height);
-            Widgets.Label(headRect, "<b>" + "MP_StatBase".Translate() + "</b>");
-
-            if (Widgets.ButtonImage(addRect, TexButton.Add))
-            {
-                List<StatDef> list = new List<StatDef>();
-                list.AddRange(MP_Options.statDefs);
-                list = list.Where(x => !stats.Any(y => y.stat == x)).ToList();
-
-                FloatMenuUtility.MakeMenu(list,
-                    (StatDef x) => x.label,
-                    (StatDef x) => delegate ()
-                    {
-                        manager.GetWeaponPatch(curWeaponDef);
-                        stats.Add(new StatModifier()
-                        {
-                            stat = x,
-                            value = 0f,
-                        });
-                    });
-            }
-
-            foreach (var item in stats)
-            {
-                Rect rect = listing.GetRect(Text.LineHeight);
-                rect.x += 20f;
-                rect.width -= 20f;
-
-                Widgets.Label(rect, item.stat.LabelCap);
-
-                //delete 
-                Rect rect1 = rect.RightPartPixels(rect.height);
-                if (Widgets.ButtonImage(rect1, TexButton.Delete))
-                {
-                    manager.GetWeaponPatch(curWeaponDef);
-                    stats.RemoveWhere(x => x.stat == item.stat);
-                    break;
-                }
-
-                //field
-                Rect fieldRect = rect1.LeftAdjoin(100f);
-                WidgetsUtility.TextFieldOnChange<float>(fieldRect, ref item.value, newValue =>
-                {
-                    manager.GetWeaponPatch(curWeaponDef);
-                });
-
-                TooltipHandler.TipRegion(rect, item.stat.description);
-                Widgets.DrawHighlightIfMouseover(rect);
-            }
         }
 
         public static void DrawVebs(Listing_Standard listing, VerbProperties verb, CompProperties_AmmoUser ammoUser, List<string> weaponTags)
@@ -267,42 +343,6 @@ namespace CeManualPatcher
                         props.soundCastTail = x;
                     });
             }, indent: 20f);
-
-            //bipod
-            if (weaponTags != null)
-                listing.ButtonX("MP_Bipod".Translate(), 100f, GetBipod()?.label ?? "MP_Null".Translate(), () =>
-                {
-                    List<BipodCategoryDef> list = new List<BipodCategoryDef>();
-
-                    list.Add(null);
-                    list.AddRange(MP_Options.bipodCategoryDefs);
-
-                    FloatMenuUtility.MakeMenu(list,
-                        (BipodCategoryDef x) => x?.label ?? "MP_Null".Translate(),
-                        (BipodCategoryDef x) => delegate ()
-                        {
-                            manager.GetWeaponPatch(curWeaponDef);
-                            SetBipod(x);
-                        });
-                }, indent: 20f);
-
-            BipodCategoryDef GetBipod()
-            {
-                if (weaponTags.NullOrEmpty())
-                    return null;
-
-                string bipodId = weaponTags.FirstOrDefault(x => MP_Options.BipodId.Contains(x));
-                return DefDatabase<BipodCategoryDef>.AllDefs.FirstOrDefault(x => x.bipod_id == bipodId);
-            }
-
-            void SetBipod(BipodCategoryDef bipodDef)
-            {
-                if (weaponTags.NullOrEmpty())
-                    return;
-                weaponTags.RemoveWhere(x => MP_Options.BipodId.Contains(x));
-                if (bipodDef != null)
-                    weaponTags.Add(bipodDef.bipod_id);
-            }
 
             foreach (var item in VerbPropertiesCESaveable.propNames)
             {
@@ -423,7 +463,6 @@ namespace CeManualPatcher
 
             foreach (var item in tool.capacities)
             {
-                listing.Gap(6f);
                 Rect subRect = listing.GetRect(Text.LineHeight);
                 subRect.x += 40f;
                 subRect.width -= 40f;
@@ -529,7 +568,7 @@ namespace CeManualPatcher
 
             foreach (var item in tool.extraMeleeDamages)
             {
-                if( DrawExtraDamageRow(listing, item, indent:40f))
+                if (DrawExtraDamageRow(listing, item, indent: 40f))
                 {
                     manager.GetWeaponPatch(curWeaponDef);
                     tool.extraMeleeDamages.Remove(item);
@@ -540,7 +579,7 @@ namespace CeManualPatcher
             listing.Gap(listing.verticalSpacing);
         }
 
-        private static bool DrawExtraDamageRow(Listing_Standard listing, ExtraDamage extraDamage,  float indent = 20f)
+        private static bool DrawExtraDamageRow(Listing_Standard listing, ExtraDamage extraDamage, float indent = 20f)
         {
             Rect rect = listing.GetRect(Text.LineHeight);
             rect.x += indent;

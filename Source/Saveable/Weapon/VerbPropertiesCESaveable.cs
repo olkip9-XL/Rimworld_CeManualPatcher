@@ -15,6 +15,7 @@ namespace CeManualPatcher.Saveable
 {
     internal class VerbPropertiesCESaveable : SaveableBase
     {
+
         public static ReadOnlyCollection<string> propNames = new List<string>()
         {
                 "ammoConsumedPerShotCount",
@@ -57,15 +58,6 @@ namespace CeManualPatcher.Saveable
             set => soundCastTailString = value?.defName ?? "null";
         }
 
-        private string bipodString = "";
-
-        private BipodCategoryDef bipodDef
-        {
-            get => DefDatabase<BipodCategoryDef>.GetNamed(bipodString, false);
-            set => bipodString = value?.defName ?? "null";
-        }
-
-
         private Type verbClass;
 
         //私有
@@ -86,8 +78,6 @@ namespace CeManualPatcher.Saveable
         }
 
         private VerbProperties originalData;
-        private BipodCategoryDef originalBipodDef;
-
         internal VerbPropertiesCESaveable() { }
         internal VerbPropertiesCESaveable(ThingDef thingDef, bool forceAdd = false)
         {
@@ -115,8 +105,6 @@ namespace CeManualPatcher.Saveable
             verbPropertiesCE.verbClass = this.verbClass;
             verbPropertiesCE.soundCast = this.soundCast;
             verbPropertiesCE.soundCastTail = this.soundCastTail;
-
-            SetBipod(this.bipodDef);
         }
         public override void ExposeData()
         {
@@ -139,8 +127,6 @@ namespace CeManualPatcher.Saveable
 
                 this.soundCast = verbPropertiesCE.soundCast;
                 this.soundCastTail = verbPropertiesCE.soundCastTail;
-
-                this.bipodDef = GetBipod();
             }
 
             Scribe_Values.Look(ref defaultProjectileString, "defaultProjectile");
@@ -159,7 +145,6 @@ namespace CeManualPatcher.Saveable
 
             Scribe_Values.Look(ref soundCastString, "soundCast");
             Scribe_Values.Look(ref soundCastTailString, "soundCastTail");
-            Scribe_Values.Look(ref bipodString, "bipodDef");
         }
         public override void Reset()
         {
@@ -168,7 +153,6 @@ namespace CeManualPatcher.Saveable
 
             thingDef.Verbs[0] = this.originalData;
 
-            SetBipod(originalBipodDef);
 
             InitOriginalData();
         }
@@ -196,33 +180,8 @@ namespace CeManualPatcher.Saveable
                 this.originalData = new VerbPropertiesCE();
 
             PropUtility.CopyPropValue(thingDef.Verbs[0], this.originalData);
-
-            this.originalBipodDef = GetBipod();
-        }
-        
-        private void SetBipod(BipodCategoryDef bipodDef)
-        {
-            if(thingDef== null && thingDef.weaponTags==null)
-            {
-                return;
-            }
-
-            thingDef.weaponTags.RemoveWhere(x => MP_Options.BipodId.Contains(x));
-            if(bipodDef != null)
-                thingDef.weaponTags.Add(bipodDef.bipod_id);
         }
 
-        private BipodCategoryDef GetBipod()
-        {
-            if (thingDef == null && thingDef.weaponTags.NullOrEmpty())
-            {
-                return null;
-            }
 
-            string bipodId = thingDef.weaponTags.FirstOrDefault(x => MP_Options.BipodId.Contains(x));
-
-            return MP_Options.bipodCategoryDefs.FirstOrDefault(x => x.bipod_id == bipodId);
-        }
-    
     }
 }

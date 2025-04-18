@@ -87,16 +87,11 @@ namespace CeManualPatcher.Manager
 
         public void ExportAll()
         {
-            XMLUtility.CreateBasicFolders();
-
             foreach (var item in this.patchers)
             {
-                XMLUtility.CreateCEPatch(item.thingDef);
+                //XMLUtility.CreateCEPatch(item.thingDef);
+                item?.ExportToFile(MP_DefManagerBase.exportPath);
             }
-
-            string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "CE Patches");
-
-            Messages.Message($"MP_CEPatchExportMsg".Translate(path), MessageTypeDefOf.NeutralEvent);
         }
 
     }

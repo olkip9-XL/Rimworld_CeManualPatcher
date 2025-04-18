@@ -143,7 +143,8 @@ namespace CeManualPatcher.RenderRect.Ammo
             Rect iconRect = rect.LeftPartPixels(30f);
             Rect labelRect = rect.RightPartPixels(rect.width - 30f);
 
-            Widgets.DrawTextureFitted(iconRect, ammoSet.Icon, 0.7f);
+            Texture2D uiTexture = ammoSet.Icon ?? BaseContent.BadTex;
+            Widgets.DrawTextureFitted(iconRect, uiTexture, 0.7f);
 
             Text.Anchor = TextAnchor.MiddleLeft;
             Widgets.Label(labelRect, ammoSet.Label);

@@ -19,6 +19,8 @@ namespace CeManualPatcher.Extension
                     return "MP_Ammo".Translate();
                 case MP_SettingTab.Bionic:
                     return "MP_Bionic".Translate();
+                case MP_SettingTab.Apparel:
+                    return "MP_Apparel".Translate();
                 default:
                     return "Unknown";
             }

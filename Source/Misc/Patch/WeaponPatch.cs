@@ -1,5 +1,6 @@
 ﻿using CeManualPatcher.Misc;
 using CeManualPatcher.Saveable;
+using CeManualPatcher.Saveable.Weapon;
 using CombatExtended;
 using RimWorld;
 using System;
@@ -29,6 +30,8 @@ namespace CeManualPatcher
         internal CompAmmoUserSaveable ammoUser;
 
         internal CompFireModesSaveable fireMode;
+
+        internal WeaponTagsSaveable weaponTags;
 
         //private
         List<Tool> originalTools = new List<Tool>();
@@ -72,6 +75,10 @@ namespace CeManualPatcher
                     fireMode = new CompFireModesSaveable(thingDef);
                 }
             }
+
+            //weapon tags
+            if (thingDef.weaponTags != null)
+                weaponTags = new WeaponTagsSaveable(thingDef);
         }
 
         public override void ExposeData()
@@ -85,6 +92,7 @@ namespace CeManualPatcher
                 }
             }
 
+
             Scribe_Values.Look(ref weaponDefString, "defName");
 
             Scribe_Deep.Look(ref statBase, "statBase");
@@ -92,18 +100,15 @@ namespace CeManualPatcher
             Scribe_Deep.Look(ref ammoUser, "ammoUser");
             Scribe_Deep.Look(ref fireMode, "fireMode");
             Scribe_Collections.Look(ref tools, "tools", LookMode.Deep);
+            Scribe_Deep.Look(ref weaponTags, "weaponTags");
 
             if (Scribe.mode == LoadSaveMode.LoadingVars)
             {
-                if (statBase == null)
-                {
-                    statBase = new StatSaveable(weaponDef);
-                }
-
                 if (tools == null)
                 {
                     tools = new List<ToolCESaveable>();
                 }
+
             }
 
         }
@@ -118,6 +123,9 @@ namespace CeManualPatcher
             //comps
             ammoUser?.Reset();
             fireMode?.Reset();
+
+            //weapontags
+            weaponTags?.Reset();
         }
 
         public override void PostLoadInit()
@@ -135,6 +143,15 @@ namespace CeManualPatcher
 
                 this.ammoUser?.PostLoadInit(weaponDef);
                 this.fireMode?.PostLoadInit(weaponDef);
+
+                if(weaponTags == null && weaponDef.weaponTags != null)
+                {
+                    weaponTags = new WeaponTagsSaveable(weaponDef);
+                }
+                else
+                {
+                    this.weaponTags?.PostLoadInit(weaponDef);
+                }
             }
         }
         private void InitTools()

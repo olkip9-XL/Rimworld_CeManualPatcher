@@ -1,8 +1,12 @@
 ﻿using CeManualPatcher.Extension;
 using CeManualPatcher.Manager;
+using CeManualPatcher.Misc;
+using CeManualPatcher.Misc.Manager;
 using CeManualPatcher.RenderRect;
+using RimWorld;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,7 +19,8 @@ namespace CeManualPatcher
     {
         Weapon,
         Ammo,
-        Bionic
+        Bionic,
+        Apparel
     }
 
     public class ModSetting_CEManualPatcher : ModSettings
@@ -24,6 +29,7 @@ namespace CeManualPatcher
         //manager
         internal AmmoManager ammoManager = new AmmoManager();
         internal WeaponManager weaponManager = new WeaponManager();
+        internal ApparelManager apparelManager = new ApparelManager();
 
         //CEPatcher
         internal CEPatchManager patchManager = new CEPatchManager();
@@ -34,10 +40,11 @@ namespace CeManualPatcher
             Scribe_Deep.Look(ref ammoManager, "ammoManager");
             Scribe_Deep.Look(ref weaponManager, "weaponManager");
             Scribe_Deep.Look(ref patchManager, "patchManager");
+            Scribe_Deep.Look(ref apparelManager, "apparelManager");
 
             if (Scribe.mode == LoadSaveMode.LoadingVars)
             {
-                if(ammoManager == null)
+                if (ammoManager == null)
                 {
                     ammoManager = new AmmoManager();
                 }
@@ -48,6 +55,10 @@ namespace CeManualPatcher
                 if (patchManager == null)
                 {
                     patchManager = new CEPatchManager();
+                }
+                if (apparelManager == null)
+                {
+                    apparelManager = new ApparelManager();
                 }
 
             }
@@ -60,6 +71,18 @@ namespace CeManualPatcher
 
             ammoManager?.PostLoadInit();
             weaponManager?.PostLoadInit();
+            apparelManager?.PostLoadInit();
+        }
+
+        public void ExportPatch()
+        {
+            XMLUtility.CreateBasicFolders();
+
+            patchManager?.ExportAll();
+            apparelManager?.ExportAll();
+
+            string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "CE Patches");
+            Messages.Message($"MP_CEPatchExportMsg".Translate(path), MessageTypeDefOf.NeutralEvent);
         }
 
     }
@@ -88,7 +111,7 @@ namespace CeManualPatcher
             foreach (MP_SettingTab tab in Enum.GetValues(typeof(MP_SettingTab)))
             {
                 //skip for now
-                if(tab == MP_SettingTab.Bionic)
+                if (tab == MP_SettingTab.Bionic)
                 {
                     continue;
                 }
@@ -99,7 +122,7 @@ namespace CeManualPatcher
                 }, this.curTab == tab));
             }
 
-            TabDrawer.DrawTabs<TabRecord>(inRect, tabRecords, 200f);
+            TabDrawer.DrawTabs<TabRecord>(inRect, tabRecords, 150f);
 
             inRect.y += 10f;
             inRect.height -= 10f;
@@ -114,10 +137,13 @@ namespace CeManualPatcher
                     break;
                 case MP_SettingTab.Bionic:
                     break;
+                case MP_SettingTab.Apparel:
+                    settings.apparelManager.DoWindowContents(inRect);
+                    break;
             }
 
         }
-    
+
 
         private void DebugLogAllButtonImage(Rect rect)
         {

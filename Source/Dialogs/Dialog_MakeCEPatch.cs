@@ -13,6 +13,7 @@ using CeManualPatcher.Extension;
 using CeManualPatcher.Saveable;
 using RuntimeAudioClipLoader;
 using CeManualPatcher.Manager;
+using CeManualPatcher.RenderRect;
 
 namespace CeManualPatcher.Dialogs
 {
@@ -27,6 +28,7 @@ namespace CeManualPatcher.Dialogs
         //scroll
         private Vector2 scrollPosition = Vector2.zero;
         private float scrollHeight = 0f;
+
         public Dialog_MakeCEPatch(ThingDef thingDef)
         {
             this.thingDef = thingDef;
@@ -73,7 +75,9 @@ namespace CeManualPatcher.Dialogs
             (innerListing) =>
             {
 
-                Rect_WeaponInfo.DrawStat(innerListing, patcher.stats);
+                //Rect_WeaponInfo.DrawStat(innerListing, patcher.stats);
+                RenderRectUtility.DrawStats(innerListing, patcher.stats, MP_Options.statDefs_Weapon, null);
+
                 Rect_WeaponInfo.DrawVebs(innerListing, patcher.verbProperties, patcher.ammoUser, null);
                 Rect_WeaponInfo.DrawTools(innerListing, patcher.tools);
                 Rect_WeaponInfo.DrawComps(innerListing, patcher.fireMode, patcher.ammoUser, patcher.verbProperties);

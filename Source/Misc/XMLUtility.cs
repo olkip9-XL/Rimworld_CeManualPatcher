@@ -1,4 +1,5 @@
 ﻿using CeManualPatcher.Manager;
+using CombatExtended;
 using RimWorld;
 using System;
 using System.Collections.Generic;
@@ -6,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 using Verse;
 
 namespace CeManualPatcher.Misc
@@ -70,18 +72,116 @@ namespace CeManualPatcher.Misc
             }
         }
 
-        public static void CreateCEPatch(ThingDef thingDef)
-        {
-            string folderPath = Path.Combine(ceFoldersPath, thingDef.modContentPack.Name);
+        //public static void CreateCEPatch(ThingDef thingDef)
+        //{
+        //    string folderPath = Path.Combine(ceFoldersPath, thingDef.modContentPack.Name);
 
-            if (!Directory.Exists(folderPath))
+        //    if (!Directory.Exists(folderPath))
+        //    {
+        //        Directory.CreateDirectory(folderPath);
+        //    }
+
+        //    string filePath = Path.Combine(folderPath, thingDef.defName + ".xml");
+
+        //    CEPatchManager.instance.GetPatcher(thingDef)?.ExportToFile(filePath);
+        //}
+
+        public static void AddChildElement(XmlDocument doc, XmlElement parent, string name, string value)
+        {
+            XmlElement element = doc.CreateElement(name);
+            element.InnerText = value;
+            parent.AppendChild(element);
+        }
+
+
+        public static XmlDocument CreateBasePatchDoc(ref XmlElement rootElement)
+        {
+            // 创建XML文档
+            XmlDocument xmlDoc = new XmlDocument();
+
+            // 声明XML头部
+            XmlDeclaration xmlDeclaration = xmlDoc.CreateXmlDeclaration("1.0", "utf-8", null);
+            xmlDoc.AppendChild(xmlDeclaration);
+
+            //Patch根元素
+            XmlElement patchElement = xmlDoc.CreateElement("Patch");
+            xmlDoc.AppendChild(patchElement);
+
+            //Operations
+            XmlElement operationElement = xmlDoc.CreateElement("Operation");
+            operationElement.SetAttribute("Class", "PatchOperationSequence");
+            patchElement.AppendChild(operationElement);
+
+            rootElement = xmlDoc.CreateElement("operations");
+            operationElement.AppendChild(rootElement);
+
+            return xmlDoc;
+        }
+
+        public static void Replace_StatBase(XmlDocument xmlDoc,XmlElement rootElement, string defName, List<StatModifier> stats)
+        {
+            if (stats == null)
+                return;
+
+            XmlElement liElement = xmlDoc.CreateElement("li");
+            liElement.SetAttribute("Class", "PatchOperationReplace");
+            rootElement.AppendChild(liElement);
+
+            AddChildElement(xmlDoc, liElement, "xpath", $"Defs/ThingDef[defName=\"{defName}\"]/statBases");
+
+            XmlElement valueElement = xmlDoc.CreateElement("value");
+            liElement.AppendChild(valueElement);
+
+            XmlElement statElement = xmlDoc.CreateElement("statBases");
+            valueElement.AppendChild(statElement);
+            foreach (var stat in stats)
             {
-                Directory.CreateDirectory(folderPath);
+               AddChildElement(xmlDoc, statElement, stat.stat.defName, stat.value.ToString());
+            }
+        }
+
+        public static void AddModExt_PartialArmor(XmlDocument xmlDoc, XmlElement rootElement, string defName, PartialArmorExt partialArmorExt)
+        {
+            if (partialArmorExt == null)
+                return;
+
+            XmlElement liElement = xmlDoc.CreateElement("li");
+            liElement.SetAttribute("Class", "PatchOperationAddModExtension");
+            rootElement.AppendChild(liElement);
+
+            AddChildElement(xmlDoc, liElement, "xpath", $"Defs/ThingDef[defName=\"{defName}\"]");
+
+            XmlElement valueElement = xmlDoc.CreateElement("value");
+            liElement.AppendChild(valueElement);
+
+            XmlElement partialArmorExtElement = xmlDoc.CreateElement("CombatExtended.PartialArmorExt");
+            valueElement.AppendChild(partialArmorExtElement);
+
+            XmlElement statsElement = xmlDoc.CreateElement("stats");
+            partialArmorExtElement.AppendChild(statsElement);
+            foreach (var stat in partialArmorExt.stats)
+            {
+                XmlElement statElement = xmlDoc.CreateElement("li");
+                statsElement.AppendChild(statElement);
+
+                if (stat.useStatic)
+                {
+                    AddChildElement(xmlDoc, statElement, stat.stat.defName, stat.staticValue.ToString());
+                    AddChildElement(xmlDoc, statElement, "useStatic", "true");
+                }
+                else
+                {
+                    AddChildElement(xmlDoc, statElement, stat.stat.defName, stat.mult.ToString());
+                }
+
+                XmlElement partsElement = xmlDoc.CreateElement("parts");
+                statElement.AppendChild(partsElement);
+                foreach (var part in stat.parts)
+                {
+                    AddChildElement(xmlDoc, partsElement, "li", part.defName);
+                }
             }
 
-            string filePath = Path.Combine(folderPath, thingDef.defName + ".xml");
-
-            CEPatchManager.instance.GetPatcher(thingDef)?.ExportToFile(filePath);
         }
 
     }

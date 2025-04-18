@@ -166,7 +166,7 @@ namespace CeManualPatcher.Saveable
                 tool.capacities?.ForEach(x => this.capacitiesString.Add(x.defName));
                 if (tool.capacities.NullOrEmpty())
                 {
-                    Log.Error($"[CeManualPatcher] Capacities (Damage types) is Empty, this could cause some errors, thing: {thingDef.defName}, tool: {tool.label}");
+                    Log.Error($"[CeManualPatcher] Capacities (Damage types) is Empty, this could cause some errors, thing: {thingDef.defName} ({thingDef.LabelCap}), tool: {tool.label}");
                 }
 
                 //surprise attack

@@ -1,6 +1,7 @@
 ﻿using CeManualPatcher.Extension;
 using CeManualPatcher.Manager;
 using CeManualPatcher.Misc;
+using CeManualPatcher.Misc.Manager;
 using RimWorld;
 using System;
 using System.Collections.Generic;
@@ -95,41 +96,11 @@ namespace CeManualPatcher.RenderRect
             {
                 foreach (var item in allWeaponDefs)
                 {
-                    DrawRow(item, listing);
+                    RenderRectUtility.DrawItemRow(listing, item, ref WeaponManager.curWeaponDef);
                 }
             });
 
             listingStandard.End();
-        }
-
-        private void DrawRow(ThingDef item, Listing_Standard listing)
-        {
-            if (item == null)
-                return;
-
-            Rect rect = listing.GetRect(rowHeight);
-
-            if (Widgets.ButtonInvisible(rect))
-            {
-                curWeaponDef = item;
-                Messages.Message(item.defName, MessageTypeDefOf.SilentInput);
-            }
-
-            Rect iconRect = new Rect(rect.x, rect.y, rowHeight, rowHeight);
-            Rect labelRect = new Rect(iconRect.xMax, rect.y, rect.width - iconRect.width, rowHeight);
-
-            Widgets.DrawTextureFitted(iconRect, item.uiIcon, 0.7f);
-
-            Text.Anchor = TextAnchor.MiddleLeft;
-            Widgets.Label(labelRect, item.label);
-            Text.Anchor = TextAnchor.UpperLeft;
-
-            if (curWeaponDef == item)
-            {
-                Widgets.DrawHighlightSelected(rect);
-            }
-
-            TooltipHandler.TipRegion(rect, $"{item.description}\n\n{"MP_Source".Translate()} {item.modContentPack.Name}");
         }
     }
 }

@@ -237,12 +237,14 @@ namespace CeManualPatcher
                     {
                         typeof(Verb_Shoot),
                         typeof(Verb_ShootOneUse),
+                        typeof(Verb_LaunchProjectile),
                         typeof(CombatExtended.Verb_ShootCE),
                         typeof(CombatExtended.Verb_ShootCEOneUse),
                         typeof(CombatExtended.Verb_LaunchProjectileCE),
                         typeof(CombatExtended.Verb_ShootCEOneUseStatic),
                         typeof(CombatExtended.Verb_ShootMortarCE),
                         typeof(CombatExtended.Verb_ShootFlareCE),
+                        typeof(CombatExtended.Verb_ShootMortarCE),
                     };
                 }
                 return VerbClassesInt;
@@ -265,7 +267,94 @@ namespace CeManualPatcher
                 return bipodIdInt;
             }
         }
-
         public static List<BipodCategoryDef> bipodCategoryDefs => DefDatabase<BipodCategoryDef>.AllDefsListForReading;
+            
+
+        private static ReadOnlyCollection<StatDef> statDefs_ApparelInt = null;
+
+        public static ReadOnlyCollection<StatDef> statDefs_Apparel
+        {
+            get
+            {
+                if (statDefs_ApparelInt == null)
+                {
+                    List<StatCategoryDef> categoryDefs = new List<StatCategoryDef>();
+
+                    foreach(var item in DefDatabase<ThingDef>.AllDefs.Where(x=> x.IsApparel))
+                    {
+                        if (item.statBases != null)
+                        {
+                            foreach (var stat in item.statBases)
+                            {
+                                if (!categoryDefs.Contains(stat.stat.category))
+                                {
+                                    categoryDefs.Add(stat.stat.category);
+                                }
+                            }
+                        }
+                    }
+
+                    categoryDefs.Add(StatCategoryDefOf.StuffStatFactors);
+
+                    List<StatDef> list = new List<StatDef>();
+                    foreach (var item in DefDatabase<StatDef>.AllDefsListForReading)
+                    {
+                        if (categoryDefs.Contains(item.category))
+                        {
+                            list.Add(item);
+                        }
+                    }
+                    statDefs_ApparelInt = list.AsReadOnly();
+                }
+                return statDefs_ApparelInt;
+            }
+        }
+
+
+        private static ReadOnlyCollection<StatDef> statDefs_WeaponInt = null;
+        public static ReadOnlyCollection<StatDef> statDefs_Weapon
+        {
+            get
+            {
+                if (statDefs_WeaponInt == null)
+                {
+                    List<StatCategoryDef> categoryDefs = new List<StatCategoryDef>();
+                    foreach (var item in DefDatabase<ThingDef>.AllDefs.Where(x => x.IsWeapon))
+                    {
+                        if (item.statBases != null)
+                        {
+                            foreach (var stat in item.statBases)
+                            {
+                                if (!categoryDefs.Contains(stat.stat.category))
+                                {
+                                    categoryDefs.Add(stat.stat.category);
+                                }
+                            }
+                        }
+                    }
+                    List<StatDef> list = new List<StatDef>();
+                    foreach (var item in DefDatabase<StatDef>.AllDefsListForReading)
+                    {
+                        if (categoryDefs.Contains(item.category))
+                        {
+                            list.Add(item);
+                        }
+                    }
+
+                    list.Remove(StatDefOf.AccuracyLong);
+                    list.Remove(StatDefOf.AccuracyMedium);
+                    list.Remove(StatDefOf.AccuracyShort);
+                    list.Remove(StatDefOf.AccuracyTouch);
+                    list.Remove(StatDefOf.ShootingAccuracyFactor_Long);
+                    list.Remove(StatDefOf.ShootingAccuracyFactor_Medium);
+                    list.Remove(StatDefOf.ShootingAccuracyFactor_Short);
+                    list.Remove(StatDefOf.ShootingAccuracyFactor_Touch);
+
+                    statDefs_WeaponInt = list.AsReadOnly();
+                }
+                return statDefs_WeaponInt;
+            }
+        }
+
     }
 }
