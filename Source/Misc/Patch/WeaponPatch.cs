@@ -9,16 +9,16 @@ using System.Collections.Generic;
 using Verse;
 using Verse.AI;
 
-namespace CeManualPatcher
+namespace CeManualPatcher.Patch
 {
-    public class WeaponPatch : PatchBase
+    public class WeaponPatch : PatchBase<ThingDef>
     {
-        private string weaponDefString;
-        public ThingDef weaponDef
-        {
-            get => DefDatabase<ThingDef>.GetNamed(weaponDefString, false);
-            set => weaponDefString = value?.defName ?? "null";
-        }
+        //private string weaponDefString;
+        //public ThingDef weaponDef
+        //{
+        //    get => DefDatabase<ThingDef>.GetNamed(weaponDefString, false);
+        //    set => weaponDefString = value?.defName ?? "null";
+        //}
 
         //字段
         internal StatSaveable statBase;
@@ -43,7 +43,7 @@ namespace CeManualPatcher
             {
                 return;
             }
-            weaponDef = thingDef;
+            targetDef = thingDef;
 
             statBase = new StatSaveable(thingDef);
 
@@ -83,17 +83,19 @@ namespace CeManualPatcher
 
         public override void ExposeData()
         {
-            if (Scribe.mode == LoadSaveMode.Saving && weaponDef != null)
+            base.ExposeData();
+
+            if (Scribe.mode == LoadSaveMode.Saving && targetDef != null)
             {
                 this.tools.Clear();
-                foreach (var item in weaponDef.tools)
-                {
-                    this.tools.Add(new ToolCESaveable(weaponDef, item.id));
-                }
+                if (targetDef.tools != null)
+                    foreach (var item in targetDef.tools)
+                    {
+                        this.tools.Add(new ToolCESaveable(targetDef, item.id));
+                    }
             }
 
-
-            Scribe_Values.Look(ref weaponDefString, "defName");
+            //Scribe_Values.Look(ref weaponDefString, "defName");
 
             Scribe_Deep.Look(ref statBase, "statBase");
             Scribe_Deep.Look(ref verbProperties, "verbProperties");
@@ -111,14 +113,27 @@ namespace CeManualPatcher
 
             }
 
+            if (Scribe.mode == LoadSaveMode.LoadingVars)
+            {
+                string oldDefString = "";
+                Scribe_Values.Look(ref oldDefString, "defName");
+                if (!oldDefString.NullOrEmpty())
+                {
+                    targetDefString = oldDefString;
+                }
+            }
+
         }
         public override void Reset()
         {
             statBase?.Reset();
             verbProperties?.Reset();
 
-            weaponDef.tools = this.originalTools;
-            InitTools();
+            if (targetDef.tools != null)
+            {
+                targetDef.tools = this.originalTools;
+                InitTools();
+            }
 
             //comps
             ammoUser?.Reset();
@@ -130,38 +145,40 @@ namespace CeManualPatcher
 
         public override void PostLoadInit()
         {
-            if (weaponDef != null)
+            if (targetDef != null)
             {
-                this.statBase?.PostLoadInit(weaponDef);
+                this.statBase?.PostLoadInit(targetDef);
 
-                this.verbProperties?.PostLoadInit(weaponDef);
+                this.verbProperties?.PostLoadInit(targetDef);
 
-                InitTools();
-                weaponDef.tools.Clear();
-                this.tools.ForEach(x => x?.PostLoadInit(weaponDef));
-
-
-                this.ammoUser?.PostLoadInit(weaponDef);
-                this.fireMode?.PostLoadInit(weaponDef);
-
-                if(weaponTags == null && weaponDef.weaponTags != null)
+                if (targetDef.tools != null)
                 {
-                    weaponTags = new WeaponTagsSaveable(weaponDef);
+                    InitTools();
+                    targetDef.tools.Clear();
+                    this.tools.ForEach(x => x?.PostLoadInit(targetDef));
+                }
+             
+                this.ammoUser?.PostLoadInit(targetDef);
+                this.fireMode?.PostLoadInit(targetDef);
+
+                if (weaponTags == null && targetDef.weaponTags != null)
+                {
+                    weaponTags = new WeaponTagsSaveable(targetDef);
                 }
                 else
                 {
-                    this.weaponTags?.PostLoadInit(weaponDef);
+                    this.weaponTags?.PostLoadInit(targetDef);
                 }
             }
         }
         private void InitTools()
         {
-            if (weaponDef == null || weaponDef.tools == null)
+            if (targetDef == null || targetDef.tools == null)
             {
                 return;
             }
             originalTools = new List<Tool>();
-            foreach (var item in weaponDef.tools)
+            foreach (var item in targetDef.tools)
             {
                 Tool tool = new Tool();
 
@@ -181,18 +198,22 @@ namespace CeManualPatcher
 
         public void AddVerb()
         {
-            this.verbProperties = new VerbPropertiesCESaveable(weaponDef, true);
+            this.verbProperties = new VerbPropertiesCESaveable(targetDef, true);
         }
 
         public void AddAmmoUser()
         {
-            this.ammoUser = new CompAmmoUserSaveable(weaponDef, true);
+            this.ammoUser = new CompAmmoUserSaveable(targetDef, true);
         }
 
         public void AddFireMode()
         {
-            this.fireMode = new CompFireModesSaveable(weaponDef, true);
+            this.fireMode = new CompFireModesSaveable(targetDef, true);
         }
 
+        public override void ExportPatch(string dirPath)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

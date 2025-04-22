@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -14,20 +15,36 @@ namespace CeManualPatcher.Misc
     {
         private static Dictionary<int, bool> labelStats = new Dictionary<int, bool>();
 
+        public static string curId;
+        public static string curBuffer;
         public static void TextFieldOnChange<T>(Rect rect, ref T value, Action<T> onChange, float min = float.MinValue, float max = float.MaxValue) where T : struct
         {
             T temp = value;
             string buffer = value.ToString();
 
-            Widgets.TextFieldNumeric(rect, ref temp, ref buffer, min, max);
+            string id = "TextField" + rect.y.ToString("F0") + rect.x.ToString("F0");
+
+            if (curId == id)
+            {
+                if (curBuffer == null)
+                {
+                    curBuffer = buffer;
+                }
+                Widgets.TextFieldNumeric(rect, ref temp, ref curBuffer, min, max);
+                buffer = curBuffer;
+            }
+            else
+            {
+                Widgets.TextFieldNumeric(rect, ref temp, ref buffer, min, max);
+            }
 
             if (buffer.NullOrEmpty())
             {
                 temp = default(T);
             }
 
-            //if(Math.Abs(value- temp)< float.Epsilon)
-            if (value.ToString() != buffer)
+            //if (!EqualityComparer<T>.Default.Equals(temp, value))
+            if(value.ToString() != buffer)
             {
                 onChange(temp);
                 value = temp;
@@ -91,7 +108,7 @@ namespace CeManualPatcher.Misc
 
                 Rect inputFieldRect = new Rect(rect.x, rect.y, width, rect.height);
                 string temp = Widgets.TextField(inputFieldRect, value);
-                if(temp != value)
+                if (temp != value)
                 {
                     value = temp;
                     if (onClick != null)

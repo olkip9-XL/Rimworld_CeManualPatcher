@@ -11,15 +11,37 @@ namespace CeManualPatcher.Saveable
     {
         protected ThingDef thingDef;
         public SaveableBase() { }
-       
+        public SaveableBase(ThingDef thingDef)
+        {
+            this.thingDef = thingDef;
+            if(NullCheck())
+            {
+                return;
+            }
+
+            InitOriginalData();
+        }
         protected abstract void Apply();
         public abstract void Reset();
         public abstract void ExposeData();
         public virtual void PostLoadInit(ThingDef thingDef)
         {
             this.thingDef = thingDef;
+            if (NullCheck())
+            {
+                return;
+            }
+
+            InitOriginalData();
+            this.Apply();
         }
 
         protected abstract void InitOriginalData();
+
+        protected virtual bool NullCheck()
+        {
+            return thingDef == null;
+        }
+
     }
 }

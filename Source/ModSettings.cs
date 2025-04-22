@@ -142,8 +142,33 @@ namespace CeManualPatcher
                     break;
             }
 
+            string curId = GUI.GetNameOfFocusedControl();
+            if(WidgetsUtility.curId != curId)
+            {
+                WidgetsUtility.curId = curId;
+                WidgetsUtility.curBuffer = null;
+            }
+
         }
 
+        //test
+        private float field1;
+        private float field2 = 0f;
+        private void DrawTestField(Rect rect)
+        {
+            Listing_Standard listing = new Listing_Standard();
+            listing.Begin(rect);
+
+            WidgetsUtility.TextFieldOnChange(listing.GetRect(24f), ref field1, (x) =>
+            {
+            });
+
+            WidgetsUtility.TextFieldOnChange(listing.GetRect(24f), ref field2, (x) =>
+            {
+            });
+
+            listing.End();
+        }
 
         private void DebugLogAllButtonImage(Rect rect)
         {

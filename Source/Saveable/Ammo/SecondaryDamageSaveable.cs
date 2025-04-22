@@ -79,7 +79,7 @@ namespace CeManualPatcher.Saveable.Ammo
 
         public override void ExposeData()
         {
-            if (Scribe.mode == LoadSaveMode.Saving)
+            if (Scribe.mode == LoadSaveMode.Saving && secondaryDamages!=null)
             {
                 secondaryDamagesExpo.Clear();
                 foreach (var damage in secondaryDamages)

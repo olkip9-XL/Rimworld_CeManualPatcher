@@ -1,4 +1,5 @@
-﻿using CeManualPatcher.Patch;
+﻿using CeManualPatcher.Misc;
+using CeManualPatcher.Patch;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,16 +11,113 @@ using Verse;
 
 namespace CeManualPatcher.Manager
 {
-    internal abstract class MP_DefManagerBase : IExposable
+    internal abstract class MP_DefManagerBase<T> : IExposable where T : Def
     {
-        public static readonly string exportPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "CE Patches/CE/Patches");
-        public abstract void ExposeData();
-        public abstract void Reset(ThingDef thing);
+        protected List<PatchBase<T>> patches = new List<PatchBase<T>>();
 
-        public abstract void ResetAll();
+        public static readonly string exportPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "CE Patches/CE/Patches");
 
         public abstract void DoWindowContents(Rect rect);
 
-        public abstract void PostLoadInit();
+        protected abstract void NewPatch(ref PatchBase<T> patch, T def);
+
+
+        public virtual PatchBase<T> GetPatch(T def)
+        {
+            PatchBase<T> patch = patches.FirstOrDefault(x => x?.targetDef == def);
+            if (patch == null)
+            {
+                try
+                {
+                    NewPatch(ref patch, def);
+                    this.patches.Add(patch);
+                }
+                catch (Exception e)
+                {
+                    Log.Error($"[CeManualPatcher] Trying create {typeof(T).Name} patch for item {def?.defName ?? "Null"}: {e}");
+                }
+            }
+            return patch;
+        }
+
+        public virtual void ExposeData()
+        {
+            Scribe_Collections.Look(ref patches, "patches", LookMode.Deep);
+            if (Scribe.mode == LoadSaveMode.LoadingVars)
+            {
+                if (patches == null)
+                {
+                    patches = new List<PatchBase<T>>();
+                }
+            }
+        }
+        public virtual void Reset(T thing)
+        {
+            Log.Warning("reset " + thing.defName);
+            PatchBase<T> patch = patches.FirstOrDefault(x => x?.targetDef == thing);
+            if (patch != null)
+            {
+                try
+                {
+                    patch.Reset();
+                }
+                catch (Exception e)
+                {
+                    Log.Error($"[CeManualPatcher] Resetting {typeof(T).Name} patch {patch?.targetDef?.defName} failed : {e}");
+                }
+                patches.Remove(patch);
+            }
+            GUI.FocusControl("");
+            WidgetsUtility.curId = "";
+        }
+
+        public virtual void ResetAll()
+        {
+            foreach (var patch in patches)
+            {
+                try
+                {
+                    patch.Reset();
+                }
+                catch (Exception e)
+                {
+                    Log.Error($"[CeManualPatcher] Resetting {typeof(T).Name} patch {patch?.targetDef?.defName} failed : {e}");
+                }
+            }
+            patches.Clear();
+            GUI.FocusControl("");
+            WidgetsUtility.curId = "";
+        }
+
+
+        public virtual void PostLoadInit()
+        {
+            foreach (var patch in patches)
+            {
+                try
+                {
+                    patch?.PostLoadInit();
+                }
+                catch (Exception e)
+                {
+                    Log.Error($"[CeManualPatcher] PostLoadInit {typeof(T).Name} patch {patch?.targetDef?.defName} failed : {e}");
+                }
+            }
+        }
+    
+        public virtual void ExportAll()
+        {
+            foreach (var patch in patches)
+            {
+                try
+                {
+                    patch?.ExportPatch(exportPath);
+                }
+                catch (Exception e)
+                {
+                    Log.Error($"[CeManualPatcher] Exporting {typeof(T).Name} patch {patch?.targetDef?.defName} failed : {e}");
+                }
+            }
+        }
     }
 }

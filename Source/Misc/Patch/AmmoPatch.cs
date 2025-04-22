@@ -12,14 +12,15 @@ using Verse;
 
 namespace CeManualPatcher.Patch
 {
-    internal class AmmoPatch : PatchBase
+    internal class AmmoPatch : PatchBase<ThingDef>
     {
-        private string thingDefString = "";
-        public ThingDef projectileDef
-        {
-            get => DefDatabase<ThingDef>.GetNamed(thingDefString, false);
-            set => thingDefString = value?.defName ?? "null";
-        }
+        //private string thingDefString = "";
+        //public ThingDef projectileDef
+        //{
+        //    get => DefDatabase<ThingDef>.GetNamed(thingDefString, false);
+        //    set => thingDefString = value?.defName ?? "null";
+        //}
+        //old
 
         private string ammoDefString = "";
         public ThingDef ammoDef
@@ -44,7 +45,7 @@ namespace CeManualPatcher.Patch
 
             if (projectileDef != null)
             {
-                this.projectileDef = projectileDef;
+                this.targetDef = projectileDef;
                 this.projectile = new ProjectileDefSaveable(projectileDef);
             }
 
@@ -65,26 +66,46 @@ namespace CeManualPatcher.Patch
 
         public override void ExposeData()
         {
-            Scribe_Values.Look(ref thingDefString, "thingDefString");
+            base.ExposeData();
+
+            //Scribe_Values.Look(ref thingDefString, "thingDefString");
             Scribe_Deep.Look(ref projectile, "projectile");
 
             Scribe_Values.Look(ref ammoDefString, "ammoDefString");
             Scribe_Deep.Look(ref ammo, "ammo");
 
             Scribe_Values.Look(ref sourceModName, "sourceModName");
+
+            //old save
+            if (Scribe.mode == LoadSaveMode.LoadingVars)
+            {
+                string oldDefString = "null";
+                Scribe_Values.Look(ref oldDefString, "thingDefString");
+                if (!oldDefString.NullOrEmpty())
+                {
+                    Log.Warning($"thingDefString is {oldDefString}");
+                    targetDefString = oldDefString;
+                }
+            }
+
         }
 
         public override void PostLoadInit()
         {
-            if (projectileDef != null)
+            if (targetDef != null)
             {
-                projectile?.PostLoadInit(projectileDef);
+                projectile?.PostLoadInit(targetDef);
             }
 
             if (ammoDef != null)
             {
                 ammo?.PostLoadInit(ammoDef);
             }
+        }
+
+        public override void ExportPatch(string dirPath)
+        {
+            throw new NotImplementedException();
         }
     }
 }

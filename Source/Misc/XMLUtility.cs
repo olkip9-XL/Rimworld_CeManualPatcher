@@ -1,4 +1,5 @@
 ﻿using CeManualPatcher.Manager;
+using CeManualPatcher.Saveable;
 using CombatExtended;
 using RimWorld;
 using System;
@@ -14,6 +15,9 @@ namespace CeManualPatcher.Misc
 {
     public static class XMLUtility
     {
+        private static WeaponManager weaponManager => WeaponManager.instance;
+
+
         private static string rootPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "CE Patches");
         private static string loadFoldersPath = Path.Combine(rootPath, "LoadFolders.xml");
         private static string ceFoldersPath = Path.Combine(rootPath, "CE\\Patches");
@@ -118,7 +122,7 @@ namespace CeManualPatcher.Misc
             return xmlDoc;
         }
 
-        public static void Replace_StatBase(XmlDocument xmlDoc,XmlElement rootElement, string defName, List<StatModifier> stats)
+        public static void Replace_StatBase(XmlDocument xmlDoc, XmlElement rootElement, string defName, List<StatModifier> stats)
         {
             if (stats == null)
                 return;
@@ -136,7 +140,7 @@ namespace CeManualPatcher.Misc
             valueElement.AppendChild(statElement);
             foreach (var stat in stats)
             {
-               AddChildElement(xmlDoc, statElement, stat.stat.defName, stat.value.ToString());
+                AddChildElement(xmlDoc, statElement, stat.stat.defName, stat.value.ToString());
             }
         }
 
@@ -159,7 +163,7 @@ namespace CeManualPatcher.Misc
 
             XmlElement statsElement = xmlDoc.CreateElement("stats");
             partialArmorExtElement.AppendChild(statsElement);
-            foreach (var stat in partialArmorExt.stats)
+            foreach (var stat in partialArmorExt.stats ?? new List<ApparelPartialStat>())
             {
                 XmlElement statElement = xmlDoc.CreateElement("li");
                 statsElement.AppendChild(statElement);
@@ -182,6 +186,235 @@ namespace CeManualPatcher.Misc
                 }
             }
 
+        }
+
+
+        public static void Replace_Tools(XmlDocument xmlDoc, XmlElement rootElement, string defName, List<Tool> tools)
+        {
+            if (tools.NullOrEmpty())
+                return;
+
+            XmlElement liElement = xmlDoc.CreateElement("li");
+            liElement.SetAttribute("Class", "PatchOperationReplace");
+            rootElement.AppendChild(liElement);
+            AddChildElement(xmlDoc, liElement, "xpath", $"Defs/ThingDef[defName=\"{defName}\"]/tools");
+            XmlElement valueElement = xmlDoc.CreateElement("value");
+            liElement.AppendChild(valueElement);
+
+            XmlElement toolsElement = xmlDoc.CreateElement("tools");
+            valueElement.AppendChild(toolsElement);
+            foreach (var tool in tools)
+            {
+                if (tool is ToolCE)
+                {
+                    XmlElement toolElement = xmlDoc.CreateElement("li");
+                    toolElement.SetAttribute("Class", "CombatExtended.ToolCE");
+                    toolsElement.AppendChild(toolElement);
+
+                    ToolCE defaultTool = new ToolCE();
+
+                    AddChildElement(xmlDoc, toolElement, "label", tool.label);
+
+                    //capacities
+                    XmlElement capacityElement = xmlDoc.CreateElement("capacities");
+                    foreach (var capacity in tool.capacities)
+                    {
+                        AddChildElement(xmlDoc, capacityElement, "li", capacity.defName);
+                    }
+                    toolElement.AppendChild(capacityElement);
+
+
+                    //surprise attack
+                    if (tool.surpriseAttack != null && tool.surpriseAttack.extraMeleeDamages != null)
+                    {
+                        XmlElement surpriseAttackElement = xmlDoc.CreateElement("surpriseAttack");
+                        toolElement.AppendChild(surpriseAttackElement);
+
+                        XmlElement extraMeleeDamageElement = xmlDoc.CreateElement("extraMeleeDamages");
+                        surpriseAttackElement.AppendChild(extraMeleeDamageElement);
+
+                        foreach (var damage in tool.surpriseAttack.extraMeleeDamages)
+                        {
+                            XmlElement listElement = xmlDoc.CreateElement("li");
+
+                            AddChildElement(xmlDoc, listElement, "def", damage.def.defName);
+                            AddChildElement(xmlDoc, listElement, "amount", damage.amount.ToString());
+                            AddChildElement(xmlDoc, listElement, "chance", damage.chance.ToString());
+
+                            extraMeleeDamageElement.AppendChild(listElement);
+                        }
+                        toolElement.AppendChild(surpriseAttackElement);
+                    }
+                    //extra damage
+                    if (tool.extraMeleeDamages != null)
+                    {
+                        XmlElement extraDamageElement = xmlDoc.CreateElement("extraMeleeDamages");
+                        foreach (var damage in tool.surpriseAttack.extraMeleeDamages)
+                        {
+                            XmlElement listElement = xmlDoc.CreateElement("li");
+
+                            AddChildElement(xmlDoc, listElement, "def", damage.def.defName);
+                            AddChildElement(xmlDoc, listElement, "amount", damage.amount.ToString());
+                            AddChildElement(xmlDoc, listElement, "chance", damage.chance.ToString());
+
+                            extraDamageElement.AppendChild(listElement);
+                        }
+                        toolElement.AppendChild(extraDamageElement);
+                    }
+
+                    foreach (var propName in ToolCESaveable.propNames)
+                    {
+                        if (PropUtility.GetPropValue(defaultTool, propName).ToString() != PropUtility.GetPropValue(tool, propName).ToString())
+                        {
+                            AddChildElement(xmlDoc, toolElement, propName, PropUtility.GetPropValue(tool, propName).ToString());
+                        }
+                    }
+
+                    if (tool.linkedBodyPartsGroup != null)
+                        AddChildElement(xmlDoc, toolElement, "linkedBodyPartsGroup", tool.linkedBodyPartsGroup.defName);
+                }
+            }
+        }
+
+        public static void MakeGunCECompatible(XmlDocument xmlDoc, XmlElement rootElement, ThingDef thingDef)
+        {
+            if (thingDef == null)
+                return;
+
+            //frame
+            XmlElement cePatchElement = xmlDoc.CreateElement("li");
+            cePatchElement.SetAttribute("Class", "CombatExtended.PatchOperationMakeGunCECompatible");
+            rootElement.AppendChild(cePatchElement);
+
+            AddChildElement(xmlDoc, cePatchElement, "defName", thingDef.defName);
+
+            MakeStat();
+            MakeVerb();
+            MakeAmmoUser();
+            MakeFireMode();
+            MakeWeaponTags();
+
+            void MakeStat()
+            {
+                //stats
+                XmlElement statBases = xmlDoc.CreateElement("statBases");
+                cePatchElement.AppendChild(statBases);
+
+                if (thingDef.statBases != null)
+                {
+                    List<StatModifier> originalStats = weaponManager.GetWeaponPatch(thingDef).statBase.OriginalStats;
+                    foreach (var item in thingDef.statBases)
+                    {
+                        StatModifier originalStatModifier = originalStats.FirstOrDefault(x => x.stat == item.stat);
+
+                        if (originalStatModifier == null || Math.Abs(originalStatModifier.value - item.value) > float.Epsilon)
+                        {
+                            AddChildElement(xmlDoc, statBases, item.stat.defName, item.value.ToString());
+                        }
+                    }
+                }
+            }
+
+            void MakeVerb()
+            {
+                //verb
+                if (!thingDef.Verbs.NullOrEmpty())
+                {
+                    XmlElement verbPropertiesElement = xmlDoc.CreateElement("Properties");
+                    cePatchElement.AppendChild(verbPropertiesElement);
+
+
+                    VerbPropertiesCE defaultVerb = new VerbPropertiesCE();
+                    VerbPropertiesCE currentVerb = thingDef.Verbs[0] as VerbPropertiesCE;
+
+                    AddChildElement(xmlDoc, verbPropertiesElement, "verbClass", currentVerb.verbClass.ToString());
+
+                    foreach (var propName in VerbPropertiesCESaveable.propNames)
+                    {
+                        if (PropUtility.GetPropValue(defaultVerb, propName).ToString() != PropUtility.GetPropValue(currentVerb, propName).ToString())
+                        {
+                            AddChildElement(xmlDoc, verbPropertiesElement, propName, PropUtility.GetPropValue(currentVerb, propName).ToString());
+                        }
+                    }
+
+                    if (currentVerb.recoilPattern != defaultVerb.recoilPattern)
+                    {
+                        AddChildElement(xmlDoc, verbPropertiesElement, "recoilPattern", currentVerb.recoilPattern.ToString());
+                    }
+
+                    if (currentVerb.defaultProjectile != defaultVerb.defaultProjectile)
+                    {
+                        AddChildElement(xmlDoc, verbPropertiesElement, "defaultProjectile", currentVerb.defaultProjectile.defName);
+                    }
+                }
+            }
+            
+            void MakeAmmoUser()
+            {
+                //ammo user
+                if (thingDef.HasComp<CompAmmoUser>())
+                {
+                    XmlElement ammoUserElement = xmlDoc.CreateElement("AmmoUser");
+                    cePatchElement.AppendChild(ammoUserElement);
+
+                    CompProperties_AmmoUser defaultAmmoUser = new CompProperties_AmmoUser();
+                    CompProperties_AmmoUser currentAmmoUser = thingDef.GetCompProperties<CompProperties_AmmoUser>();
+
+                    foreach (var propName in CompAmmoUserSaveable.propNames)
+                    {
+                        if (PropUtility.GetPropValue(defaultAmmoUser, propName).ToString() != PropUtility.GetPropValue(currentAmmoUser, propName).ToString())
+                        {
+                            AddChildElement(xmlDoc, ammoUserElement, propName, PropUtility.GetPropValue(currentAmmoUser, propName).ToString());
+                        }
+                    }
+
+                    if (currentAmmoUser.ammoSet != defaultAmmoUser.ammoSet)
+                    {
+                        AddChildElement(xmlDoc, ammoUserElement, "ammoSet", currentAmmoUser.ammoSet.defName);
+                    }
+                }
+            }
+          
+            void MakeFireMode()
+            {
+
+                //fire mode
+                if (thingDef.HasComp<CompFireModes>())
+                {
+                    XmlElement fireModeElement = xmlDoc.CreateElement("FireModes");
+                    cePatchElement.AppendChild(fireModeElement);
+
+                    CompProperties_FireModes defaultFireMode = new CompProperties_FireModes();
+                    CompProperties_FireModes currentFireMode = thingDef.GetCompProperties<CompProperties_FireModes>();
+
+                    foreach (var propName in CompFireModesSaveable.propNames)
+                    {
+                        if (PropUtility.GetPropValue(defaultFireMode, propName).ToString() != PropUtility.GetPropValue(currentFireMode, propName).ToString())
+                        {
+                            AddChildElement(xmlDoc, fireModeElement, propName, PropUtility.GetPropValue(currentFireMode, propName).ToString());
+                        }
+                    }
+
+                    if (currentFireMode.aiAimMode != defaultFireMode.aiAimMode)
+                    {
+                        AddChildElement(xmlDoc, fireModeElement, "aiAimMode", currentFireMode.aiAimMode.ToString());
+                    }
+                }
+            }
+       
+            void MakeWeaponTags()
+            {
+                //weapontags
+                if (thingDef.weaponTags != null)
+                {
+                    XmlElement weaponTagsElement = xmlDoc.CreateElement("weaponTags");
+                    cePatchElement.AppendChild(weaponTagsElement);
+                    foreach (var tag in thingDef.weaponTags)
+                    {
+                        AddChildElement(xmlDoc, weaponTagsElement, "li", tag);
+                    }
+                }
+            }
         }
 
     }

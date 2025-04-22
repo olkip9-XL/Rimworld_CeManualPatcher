@@ -1,4 +1,5 @@
-﻿using CeManualPatcher.Saveable;
+﻿using CeManualPatcher.Misc;
+using CeManualPatcher.Saveable;
 using CeManualPatcher.Saveable.Apparel;
 using CombatExtended;
 using RimWorld;
@@ -11,16 +12,16 @@ using System.Threading.Tasks;
 using System.Xml;
 using Verse;
 
-namespace CeManualPatcher.Misc.Patch
+namespace CeManualPatcher.Patch
 {
-    internal class ApparelPatch : PatchBase
+    internal class ApparelPatch : PatchBase<ThingDef>
     {
-        private string apparelDefString;
-        public ThingDef apparelDef
-        {
-            get => DefDatabase<ThingDef>.GetNamed(apparelDefString, false);
-            set => apparelDefString = value?.defName ?? "Null";
-        }
+        //private string apparelDefString;
+        //public ThingDef apparelDef
+        //{
+        //    get => DefDatabase<ThingDef>.GetNamed(apparelDefString, false);
+        //    set => apparelDefString = value?.defName ?? "Null";
+        //}
 
         private StatSaveable statSaveable;
         private PartialArmorExtSaveable partialArmorExtSaveable;
@@ -33,29 +34,39 @@ namespace CeManualPatcher.Misc.Patch
                 return;
             }
 
-            this.apparelDef = apparelDef;
+            this.targetDef = apparelDef;
 
             statSaveable = new StatSaveable(apparelDef);
             partialArmorExtSaveable = new PartialArmorExtSaveable(apparelDef);
         }
 
-
         public override void ExposeData()
         {
-            Scribe_Values.Look(ref apparelDefString, "apparelDef");
+            base.ExposeData();
+            //Scribe_Values.Look(ref apparelDefString, "apparelDef");
             Scribe_Deep.Look(ref statSaveable, "statBase");
             Scribe_Deep.Look(ref partialArmorExtSaveable, "partialArmorExt");
+
+            if (Scribe.mode == LoadSaveMode.LoadingVars)
+            {
+                string oldDefString = "";
+                Scribe_Values.Look(ref oldDefString, "apparelDef");
+                if (!oldDefString.NullOrEmpty())
+                {
+                    targetDefString = oldDefString;
+                }
+            }
         }
 
         public override void PostLoadInit()
         {
-            if(apparelDef == null)
+            if(targetDef == null)
             {
                 return;
             }
 
-            statSaveable?.PostLoadInit(apparelDef);
-            partialArmorExtSaveable?.PostLoadInit(apparelDef);
+            statSaveable?.PostLoadInit(targetDef);
+            partialArmorExtSaveable?.PostLoadInit(targetDef);
         }
 
         public override void Reset()
@@ -64,23 +75,23 @@ namespace CeManualPatcher.Misc.Patch
             partialArmorExtSaveable?.Reset();
         }
 
-        public void ExportPatch(string dirPath)
+        public override void ExportPatch(string dirPath)
         {
-            string folderPath = Path.Combine(dirPath, apparelDef.modContentPack.Name);
+            string folderPath = Path.Combine(dirPath, targetDef.modContentPack.Name);
             folderPath = Path.Combine(folderPath, "Apparel");
             if (!Directory.Exists(folderPath))
             {
                 Directory.CreateDirectory(folderPath);
             }
 
-            string filePath = Path.Combine(folderPath, apparelDef.defName + ".xml");
+            string filePath = Path.Combine(folderPath, targetDef.defName + ".xml");
 
             // 创建XML文档
             XmlElement rootPatchElement = null; 
             XmlDocument xmlDoc = XMLUtility.CreateBasePatchDoc(ref rootPatchElement);
 
-            XMLUtility.Replace_StatBase(xmlDoc, rootPatchElement, apparelDef.defName, apparelDef.statBases);
-            XMLUtility.AddModExt_PartialArmor(xmlDoc, rootPatchElement, apparelDef.defName, apparelDef.GetModExtension<PartialArmorExt>());
+            XMLUtility.Replace_StatBase(xmlDoc, rootPatchElement, targetDef.defName, targetDef.statBases);
+            XMLUtility.AddModExt_PartialArmor(xmlDoc, rootPatchElement, targetDef.defName, targetDef.GetModExtension<PartialArmorExt>());
 
             xmlDoc.Save(filePath);
         }

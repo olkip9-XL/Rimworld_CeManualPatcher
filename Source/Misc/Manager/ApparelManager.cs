@@ -1,7 +1,6 @@
 ﻿using CeManualPatcher.Manager;
-using CeManualPatcher.Misc.Patch;
+using CeManualPatcher.Patch;
 using CeManualPatcher.RenderRect;
-using CeManualPatcher.RenderRect.Ammo;
 using CeManualPatcher.RenderRect.Apparel;
 using System;
 using System.Collections.Generic;
@@ -14,12 +13,12 @@ using Verse;
 
 namespace CeManualPatcher.Misc.Manager
 {
-    internal class ApparelManager : MP_DefManagerBase
+    internal class ApparelManager : MP_DefManagerBase<ThingDef>
     {
         internal static ThingDef curApparelDef;
         internal static ApparelManager instance;
 
-        private List<ApparelPatch> patches = new List<ApparelPatch>();
+        //private List<ApparelPatch> patches = new List<ApparelPatch>();
         private Rect_ApparelList rect_ApparelList = new Rect_ApparelList();
         private Rect_ApparelInfo rect_ApparelInfo = new Rect_ApparelInfo();
 
@@ -38,73 +37,120 @@ namespace CeManualPatcher.Misc.Manager
             rect_ApparelInfo.DoWindowContents(rightRect);
         }
 
-        public ApparelPatch GetPatch(ThingDef thing)
+        protected override void NewPatch(ref PatchBase<ThingDef> patch, ThingDef def)
         {
-            ApparelPatch patch = patches.FirstOrDefault(x => x?.apparelDef == thing);
-            if (patch == null)
-            {
-                try
-                {
-                    patch = new ApparelPatch(thing);
-                    patches.Add(patch);
-                }
-                catch (Exception e)
-                {
-                    Log.Error($"[CeManualPatcher] ApparelManager Trying create patch for item {thing?.defName ?? "Null"}: {e}");
-                }
-            }
-
-            return patch;
+            patch = new ApparelPatch(def);
         }
+
+        //public ApparelPatch GetPatch(ThingDef thing)
+        //{
+        //    ApparelPatch patch = (ApparelPatch)patches.FirstOrDefault(x => x?.targetDef == thing);
+        //    if (patch == null)
+        //    {
+        //        try
+        //        {
+        //            patch = new ApparelPatch(thing);
+        //            patches.Add(patch);
+        //        }
+        //        catch (Exception e)
+        //        {
+        //            Log.Error($"[CeManualPatcher] ApparelManager Trying create patch for item {thing?.defName ?? "Null"}: {e}");
+        //        }
+        //    }
+
+        //    return patch;
+        //}
+
 
         public bool HasPatch(ThingDef thing)
         {
-            return patches.Any(x => x?.apparelDef == thing);
+            return patches.Any(x => x?.targetDef == thing);
         }
 
 
         public override void ExposeData()
         {
-            Scribe_Collections.Look(ref patches, "apparelPatches", LookMode.Deep);
+            base.ExposeData();
+            //Scribe_Collections.Look(ref patches, "apparelPatches", LookMode.Deep);
+            //if (Scribe.mode == LoadSaveMode.LoadingVars)
+            //{
+            //    if (patches == null)
+            //    {
+            //        patches = new List<ApparelPatch>();
+            //    }
+            //}
             if (Scribe.mode == LoadSaveMode.LoadingVars)
             {
-                if (patches == null)
+                List<ApparelPatch> apparelPatches = new List<ApparelPatch>();
+                Scribe_Collections.Look(ref apparelPatches, "apparelPatches", LookMode.Deep);
+                if(!apparelPatches.NullOrEmpty())
                 {
-                    patches = new List<ApparelPatch>();
+                    patches.AddRange(apparelPatches);
                 }
             }
         }
 
-        public override void PostLoadInit()
-        {
-            patches.ForEach(x => x?.PostLoadInit());
-        }
+        //public override void PostLoadInit()
+        //{
+        //    foreach (var patch in patches)
+        //    {
+        //        try
+        //        {
+        //            patch?.PostLoadInit();
+        //        }
+        //        catch (Exception e)
+        //        {
+        //            Log.Error($"[CeManualPatcher] PostLoadInit apparel patch {patch?.apparelDef?.defName} failed : {e}");
+        //        }
+        //    }
+        //}
 
-        public override void Reset(ThingDef thing)
-        {
-            ApparelPatch patch = patches.FirstOrDefault(x => x?.apparelDef == thing);
-            if (patch != null)
-            {
-                patch.Reset();
-                patches.Remove(patch);
-            }
-        }
+        //public override void Reset(ThingDef thing)
+        //{
+        //    ApparelPatch patch = patches.FirstOrDefault(x => x?.apparelDef == thing);
+        //    if (patch != null)
+        //    {
+        //        try
+        //        {
+        //            patch.Reset();
+        //        }
+        //        catch (Exception e)
+        //        {
+        //            Log.Error($"[CeManualPatcher] Resetting apparel patch {patch?.apparelDef?.defName} failed : {e}");
+        //        }
+        //        patches.Remove(patch);
+        //    }
+        //}
 
-        public override void ResetAll()
-        {
-            foreach (var patch in patches)
-            {
-                patch.Reset();
-            }
-            patches.Clear();
-        }
+        //public override void ResetAll()
+        //{
+        //    foreach (var patch in patches)
+        //    {
+        //        try
+        //        {
+        //            patch.Reset();
+        //        }
+        //        catch (Exception e)
+        //        {
+        //            Log.Error($"[CeManualPatcher] Resetting apparel patch {patch?.apparelDef?.defName} failed : {e}");
+        //        }
+        //    }
+        //    patches.Clear();
+        //}
 
-        public void ExportAll()
-        {
-            foreach (var patch in patches)
-            {
-               patch?.ExportPatch(MP_DefManagerBase.exportPath);
-            }   
-        }
+        //public void ExportAll()
+        //{
+        //    foreach (var patch in patches)
+        //    {
+        //        try
+        //        {
+        //            patch?.ExportPatch(MP_DefManagerBase.exportPath);
+        //        }
+        //        catch (Exception e)
+        //        {
+        //            Log.Error($"[CeManualPatcher] Exporting apparel patch {patch?.apparelDef?.defName} failed : {e}");
+        //        }
+        //    }
+        //}
     }
 }

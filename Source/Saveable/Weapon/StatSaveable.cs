@@ -31,15 +31,20 @@ namespace CeManualPatcher.Saveable
         public List<StatModifier> OriginalStats => originalData;
 
         public StatSaveable() { }
-        public StatSaveable(ThingDef thingDef)
+        public StatSaveable(ThingDef thingDef) : base(thingDef)
         {
-            this.thingDef = thingDef;
-            if (statBases.NullOrEmpty())
-            {
-                return;
-            }
+            //this.thingDef = thingDef;
+            //if (statBases.NullOrEmpty())
+            //{
+            //    return;
+            //}
 
-            InitOriginalData();
+            //InitOriginalData();
+        }
+
+        protected override bool NullCheck()
+        {
+           return statBases.NullOrEmpty();
         }
 
         public override void ExposeData()
@@ -90,19 +95,20 @@ namespace CeManualPatcher.Saveable
                 if (statModifier.stat != null)
                     thingDef.statBases.Add(statModifier);
             }
+
         }
 
-        public override void PostLoadInit(ThingDef thingDef)
-        {
-            this.thingDef = thingDef;
-            if (statBases.NullOrEmpty())
-            {
-                return;
-            }
+        //public override void PostLoadInit(ThingDef thingDef)
+        //{
+        //    this.thingDef = thingDef;
+        //    if (statBases.NullOrEmpty())
+        //    {
+        //        return;
+        //    }
 
-            InitOriginalData();
-            this.Apply();
-        }
+        //    InitOriginalData();
+        //    this.Apply();
+        //}
 
         protected override void InitOriginalData()
         {

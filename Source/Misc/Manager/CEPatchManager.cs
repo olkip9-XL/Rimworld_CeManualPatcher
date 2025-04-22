@@ -11,7 +11,7 @@ using Verse;
 
 namespace CeManualPatcher.Manager
 {
-    internal class CEPatchManager : MP_DefManagerBase
+    internal class CEPatchManager : IExposable
     {
         public static CEPatchManager instance { get; private set; }
 
@@ -43,7 +43,7 @@ namespace CeManualPatcher.Manager
             return patchers.FirstOrDefault(x => x?.thingDef == thingDef);
         }
 
-        public override void ExposeData()
+        public void ExposeData()
         {
             Scribe_Collections.Look(ref patchers, "patchers", LookMode.Deep);
             if (Scribe.mode == LoadSaveMode.LoadingVars)
@@ -55,7 +55,7 @@ namespace CeManualPatcher.Manager
             }
         }
 
-        public override void Reset(ThingDef thing)
+        public void Reset(ThingDef thing)
         {
             if (thing == null)
             {
@@ -71,16 +71,13 @@ namespace CeManualPatcher.Manager
             patchers.Remove(patcher);
         }
 
-        public override void ResetAll()
+        public void ResetAll()
         {
             this.patchers.Clear();
         }
 
-        public override void DoWindowContents(Rect rect)
-        {
-        }
-
-        public override void PostLoadInit()
+     
+        public void PostLoadInit()
         {
             patchers?.ForEach(x => x?.PostLoadInit());
         }
@@ -89,8 +86,14 @@ namespace CeManualPatcher.Manager
         {
             foreach (var item in this.patchers)
             {
-                //XMLUtility.CreateCEPatch(item.thingDef);
-                item?.ExportToFile(MP_DefManagerBase.exportPath);
+                try
+                {
+                    item?.ExportToFile(MP_DefManagerBase<Def>.exportPath);
+                }
+                catch (Exception e)
+                {
+                    Log.Error($"[CeManualPatcher] Exporting weapon patch {item?.thingDef?.defName} failed : {e}");
+                }
             }
         }
 

@@ -13,6 +13,7 @@ namespace CeManualPatcher.Saveable.Weapon
     {
         public static readonly string tagOneHandWeaponCE = "CE_OneHandedWeapon";
 
+        //字段
         List<string> saveData = new List<string>();
 
         List<String> WeaponTags
@@ -30,15 +31,8 @@ namespace CeManualPatcher.Saveable.Weapon
         List<string> originalData = new List<string>();
 
         public WeaponTagsSaveable() { }
-        public WeaponTagsSaveable(ThingDef thingDef)
+        public WeaponTagsSaveable(ThingDef thingDef) : base(thingDef)
         {
-            this.thingDef = thingDef;
-            if (thingDef == null || thingDef.weaponTags == null)
-            {
-                return;
-            }
-
-            InitOriginalData();
         }
 
         public override void ExposeData()
@@ -58,7 +52,6 @@ namespace CeManualPatcher.Saveable.Weapon
                     saveData = new List<string>();
                 }
             }
-
         }
 
         public override void Reset()
@@ -92,16 +85,21 @@ namespace CeManualPatcher.Saveable.Weapon
             originalData.AddRange(WeaponTags);
         }
 
-        public override void PostLoadInit(ThingDef thingDef)
-        {
-            this.thingDef = thingDef;
-            if (WeaponTags == null)
-            {
-                return;
-            }
+        //public override void PostLoadInit(ThingDef thingDef)
+        //{
+        //    this.thingDef = thingDef;
+        //    if (WeaponTags == null)
+        //    {
+        //        return;
+        //    }
 
-            InitOriginalData();
-            this.Apply();
+        //    InitOriginalData();
+        //    this.Apply();
+        //}
+
+        protected override bool NullCheck()
+        {
+            return this.WeaponTags == null;
         }
 
 

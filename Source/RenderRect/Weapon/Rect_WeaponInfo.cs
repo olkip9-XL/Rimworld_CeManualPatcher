@@ -31,7 +31,6 @@ namespace CeManualPatcher
 
 
         private static WeaponManager manager => WeaponManager.instance;
-
         private static CEPatchManager patchManager => CEPatchManager.instance;
         private static ThingDef curWeaponDef => WeaponManager.curWeaponDef;
 
@@ -114,6 +113,7 @@ namespace CeManualPatcher
             if (Widgets.ButtonText(resetAllRect, "MP_ResetAll".Translate()))
             {
                 manager.ResetAll();
+                patchManager.ResetAll();
             }
 
             Rect exportCEPatchRect = rect.RightPartPixels(120f);
@@ -156,6 +156,7 @@ namespace CeManualPatcher
             if (Widgets.ButtonImage(rect3, MP_Texture.Reset))
             {
                 manager.Reset(curWeaponDef);
+                patchManager.Reset(curWeaponDef);
             }
 
             //CE patch button

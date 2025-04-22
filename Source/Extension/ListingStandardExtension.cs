@@ -98,6 +98,11 @@ namespace CeManualPatcher.Extension
         //*********************************************
         public static void FieldLine<T>(this Listing_Standard listing, string label, ref T value, float fieldWidth = 100f, string tooltip = null, float indent = 0, float min = float.MinValue, float max = float.MaxValue) where T : struct
         {
+            listing.FieldLineOnChange(label, ref value, (x) => { }, fieldWidth, tooltip, indent, min, max);
+        }
+
+        public static void FieldLineOnChange<T>(this Listing_Standard listing, string label, ref T value, Action<T> onChange, float fieldWidth = 100f, string tooltip = null, float indent = 0, float min = float.MinValue, float max = float.MaxValue) where T : struct
+        {
             Rect rect = listing.GetRect(Text.LineHeight);
             rect.x += indent;
             rect.width -= indent;
@@ -115,14 +120,12 @@ namespace CeManualPatcher.Extension
             else
             {
                 Rect fieldRect = rect.RightPartPixels(fieldWidth);
-                string buffer = value.ToString();
 
-                Widgets.TextFieldNumeric(fieldRect, ref value, ref buffer, min, max);
-
-                if (buffer.NullOrEmpty())
+                //Widgets.TextFieldNumeric(fieldRect, ref value, ref buffer, min, max);
+                WidgetsUtility.TextFieldOnChange(fieldRect, ref value, (x) =>
                 {
-                    value = default(T);
-                }
+                    onChange(x);
+                }, min, max);
             }
 
             Widgets.DrawHighlightIfMouseover(rect);
@@ -134,18 +137,6 @@ namespace CeManualPatcher.Extension
 
             listing.Gap(listing.verticalSpacing);
         }
-
-        public static void FieldLineOnChange<T>(this Listing_Standard listing, string label, ref T value, Action<T> onChange, float fieldWidth = 100f, string tooltip = null, float indent = 0, float min = float.MinValue, float max = float.MaxValue) where T : struct
-        {
-            T temp = value;
-            FieldLine(listing, label, ref temp, fieldWidth, tooltip, indent, min, max);
-            if (temp.ToString() != value.ToString())
-            {
-                onChange(temp);
-                value = temp;
-            }
-        }
-
 
         public static void ButtonTextLine(this Listing_Standard listing, string label, string buttonLabel, Action onClick, float fieldWidth = 100f, string tooltip = null, float indent = 0)
         {
@@ -200,32 +191,33 @@ namespace CeManualPatcher.Extension
             if (type == typeof(int))
             {
                 int intValue = (int)value;
-                listing.FieldLine(label, ref intValue, fieldWidth, tooltip, indent, min, max);
-                if (intValue != (int)value)
+
+                listing.FieldLineOnChange(label, ref intValue, (x) =>
                 {
-                    onChange(intValue);
-                    fieldInfo.SetValue(instance, intValue);
-                }
+                    onChange(x);
+                    fieldInfo.SetValue(instance, x);
+                }, fieldWidth, tooltip, indent, min, max);
             }
             else if (type == typeof(float))
             {
                 float floatValue = (float)value;
-                listing.FieldLine(label, ref floatValue, fieldWidth, tooltip, indent, min, max);
-                if (Math.Abs(floatValue - (float)value) > float.Epsilon)
+
+                listing.FieldLineOnChange(label, ref floatValue, (x) =>
                 {
-                    onChange(floatValue);
-                    fieldInfo.SetValue(instance, floatValue);
-                }
+                    onChange(x);
+                    fieldInfo.SetValue(instance, x);
+                }, fieldWidth, tooltip, indent, min, max);
+
             }
             else if (type == typeof(bool))
             {
                 bool boolValue = (bool)value;
-                listing.FieldLine(label, ref boolValue, fieldWidth, tooltip, indent);
-                if (boolValue != (bool)value)
+
+                listing.FieldLineOnChange(label, ref boolValue, (x) =>
                 {
-                    onChange(boolValue);
-                    fieldInfo.SetValue(instance, boolValue);
-                }
+                    onChange(x);
+                    fieldInfo.SetValue(instance, x);
+                }, fieldWidth, tooltip, indent);
             }
             else
             {
