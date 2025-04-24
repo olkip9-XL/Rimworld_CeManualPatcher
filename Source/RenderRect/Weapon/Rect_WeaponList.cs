@@ -96,7 +96,15 @@ namespace CeManualPatcher.RenderRect
             {
                 foreach (var item in allWeaponDefs)
                 {
-                    RenderRectUtility.DrawItemRow(listing, item, ref WeaponManager.curWeaponDef);
+                    try
+                    {
+                        RenderRectUtility.DrawItemRow(listing, item, ref WeaponManager.curWeaponDef);
+                    }
+                    catch(Exception e)
+                    {
+                        Log.ErrorOnce($"[CeManualPatcher] Error while drawing Weapon tab {item?.defName ?? "null"} from {item?.modContentPack.Name ?? "null"} : {e}", e.GetHashCode());
+                    }
+
                 }
             });
 

@@ -268,7 +268,7 @@ namespace CeManualPatcher
             }
         }
         public static List<BipodCategoryDef> bipodCategoryDefs => DefDatabase<BipodCategoryDef>.AllDefsListForReading;
-            
+
 
         private static ReadOnlyCollection<StatDef> statDefs_ApparelInt = null;
 
@@ -280,7 +280,7 @@ namespace CeManualPatcher
                 {
                     List<StatCategoryDef> categoryDefs = new List<StatCategoryDef>();
 
-                    foreach(var item in DefDatabase<ThingDef>.AllDefs.Where(x=> x.IsApparel))
+                    foreach (var item in DefDatabase<ThingDef>.AllDefs.Where(x => x.IsApparel))
                     {
                         if (item.statBases != null)
                         {
@@ -356,5 +356,97 @@ namespace CeManualPatcher
             }
         }
 
+        private static ReadOnlyCollection<string> weaponTagsInt;
+        public static ReadOnlyCollection<string> weaponTags
+        {
+            get
+            {
+                if (weaponTagsInt == null)
+                {
+                    List<string> list = new List<string>();
+                    foreach (var item in DefDatabase<ThingDef>.AllDefs.Where(x => x.weaponTags != null))
+                    {
+                        foreach (var tag in item.weaponTags)
+                        {
+                            if (!list.Contains(tag))
+                            {
+                                list.Add(tag);
+                            }
+                        }
+                    }
+                    list.Sort();
+                    weaponTagsInt = list.AsReadOnly();
+                }
+                return weaponTagsInt;
+            }
+        }
+
+
+        private static ReadOnlyCollection<StatDef> statDefs_WeaponOffsetInt;
+        public static ReadOnlyCollection<StatDef> statDefs_WeaponOffset
+        {
+            get
+            {
+                if (statDefs_WeaponOffsetInt == null)
+                {
+                    List<StatCategoryDef> categoryDefs = new List<StatCategoryDef>();
+
+                    foreach (var item in DefDatabase<ThingDef>.AllDefs.Where(x=> x.IsWeapon))
+                    {
+                       if(item.equippedStatOffsets!= null)
+                        {
+                            foreach (var stat in item.equippedStatOffsets)
+                            {
+                               categoryDefs.AddDistinct(stat.stat.category);
+                            }
+                        }
+                    }
+
+                    List<StatDef> list = new List<StatDef>();
+                    foreach(var item in DefDatabase<StatDef>.AllDefsListForReading)
+                    {
+                        if (categoryDefs.Contains(item.category))
+                        {
+                            list.Add(item);
+                        }
+                    }
+
+                    statDefs_WeaponOffsetInt = list.AsReadOnly();
+                }
+                return statDefs_WeaponOffsetInt;
+            }
+        }
+
+        private static ReadOnlyCollection<StatDef> statDefs_ApparelOffsetInt;
+        public static ReadOnlyCollection<StatDef> statDefs_ApparelOffset
+        {
+            get
+            {
+                if (statDefs_ApparelOffsetInt == null)
+                {
+                    List<StatCategoryDef> categoryDefs = new List<StatCategoryDef>();
+                    foreach (var item in DefDatabase<ThingDef>.AllDefs.Where(x => x.IsApparel))
+                    {
+                        if (item.equippedStatOffsets != null)
+                        {
+                            foreach (var stat in item.equippedStatOffsets)
+                            {
+                                categoryDefs.AddDistinct(stat.stat.category);
+                            }
+                        }
+                    }
+                    List<StatDef> list = new List<StatDef>();
+                    foreach (var item in DefDatabase<StatDef>.AllDefsListForReading)
+                    {
+                        if (categoryDefs.Contains(item.category))
+                        {
+                            list.Add(item);
+                        }
+                    }
+                    statDefs_ApparelOffsetInt = list.AsReadOnly();
+                }
+                return statDefs_ApparelOffsetInt;
+            }
+        }
     }
 }

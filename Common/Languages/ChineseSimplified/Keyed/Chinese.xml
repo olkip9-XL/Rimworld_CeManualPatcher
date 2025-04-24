@@ -12,6 +12,8 @@
 
   <MP_StatBase>基本状态</MP_StatBase>
 
+  <MP_StatOffset>装备时状态偏移</MP_StatOffset>
+
   <!--Verbs-->
   <MP_Verb>远程参数</MP_Verb>
 
@@ -106,7 +108,8 @@
 <!--Weapon tags-->
 
   <MP_WeaponTags>武器标签</MP_WeaponTags>
-  
+
+  <MP_CombatRole>CE战斗角色标签</MP_CombatRole>
   
   <!--Apparel-->
   

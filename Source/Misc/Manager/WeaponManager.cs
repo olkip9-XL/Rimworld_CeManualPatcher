@@ -25,14 +25,14 @@ namespace CeManualPatcher.Manager
         {
             WeaponManager.instance = this;
         }
-
-        public WeaponPatch GetWeaponPatch(ThingDef thingDef)
-        {
-            return GetPatch(thingDef) as WeaponPatch;
-        }
         protected override void NewPatch(ref PatchBase<ThingDef> patch, ThingDef def)
         {
             patch = new WeaponPatch(def);
+        }
+
+        public  WeaponPatch GetWeaponPatch(ThingDef thingDef)
+        {
+            return base.GetPatch(thingDef) as WeaponPatch;
         }
 
         public bool HasWeaponPatch(ThingDef thingDef)
@@ -46,8 +46,24 @@ namespace CeManualPatcher.Manager
             Rect leftRect = rect.LeftPart(0.3f);
             leftRect.width -= 20f;
 
-            rect_WeaponInfo.DoWindowContents(rightRect);
-            rect_WeaponList.DoWindowContents(leftRect);
+            try
+            {
+                rect_WeaponInfo.DoWindowContents(rightRect);
+            }
+            catch (Exception e)
+            {
+                Log.ErrorOnce($"[CeManualPatcher] WeaponManager weapon info error on thing {curWeaponDef?.defName ?? "null"} form {curWeaponDef?.modContentPack?.Name ?? "null"} : {e}", e.GetHashCode());
+            }
+
+            try
+            {
+                rect_WeaponList.DoWindowContents(leftRect);
+            }
+            catch (Exception e)
+            {
+                Log.ErrorOnce($"[CeManualPatcher] WeaponManager weapon list error : {e}", e.GetHashCode());
+            }
+           
         }
 
         public override void ExposeData()

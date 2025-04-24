@@ -86,7 +86,14 @@ namespace CeManualPatcher.RenderRect
             {
                 foreach (var item in ApparelDefs)
                 {
-                    RenderRectUtility.DrawItemRow(innerListing, item, ref ApparelManager.curApparelDef);
+                    try
+                    {
+                        RenderRectUtility.DrawItemRow(innerListing, item, ref ApparelManager.curApparelDef);
+                    }
+                    catch (Exception e)
+                    {
+                        Log.ErrorOnce($"[CeManualPatcher] Error while drawing Apparel tab {item?.defName ?? "null"} from {item?.modContentPack?.Name ?? "null"} : {e}", e.GetHashCode());
+                    }
                 }
             });
 

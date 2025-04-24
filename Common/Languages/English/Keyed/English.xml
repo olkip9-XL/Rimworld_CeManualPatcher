@@ -12,6 +12,8 @@
 
   <MP_StatBase>Base Stats</MP_StatBase>
 
+  <MP_StatOffset>Equipped Stat Offsets</MP_StatOffset>
+
   <!--Verbs-->
   <MP_Verb>Ranged Parameters</MP_Verb>
 
@@ -106,6 +108,7 @@
 
   <MP_WeaponTags>Weapon Tags</MP_WeaponTags>
 
+  <MP_CombatRole>CE Combat Role Tag</MP_CombatRole>
 
   <!--Apparel-->
 

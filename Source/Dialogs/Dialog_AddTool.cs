@@ -63,7 +63,7 @@ namespace CeManualPatcher.Dialogs
             {
                 innerListing.TextX("Label", 100f, ref toolReadyToAdd.label);
 
-                Rect_WeaponInfo.DrawToolContent(innerListing, toolReadyToAdd);
+                Rect_WeaponInfo.DrawToolContent(innerListing, toolReadyToAdd, null);
 
                 DrawControlPannel(innerListing);
             });

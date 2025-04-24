@@ -53,7 +53,6 @@ namespace CeManualPatcher.Manager
         }
         public virtual void Reset(T thing)
         {
-            Log.Warning("reset " + thing.defName);
             PatchBase<T> patch = patches.FirstOrDefault(x => x?.targetDef == thing);
             if (patch != null)
             {

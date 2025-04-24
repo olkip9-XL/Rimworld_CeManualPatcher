@@ -38,10 +38,15 @@ namespace CeManualPatcher.RenderRect.Apparel
 
             WidgetsUtility.ScrollView(listing_Standard.GetRect(rect.height - listing_Standard.CurHeight - Text.LineHeight - 0.1f), ref scrollPosition, ref scrollViewHeight, (innerListing) =>
             {
-                RenderRectUtility.DrawStats(innerListing, curApparel.statBases, MP_Options.statDefs_Apparel, delegate
+                RenderRectUtility.DrawStats(innerListing, ref curApparel.statBases, MP_Options.statDefs_Apparel, delegate
                 {
                     manager.GetPatch(curApparel);
                 });
+
+                RenderRectUtility.DrawStats(innerListing, ref curApparel.equippedStatOffsets, MP_Options.statDefs_ApparelOffset, delegate
+                {
+                    manager.GetPatch(curApparel);
+                }, headLabel: "MP_StatOffset".Translate());
 
                 DrawPartialArmorExt(innerListing);
             });
@@ -142,7 +147,10 @@ namespace CeManualPatcher.RenderRect.Apparel
                 return;
 
             //stat
-            curApparel.statBases = CopyUtility.CopyStats(copiedThing);
+            curApparel.statBases = CopyUtility.CopyStats(copiedThing.statBases);
+
+            //stat offsets
+            curApparel.equippedStatOffsets = CopyUtility.CopyStats(copiedThing.equippedStatOffsets);
 
             //modExtension
             if (copiedThing.HasModExtension<PartialArmorExt>())

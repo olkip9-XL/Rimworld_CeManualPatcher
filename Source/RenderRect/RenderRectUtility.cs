@@ -53,26 +53,39 @@ namespace CeManualPatcher.RenderRect
         //Stats dic
         private static Dictionary<int, StatCategoryDef> statCategoryDic = new Dictionary<int, StatCategoryDef>();
 
-        public static void DrawStats(Listing_Standard listing, List<StatModifier> stats, ReadOnlyCollection<StatDef> avaliableStats, Action preChange)
+        public static void DrawStats(Listing_Standard listing, ref List<StatModifier> stats, ReadOnlyCollection<StatDef> avaliableStats, Action preChange, string headLabel = null)
         {
             listing.GapLine(6f);
 
             Rect headRect = listing.GetRect(Text.LineHeight);
             Rect addRect = headRect.RightPartPixels(headRect.height);
-            Widgets.Label(headRect, "<b>" + "MP_StatBase".Translate() + "</b>");
 
-            int hashCode = stats.GetHashCode();
+            if (headLabel.NullOrEmpty())
+                headLabel = "MP_StatBase".Translate();
+
+            Widgets.Label(headRect, "<b>" + headLabel + "</b>");
+
+            int hashCode = stats?.GetHashCode() ?? 0;
             if (!statCategoryDic.ContainsKey(hashCode))
             {
                 statCategoryDic[hashCode] = null;
             }
 
-            //Add button
+            // Add button
             if (Widgets.ButtonImage(addRect, TexButton.Add))
             {
+                if (stats == null)
+                    stats = new List<StatModifier>();
+
+                List<StatModifier> localStats = stats;
+
                 List<StatDef> list = new List<StatDef>();
                 list.AddRange(avaliableStats);
-                list = list.Where(x => !stats.Any(y => y.stat == x)).ToList();
+
+                if (stats != null)
+                {
+                    list = list.Where(x => !localStats.Any(y => y.stat == x)).ToList();
+                }
 
                 if (statCategoryDic[hashCode] != null)
                 {
@@ -84,9 +97,9 @@ namespace CeManualPatcher.RenderRect
                 {
                     FloatMenuOption option = new FloatMenuOption(item.LabelCap, delegate
                     {
-                        if (preChange != null) preChange();
-
-                        stats.Add(new StatModifier()
+                        preChange?.Invoke();
+                        //???
+                        localStats.Add(new StatModifier()
                         {
                             stat = item,
                             value = item.defaultBaseValue,
@@ -103,7 +116,7 @@ namespace CeManualPatcher.RenderRect
                 }
             }
 
-            //stat分类按钮
+            // Stat category button
             Rect categoryRect = addRect.LeftAdjoin(150f);
             if (Widgets.ButtonText(categoryRect, statCategoryDic[hashCode]?.LabelCap ?? "MP_All".Translate()))
             {
@@ -122,14 +135,14 @@ namespace CeManualPatcher.RenderRect
                     });
             }
 
-            //category Label
+            // Category Label
             string label = "MP_Category".Translate();
             Rect labelRect = categoryRect.LeftAdjoin(Text.CalcSize(label).x);
             Widgets.Label(labelRect, label);
 
             listing.Gap(6f);
-            //stat 条目
-            foreach (var item in stats)
+            // Stat entries
+            foreach (var item in stats ?? new List<StatModifier>())
             {
                 Rect rect = listing.GetRect(Text.LineHeight);
                 rect.x += 20f;
@@ -137,21 +150,21 @@ namespace CeManualPatcher.RenderRect
 
                 Widgets.Label(rect, item.stat.LabelCap);
 
-                //delete 
+                // Delete button
                 Rect rect1 = rect.RightPartPixels(rect.height);
                 if (Widgets.ButtonImage(rect1, TexButton.Delete))
                 {
-                    if (preChange != null) preChange();
+                    preChange?.Invoke();
 
                     stats.RemoveWhere(x => x.stat == item.stat);
                     break;
                 }
 
-                //field
+                // Field
                 Rect fieldRect = rect1.LeftAdjoin(100f);
                 WidgetsUtility.TextFieldOnChange<float>(fieldRect, ref item.value, newValue =>
                 {
-                    if (preChange != null) preChange();
+                    preChange?.Invoke();
                 });
 
                 TooltipHandler.TipRegion(rect, item.stat.description);

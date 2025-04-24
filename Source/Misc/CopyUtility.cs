@@ -12,22 +12,22 @@ namespace CeManualPatcher.Misc
     internal static class CopyUtility
     {
 
-        public static List<StatModifier> CopyStats(ThingDef thing)
+        public static List<StatModifier> CopyStats(List<StatModifier> statModifiers)
         {
-            if (thing == null || thing.statBases == null)
+            if (statModifiers == null)
             {
                 return null;
             }
 
-            List<StatModifier> statModifiers = new List<StatModifier>();
-            foreach (var item in thing.statBases)
+            List<StatModifier> copyStats = new List<StatModifier>();
+            foreach (var item in statModifiers)
             {
                 StatModifier statModifier = new StatModifier();
                 PropUtility.CopyPropValue(item, statModifier);
-                statModifiers.Add(statModifier);
+                copyStats.Add(statModifier);
             }
 
-            return statModifiers;
+            return copyStats;
         }
 
         public static VerbProperties CopyVerb(ThingDef thing, bool convertToCE = false)

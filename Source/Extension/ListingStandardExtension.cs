@@ -100,7 +100,6 @@ namespace CeManualPatcher.Extension
         {
             listing.FieldLineOnChange(label, ref value, (x) => { }, fieldWidth, tooltip, indent, min, max);
         }
-
         public static void FieldLineOnChange<T>(this Listing_Standard listing, string label, ref T value, Action<T> onChange, float fieldWidth = 100f, string tooltip = null, float indent = 0, float min = float.MinValue, float max = float.MaxValue) where T : struct
         {
             Rect rect = listing.GetRect(Text.LineHeight);
@@ -115,7 +114,11 @@ namespace CeManualPatcher.Extension
                 bool temp = (bool)(object)value;
 
                 Widgets.Checkbox(new Vector2(fieldRect.x, fieldRect.y), ref temp);
-                value = (T)(object)temp;
+                if(temp != (bool)(object)value)
+                {
+                    onChange((T)(object)temp);
+                    value = (T)(object)temp;
+                }
             }
             else
             {
@@ -137,8 +140,7 @@ namespace CeManualPatcher.Extension
 
             listing.Gap(listing.verticalSpacing);
         }
-
-        public static void ButtonTextLine(this Listing_Standard listing, string label, string buttonLabel, Action onClick, float fieldWidth = 100f, string tooltip = null, float indent = 0)
+        public static void ButtonTextLine(this Listing_Standard listing, TaggedString label, string buttonLabel, Action onClick, float fieldWidth = 100f, string tooltip = null, float indent = 0)
         {
             Rect rect = listing.GetRect(Text.LineHeight);
             rect.x += indent;
@@ -224,6 +226,22 @@ namespace CeManualPatcher.Extension
                 Log.Error($"Unsupported type {type} for field {fieldName}");
             }
 
+        }
+
+        public static void LabelLine(this Listing_Standard listing, TaggedString label, string tooltip = null, float indent = 0f)
+        {
+            Rect rect = listing.GetRect(Text.LineHeight);
+            rect.x += indent;
+            rect.width -= indent;
+
+            Widgets.Label(rect, label);
+            Widgets.DrawHighlightIfMouseover(rect);
+            if (!tooltip.NullOrEmpty())
+            {
+                TooltipHandler.TipRegion(rect, tooltip);
+            }
+
+            listing.Gap(listing.verticalSpacing);
         }
 
     }

@@ -31,18 +31,35 @@ namespace CeManualPatcher.Manager
             Rect rightRect = rect.RightPart(0.7f);
             leftRect.width -= 20f;
 
-            rect_AmmoList.DoWindowContents(leftRect);
-            rect_AmmoInfo.DoWindowContents(rightRect);
+            try
+            {
+                rect_AmmoList.DoWindowContents(leftRect);
+            }
+            catch (Exception e)
+            {
+                Log.ErrorOnce($"[CeManualPatcher] AmmoManager ammo list error: {e}", e.GetHashCode());
+            }
+
+            try
+            {
+                rect_AmmoInfo.DoWindowContents(rightRect);
+            }
+            catch (Exception e)
+            {
+                Log.ErrorOnce($"[CeManualPatcher] AmmoManager ammo info error: {e}", e.GetHashCode());
+            }
+
         }
 
         protected override void NewPatch(ref PatchBase<ThingDef> patch, ThingDef def)
         {
+            //Do nothing
         }
 
 
         public AmmoPatch GetAmmoPatch(MP_Ammo ammo)
         {
-            AmmoPatch result =(AmmoPatch)patches.Find(x => x?.targetDef == ammo.projectile);
+            AmmoPatch result = (AmmoPatch)patches.Find(x => x?.targetDef == ammo.projectile);
             if (result == null)
             {
                 try
@@ -67,9 +84,6 @@ namespace CeManualPatcher.Manager
         {
             return patches.Any(x => x.targetDef == ammo.projectile);
         }
-
-
-
         public override void ExposeData()
         {
             base.ExposeData();
@@ -81,7 +95,7 @@ namespace CeManualPatcher.Manager
             //        ammoPatches = new List<AmmoPatch>();
             //    }
             //}
-            if(Scribe.mode == LoadSaveMode.LoadingVars)
+            if (Scribe.mode == LoadSaveMode.LoadingVars)
             {
                 List<AmmoPatch> ammoPatches = new List<AmmoPatch>();
                 Scribe_Collections.Look(ref ammoPatches, "ammoPatches", LookMode.Deep);

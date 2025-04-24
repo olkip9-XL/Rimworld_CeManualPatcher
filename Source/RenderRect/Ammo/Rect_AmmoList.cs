@@ -124,7 +124,14 @@ namespace CeManualPatcher.RenderRect.Ammo
             {
                 foreach (var item in filteredAmmoSet)
                 {
-                    DrawRow(listing, item);
+                    try
+                    {
+                        DrawRow(listing, item);
+                    }
+                    catch (Exception e)
+                    {
+                        Log.ErrorOnce($"[CeManualPatcher] Error while drawing Ammo tab {item?.DefName ?? "null"} from {item?.sourceModName ?? "null"} : {e}", e.GetHashCode());
+                    }
                 }
             });
 

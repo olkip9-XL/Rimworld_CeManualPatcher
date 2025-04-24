@@ -2,6 +2,7 @@
 using RimWorld;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -85,18 +86,6 @@ namespace CeManualPatcher.Saveable.Weapon
             originalData.AddRange(WeaponTags);
         }
 
-        //public override void PostLoadInit(ThingDef thingDef)
-        //{
-        //    this.thingDef = thingDef;
-        //    if (WeaponTags == null)
-        //    {
-        //        return;
-        //    }
-
-        //    InitOriginalData();
-        //    this.Apply();
-        //}
-
         protected override bool NullCheck()
         {
             return this.WeaponTags == null;
@@ -104,63 +93,107 @@ namespace CeManualPatcher.Saveable.Weapon
 
 
         //help function
-        public static void SetBipod(ThingDef thing, BipodCategoryDef bipodDef)
+
+        //bipod
+        public static void SetBipod(List<string> weaponTags, BipodCategoryDef bipodDef)
         {
-            if (thing == null && thing.weaponTags == null)
+            if (weaponTags == null)
             {
                 return;
             }
 
-            thing.weaponTags.RemoveWhere(x => MP_Options.BipodId.Contains(x));
+            weaponTags.RemoveWhere(x => MP_Options.BipodId.Contains(x));
             if (bipodDef != null)
-                thing.weaponTags.Add(bipodDef.bipod_id);
+                weaponTags.Add(bipodDef.bipod_id);
         }
-
-        public static BipodCategoryDef GetBipod(ThingDef thing)
+        public static BipodCategoryDef GetBipod(List<string> weaponTags)
         {
-            if (thing == null || thing.weaponTags.NullOrEmpty())
+            if (weaponTags.NullOrEmpty())
             {
                 return null;
             }
 
-            string bipodId = thing.weaponTags.FirstOrDefault(x => MP_Options.BipodId.Contains(x));
+            string bipodId = weaponTags.FirstOrDefault(x => MP_Options.BipodId.Contains(x));
 
             return MP_Options.bipodCategoryDefs.FirstOrDefault(x => x.bipod_id == bipodId);
         }
-        public static bool GetOneHandWeapon(ThingDef thing)
+
+        //One hand
+        public static bool GetOneHandWeapon(List<string> weaponTags)
         {
-            if (thing == null || thing.weaponTags == null)
+            if (weaponTags == null)
             {
                 return false;
             }
-            return thing.weaponTags.Contains(tagOneHandWeaponCE);
+            return weaponTags.Contains(tagOneHandWeaponCE);
         }
-        public static void SetOneHandWeapon(ThingDef thing, bool isOneHand)
+        public static void SetOneHandWeapon(List<string> weaponTags, bool isOneHand)
         {
-            if (thing == null) return;
+            if (weaponTags == null)
+                return;
 
             // Update tag
             if (isOneHand)
-                thing.weaponTags.AddDistinct(tagOneHandWeaponCE);
+                weaponTags.AddDistinct(tagOneHandWeaponCE);
             else
-                thing.weaponTags.Remove(tagOneHandWeaponCE);
+                weaponTags.Remove(tagOneHandWeaponCE);
 
             // Update stat
-            var stat = thing.statBases.FirstOrDefault(x => x.stat == CE_StatDefOf.OneHandedness);
-            if (stat == null && isOneHand)
-            {
-                thing.statBases.Add(new StatModifier
-                {
-                    stat = CE_StatDefOf.OneHandedness,
-                    value = 1f
-                });
-            }
-            else if (stat != null)
-            {
-                stat.value = isOneHand ? 1f : 0f;
-            }
+            //var stat = thing.statBases.FirstOrDefault(x => x.stat == CE_StatDefOf.OneHandedness);
+            //if (stat == null && isOneHand)
+            //{
+            //    thing.statBases.Add(new StatModifier
+            //    {
+            //        stat = CE_StatDefOf.OneHandedness,
+            //        value = 1f
+            //    });
+            //}
+            //else if (stat != null)
+            //{
+            //    stat.value = isOneHand ? 1f : 0f;
+            //}
         }
 
+        //combat role
+        public static ReadOnlyCollection<string> combatRoleTags = new List<string>()
+        {
+            "CE_AI_AssaultWeapon",
+            "CE_AI_Pistol",
+            "CE_AI_Rifle",
+            "CE_AI_Suppressive",
+            "CE_AI_Grenade",
+            "CE_AI_Nonlethal",
+            "CE_AI_Launcher"
+        }.AsReadOnly();
+        public static string GetCombatRole(List<string> weaponTags)
+        {
+            if (weaponTags == null)
+            {
+                return null;
+            }
+
+            string combatRole = weaponTags.FirstOrDefault(x => combatRoleTags.Contains(x));
+            if (combatRole == null)
+            {
+                return null;
+            }
+            return combatRole;
+        }
+
+        public static void SetCombatRole(List<string> weaponTags, string combatRole)
+        {
+            if (weaponTags == null)
+            {
+                return;
+            }
+            // Remove all combat role tags
+            weaponTags.RemoveAll(x => combatRoleTags.Contains(x));
+            // Add the new combat role tag
+            if (combatRole != null)
+            {
+                weaponTags.Add(combatRole);
+            }
+        }
 
     }
 }

@@ -76,19 +76,6 @@ namespace CeManualPatcher.Misc
             }
         }
 
-        //public static void CreateCEPatch(ThingDef thingDef)
-        //{
-        //    string folderPath = Path.Combine(ceFoldersPath, thingDef.modContentPack.Name);
-
-        //    if (!Directory.Exists(folderPath))
-        //    {
-        //        Directory.CreateDirectory(folderPath);
-        //    }
-
-        //    string filePath = Path.Combine(folderPath, thingDef.defName + ".xml");
-
-        //    CEPatchManager.instance.GetPatcher(thingDef)?.ExportToFile(filePath);
-        //}
 
         public static void AddChildElement(XmlDocument doc, XmlElement parent, string name, string value)
         {
@@ -96,7 +83,6 @@ namespace CeManualPatcher.Misc
             element.InnerText = value;
             parent.AppendChild(element);
         }
-
 
         public static XmlDocument CreateBasePatchDoc(ref XmlElement rootElement)
         {
@@ -158,7 +144,8 @@ namespace CeManualPatcher.Misc
             XmlElement valueElement = xmlDoc.CreateElement("value");
             liElement.AppendChild(valueElement);
 
-            XmlElement partialArmorExtElement = xmlDoc.CreateElement("CombatExtended.PartialArmorExt");
+            XmlElement partialArmorExtElement = xmlDoc.CreateElement("li");
+            partialArmorExtElement.SetAttribute("Class", "CombatExtended.PartialArmorExt");
             valueElement.AppendChild(partialArmorExtElement);
 
             XmlElement statsElement = xmlDoc.CreateElement("stats");
@@ -187,8 +174,6 @@ namespace CeManualPatcher.Misc
             }
 
         }
-
-
         public static void Replace_Tools(XmlDocument xmlDoc, XmlElement rootElement, string defName, List<Tool> tools)
         {
             if (tools.NullOrEmpty())
@@ -348,7 +333,7 @@ namespace CeManualPatcher.Misc
                     }
                 }
             }
-            
+
             void MakeAmmoUser()
             {
                 //ammo user
@@ -374,7 +359,7 @@ namespace CeManualPatcher.Misc
                     }
                 }
             }
-          
+
             void MakeFireMode()
             {
 
@@ -401,7 +386,7 @@ namespace CeManualPatcher.Misc
                     }
                 }
             }
-       
+
             void MakeWeaponTags()
             {
                 //weapontags
@@ -417,5 +402,48 @@ namespace CeManualPatcher.Misc
             }
         }
 
+        public static void Replace_StatOffsets(XmlDocument xmlDoc, XmlElement rootElement, string defName, List<StatModifier> statOffsets)
+        {
+            if (statOffsets == null)
+                return;
+
+
+            XmlElement liElement = xmlDoc.CreateElement("li");
+            liElement.SetAttribute("Class", "PatchOperationConditional");
+            AddChildElement(xmlDoc, liElement, "xpath", $"Defs/ThingDef[defName=\"{defName}\"]");
+
+            XmlElement matchElement = xmlDoc.CreateElement("match");
+            liElement.AppendChild(matchElement);
+            AddChildElement(xmlDoc, matchElement, "xpath", $"Defs/ThingDef[defName=\"{defName}\"]/equippedStatOffsets");
+
+
+            //success
+            XmlElement successElement = xmlDoc.CreateElement("success");
+            XmlElement xmlElement = xmlDoc.CreateElement("Operation");
+            xmlElement.SetAttribute("Class", "PatchOperationReplace");
+            AddChildElement(xmlDoc, xmlElement, "xpath", $"Defs/ThingDef[defName=\"{defName}\"]/equippedStatOffsets");
+            CreateValue(xmlElement);
+
+            //fail
+            XmlElement failElement = xmlDoc.CreateElement("fail");
+            XmlElement xmlElement2 = xmlDoc.CreateElement("Operation");
+            xmlElement2.SetAttribute("Class", "PatchOperationAdd");
+            AddChildElement(xmlDoc, xmlElement2, "xpath", $"Defs/ThingDef[defName=\"{defName}\"]");
+            CreateValue(xmlElement2);
+
+            void CreateValue(XmlElement operationElement)
+            {
+                XmlElement valueElement = xmlDoc.CreateElement("value");
+                operationElement.AppendChild(valueElement);
+
+                XmlElement statElement = xmlDoc.CreateElement("equippedStatOffsets");
+                valueElement.AppendChild(statElement);
+                foreach (var stat in statOffsets)
+                {
+                    AddChildElement(xmlDoc, statElement, stat.stat.defName, stat.value.ToString());
+                }
+            }
+
+        }
     }
 }

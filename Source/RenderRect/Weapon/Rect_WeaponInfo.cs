@@ -7,7 +7,6 @@ using CeManualPatcher.Saveable;
 using CeManualPatcher.Saveable.Weapon;
 using CombatExtended;
 using CombatExtended.Compatibility;
-using KTrie;
 using RimWorld;
 using System;
 using System.Collections.Generic;
@@ -46,20 +45,29 @@ namespace CeManualPatcher
 
             DrawHead(listing);
 
+            Action preChange = delegate
+            {
+                manager.GetPatch(curWeaponDef);
+            };
+
             WidgetsUtility.ScrollView(listing.GetRect(rect.height - listing.CurHeight - Text.LineHeight - 0.1f), ref scrollPosition, ref innerHeight, (innerListing) =>
             {
-                RenderRectUtility.DrawStats(innerListing, curWeaponDef.statBases, MP_Options.statDefs_Weapon, delegate
-                {
-                    manager.GetWeaponPatch(curWeaponDef);
-                });
-                DrawWeaponTags(innerListing, curWeaponDef.weaponTags);
+                RenderRectUtility.DrawStats(innerListing, ref curWeaponDef.statBases, MP_Options.statDefs_Weapon, preChange);
 
-                DrawVebs(innerListing, curWeaponDef.Verbs.FirstOrDefault(), curWeaponDef.GetCompProperties<CompProperties_AmmoUser>(), curWeaponDef.weaponTags);
-                DrawTools(innerListing, curWeaponDef.tools);
+                RenderRectUtility.DrawStats(innerListing, ref curWeaponDef.equippedStatOffsets, MP_Options.statDefs_WeaponOffset, delegate
+                {
+                    manager.GetPatch(curWeaponDef);
+                }, headLabel: "MP_StatOffset".Translate());
+
+                DrawWeaponTags(innerListing, curWeaponDef.weaponTags, preChange);
+
+                DrawVebs(innerListing, curWeaponDef.Verbs.FirstOrDefault(), curWeaponDef.GetCompProperties<CompProperties_AmmoUser>(), preChange);
+                DrawTools(innerListing, curWeaponDef.tools, preChange);
                 DrawComps(innerListing,
                     curWeaponDef.GetCompProperties<CompProperties_FireModes>(),
                     curWeaponDef.GetCompProperties<CompProperties_AmmoUser>(),
-                    curWeaponDef.Verbs.FirstOrDefault());
+                    curWeaponDef.Verbs.FirstOrDefault(),
+                    preChange);
             });
 
             //control pannel
@@ -68,7 +76,7 @@ namespace CeManualPatcher
             listing.End();
         }
 
-        public static void DrawWeaponTags(Listing_Standard listing, List<string> weaponTags)
+        public static void DrawWeaponTags(Listing_Standard listing, List<string> weaponTags, Action preChange)
         {
             if (weaponTags == null)
                 return;
@@ -78,16 +86,16 @@ namespace CeManualPatcher
             listing.Label("<b>" + "MP_WeaponTags".Translate() + "</b>");
 
             //isOneHand
-            bool isOnehand = WeaponTagsSaveable.GetOneHandWeapon(curWeaponDef);
+            bool isOnehand = WeaponTagsSaveable.GetOneHandWeapon(weaponTags);
             listing.FieldLineOnChange(CE_StatDefOf.OneHandedness.LabelCap, ref isOnehand, (x) =>
             {
-                manager.GetWeaponPatch(curWeaponDef);
-                WeaponTagsSaveable.SetOneHandWeapon(curWeaponDef, x);
+                preChange?.Invoke();
+                WeaponTagsSaveable.SetOneHandWeapon(weaponTags, x);
             }, indent: 20f);
 
             //bipod
-            BipodCategoryDef bipodCategoryDef = WeaponTagsSaveable.GetBipod(curWeaponDef);
-            listing.ButtonTextLine(CE_StatDefOf.BipodStats.LabelCap, WeaponTagsSaveable.GetBipod(curWeaponDef)?.label ?? "MP_Null".Translate(), () =>
+            BipodCategoryDef bipodCategoryDef = WeaponTagsSaveable.GetBipod(weaponTags);
+            listing.ButtonTextLine(CE_StatDefOf.BipodStats.LabelCap, WeaponTagsSaveable.GetBipod(weaponTags)?.label ?? "MP_Null".Translate(), () =>
             {
                 List<BipodCategoryDef> list = new List<BipodCategoryDef>();
 
@@ -98,10 +106,57 @@ namespace CeManualPatcher
                     (BipodCategoryDef x) => x?.label ?? "MP_Null".Translate(),
                     (BipodCategoryDef x) => delegate ()
                     {
-                        manager.GetWeaponPatch(curWeaponDef);
-                        WeaponTagsSaveable.SetBipod(curWeaponDef, x);
+                        preChange?.Invoke();
+                        WeaponTagsSaveable.SetBipod(weaponTags, x);
                     });
             }, indent: 20f);
+
+            //combat role
+            string roleTag = WeaponTagsSaveable.GetCombatRole(weaponTags);
+            listing.ButtonTextLine("MP_CombatRole".Translate(), roleTag ?? "MP_Null".Translate(), () =>
+            {
+                List<string> list = new List<string>();
+                list.Add(null);
+                list.AddRange(WeaponTagsSaveable.combatRoleTags);
+
+                FloatMenuUtility.MakeMenu(list,
+                    (string x) => x ?? "MP_Null".Translate(),
+                    (string x) => delegate ()
+                    {
+                        preChange?.Invoke();
+                        WeaponTagsSaveable.SetCombatRole(weaponTags, x);
+                    });
+            }, indent: 20f);
+
+            //All weaponTags
+            listing.ButtonImageLine("<color=#6b717a>" + "MP_WeaponTags".Translate() + "</color>", TexButton.Add, () =>
+            {
+                List<string> tags = new List<string>(MP_Options.weaponTags);
+                tags = tags.Except(weaponTags).ToList();
+
+                FloatMenuUtility.MakeMenu(tags,
+                    (string x) => x,
+                    (string x) => delegate ()
+                    {
+                        preChange?.Invoke();
+                        weaponTags.Add(x);
+                    });
+            }, indent: 20f);
+
+            foreach (var item in weaponTags)
+            {
+                bool needBreak = false;
+                listing.ButtonImageLine("<color=#6b717a>" + item + "</color>", TexButton.Delete, () =>
+                {
+                    preChange?.Invoke();
+                    weaponTags.Remove(item);
+                    needBreak = true;
+                }, indent: 40f);
+                if(needBreak)
+                {
+                    break;
+                }
+            }
 
         }
 
@@ -187,7 +242,7 @@ namespace CeManualPatcher
                 {
                     if (copiedThing != null)
                     {
-                        manager.GetWeaponPatch(curWeaponDef);
+                        manager.GetPatch(curWeaponDef);
                         CopyThing();
                         copiedThing = null;
                         //Messages.Message("MP_Paste".Translate(curWeaponDef.defName), MessageTypeDefOf.NeutralEvent);
@@ -206,7 +261,10 @@ namespace CeManualPatcher
             }
 
             //stat
-            curWeaponDef.statBases = CopyUtility.CopyStats(copiedThing);
+            curWeaponDef.statBases = CopyUtility.CopyStats(copiedThing.statBases);
+
+            //stat Offset
+            curWeaponDef.equippedStatOffsets = CopyUtility.CopyStats(copiedThing.equippedStatOffsets);
 
             //verb
             if (!curWeaponDef.Verbs.NullOrEmpty() && !copiedThing.Verbs.NullOrEmpty())
@@ -270,7 +328,7 @@ namespace CeManualPatcher
             return true;
         }
 
-        public static void DrawVebs(Listing_Standard listing, VerbProperties verb, CompProperties_AmmoUser ammoUser, List<string> weaponTags)
+        public static void DrawVebs(Listing_Standard listing, VerbProperties verb, CompProperties_AmmoUser ammoUser, Action preChange)
         {
             if (verb == null)
             {
@@ -295,7 +353,7 @@ namespace CeManualPatcher
                     (Type x) => x.ToString(),
                     (Type x) => delegate ()
                     {
-                        manager.GetWeaponPatch(curWeaponDef);
+                        preChange?.Invoke();
                         props.verbClass = x;
                     });
             }, indent: 20f);
@@ -308,7 +366,7 @@ namespace CeManualPatcher
                     (RecoilPattern x) => x.ToString(),
                     (RecoilPattern x) => delegate ()
                     {
-                        manager.GetWeaponPatch(curWeaponDef);
+                        preChange?.Invoke();
                         props.recoilPattern = x;
                     });
 
@@ -317,7 +375,7 @@ namespace CeManualPatcher
             //if (props.defaultProjectile != null)
             listing.ButtonX("MP_DefaultProjectile".Translate(), 250f, props.defaultProjectile?.LabelCap ?? "null", () =>
             {
-                manager.GetWeaponPatch(curWeaponDef);
+                preChange?.Invoke();
                 Dialog_SetDefaultProjectile dialog = new Dialog_SetDefaultProjectile(props, ammoUser);
                 Find.WindowStack.Add(dialog);
             }, indent: 20f);
@@ -329,7 +387,7 @@ namespace CeManualPatcher
                     (SoundDef x) => x.defName,
                     (SoundDef x) => delegate ()
                     {
-                        manager.GetWeaponPatch(curWeaponDef);
+                        preChange?.Invoke();
                         props.soundCast = x;
                     });
             }, indent: 20f);
@@ -340,7 +398,7 @@ namespace CeManualPatcher
                     (SoundDef x) => x.defName,
                     (SoundDef x) => delegate ()
                     {
-                        manager.GetWeaponPatch(curWeaponDef);
+                        preChange?.Invoke();
                         props.soundCastTail = x;
                     });
             }, indent: 20f);
@@ -349,11 +407,11 @@ namespace CeManualPatcher
             {
                 listing.FieldLineReflexion($"MP_Verbproperties.{item}".Translate(), item, props, newValue =>
                 {
-                    manager.GetWeaponPatch(curWeaponDef);
+                    preChange?.Invoke();
                 }, indent: 20f);
             }
         }
-        public static void DrawTools(Listing_Standard listing, List<Tool> tools)
+        public static void DrawTools(Listing_Standard listing, List<Tool> tools, Action preChange)
         {
             if (tools.NullOrEmpty())
             {
@@ -368,7 +426,7 @@ namespace CeManualPatcher
             Widgets.Label(rect, "<b>" + "MP_Tools".Translate() + "</b>");
             if (Widgets.ButtonImage(addRect, TexButton.Add))
             {
-                manager.GetWeaponPatch(curWeaponDef);
+                preChange?.Invoke();
                 Find.WindowStack.Add(new Dialog_AddTool(tools));
             }
 
@@ -381,7 +439,7 @@ namespace CeManualPatcher
                 //label
                 WidgetsUtility.LabelChange(subRect, ref item.label, item.GetHashCode(), onClick: () =>
                 {
-                    manager.GetWeaponPatch(curWeaponDef);
+                    preChange?.Invoke();
                 });
 
                 if (!(item is ToolCE))
@@ -396,7 +454,7 @@ namespace CeManualPatcher
                 Rect removeRect = subRect.RightPartPixels(subRect.height);
                 if (Widgets.ButtonImage(removeRect, TexButton.Delete))
                 {
-                    manager.GetWeaponPatch(curWeaponDef);
+                    preChange?.Invoke();
                     tools.Remove(item);
                     return;
                 }
@@ -406,10 +464,10 @@ namespace CeManualPatcher
                 Widgets.Label(idRect, idString);
 
                 //内容
-                DrawToolContent(listing, toolCE);
+                DrawToolContent(listing, toolCE, preChange);
             }
         }
-        public static void DrawToolContent(Listing_Standard listing, ToolCE tool, float indent = 20f)
+        public static void DrawToolContent(Listing_Standard listing, ToolCE tool,Action preChange, float indent = 20f)
         {
             if (tool == null)
             {
@@ -417,16 +475,16 @@ namespace CeManualPatcher
             }
 
             //内容
-            DrawCapacities(listing, tool);
-            DrawSurpriseAttack(listing, tool);
-            DrawExtraMeleeDamage(listing, tool);
+            DrawCapacities(listing, tool, preChange);
+            DrawSurpriseAttack(listing, tool, preChange);
+            DrawExtraMeleeDamage(listing, tool, preChange);
             listing.ButtonX("MP_LinkedBodyPartsGroup".Translate(), 100f, tool.linkedBodyPartsGroup?.label ?? "null", () =>
             {
                 FloatMenuUtility.MakeMenu(MP_Options.bodyPartGroupDefs,
                     (BodyPartGroupDef x) => $"{x.LabelCap} ({x.defName})",
                     (BodyPartGroupDef x) => delegate ()
                     {
-                        manager.GetWeaponPatch(curWeaponDef);
+                        preChange?.Invoke();
                         tool.linkedBodyPartsGroup = x;
                         Messages.Message(x.defName, MessageTypeDefOf.SilentInput);
                     });
@@ -436,11 +494,11 @@ namespace CeManualPatcher
             {
                 listing.FieldLineReflexion($"MP_Tools.{fieldName}".Translate(), fieldName, tool, newValue =>
                 {
-                    manager.GetWeaponPatch(curWeaponDef);
+                    preChange?.Invoke();
                 }, indent: indent);
             }
         }
-        private static void DrawCapacities(Listing_Standard listing, ToolCE tool)
+        private static void DrawCapacities(Listing_Standard listing, ToolCE tool, Action preChange)
         {
             Rect rect = listing.GetRect(Text.LineHeight);
             rect.x += 20f;
@@ -457,7 +515,7 @@ namespace CeManualPatcher
                     (ToolCapacityDef x) => x.label,
                     (ToolCapacityDef x) => delegate ()
                     {
-                        manager.GetWeaponPatch(curWeaponDef);
+                        preChange?.Invoke();
                         tool.capacities.Add(x);
                     });
             }
@@ -474,13 +532,13 @@ namespace CeManualPatcher
                 Rect removeRect = subRect.RightPartPixels(subRect.height);
                 if (Widgets.ButtonImage(removeRect, TexButton.Delete))
                 {
-                    manager.GetWeaponPatch(curWeaponDef);
+                    preChange?.Invoke();
                     tool.capacities.Remove(item);
                     break;
                 }
             }
         }
-        private static void DrawSurpriseAttack(Listing_Standard listing, ToolCE tool)
+        private static void DrawSurpriseAttack(Listing_Standard listing, ToolCE tool, Action preChange)
         {
             Rect rect = listing.GetRect(Text.LineHeight);
             rect.x += 20f;
@@ -496,7 +554,7 @@ namespace CeManualPatcher
                     (DamageDef x) => x.label,
                     (DamageDef x) => delegate ()
                     {
-                        manager.GetWeaponPatch(curWeaponDef);
+                        preChange?.Invoke();
 
                         if (tool.surpriseAttack == null)
                         {
@@ -519,9 +577,9 @@ namespace CeManualPatcher
 
             foreach (var item in tool.surpriseAttack.extraMeleeDamages)
             {
-                if (DrawExtraDamageRow(listing, item, indent: 40f))
+                if (DrawExtraDamageRow(listing, item,preChange, indent: 40f))
                 {
-                    manager.GetWeaponPatch(curWeaponDef);
+                    preChange?.Invoke();
                     tool.surpriseAttack.extraMeleeDamages.Remove(item);
                     return;
                 }
@@ -529,8 +587,7 @@ namespace CeManualPatcher
 
             listing.Gap(listing.verticalSpacing);
         }
-
-        private static void DrawExtraMeleeDamage(Listing_Standard listing, ToolCE tool)
+        private static void DrawExtraMeleeDamage(Listing_Standard listing, ToolCE tool, Action preChange)
         {
             Rect rect = listing.GetRect(Text.LineHeight);
             rect.x += 20f;
@@ -547,7 +604,7 @@ namespace CeManualPatcher
                     (DamageDef x) => x.label,
                     (DamageDef x) => delegate ()
                     {
-                        manager.GetWeaponPatch(curWeaponDef);
+                        preChange?.Invoke();
 
                         if (tool.extraMeleeDamages == null)
                         {
@@ -569,9 +626,9 @@ namespace CeManualPatcher
 
             foreach (var item in tool.extraMeleeDamages)
             {
-                if (DrawExtraDamageRow(listing, item, indent: 40f))
+                if (DrawExtraDamageRow(listing, item, preChange, indent: 40f))
                 {
-                    manager.GetWeaponPatch(curWeaponDef);
+                    preChange?.Invoke();
                     tool.extraMeleeDamages.Remove(item);
                     return;
                 }
@@ -579,8 +636,7 @@ namespace CeManualPatcher
 
             listing.Gap(listing.verticalSpacing);
         }
-
-        private static bool DrawExtraDamageRow(Listing_Standard listing, ExtraDamage extraDamage, float indent = 20f)
+        private static bool DrawExtraDamageRow(Listing_Standard listing, ExtraDamage extraDamage,Action preChange, float indent = 20f)
         {
             Rect rect = listing.GetRect(Text.LineHeight);
             rect.x += indent;
@@ -602,7 +658,7 @@ namespace CeManualPatcher
             Rect rect1 = removeRect.LeftAdjoin(100f);
             WidgetsUtility.TextFieldOnChange<float>(rect1, ref extraDamage.chance, newValue =>
             {
-                manager.GetWeaponPatch(curWeaponDef);
+                preChange?.Invoke();
             });
             Rect rect2 = rect1.LeftAdjoin(Text.CalcSize(chanceLabel).x);
             Widgets.Label(rect2, chanceLabel);
@@ -612,7 +668,7 @@ namespace CeManualPatcher
             Rect rect3 = rect2.LeftAdjoin(100f);
             WidgetsUtility.TextFieldOnChange<float>(rect3, ref extraDamage.amount, newValue =>
             {
-                manager.GetWeaponPatch(curWeaponDef);
+                preChange?.Invoke();
             });
             Rect rect4 = rect3.LeftAdjoin(Text.CalcSize(amountLabel).x);
             Widgets.Label(rect4, amountLabel);
@@ -621,8 +677,7 @@ namespace CeManualPatcher
 
             return false;
         }
-
-        public static void DrawComps(Listing_Standard listing, CompProperties_FireModes fireModes, CompProperties_AmmoUser ammoUser, VerbProperties verb)
+        public static void DrawComps(Listing_Standard listing, CompProperties_FireModes fireModes, CompProperties_AmmoUser ammoUser, VerbProperties verb, Action preChange)
         {
             //CompFireModes
             if (fireModes != null)
@@ -637,7 +692,7 @@ namespace CeManualPatcher
                         (AimMode x) => x.ToString(),
                         (AimMode x) => delegate ()
                         {
-                            manager.GetWeaponPatch(curWeaponDef);
+                            preChange?.Invoke();
                             fireModes.aiAimMode = x;
                         });
                 }, indent: 20f);
@@ -646,7 +701,7 @@ namespace CeManualPatcher
                 {
                     listing.FieldLineReflexion($"MP_FireModes.{item}".Translate(), item, fireModes, newValue =>
                     {
-                        manager.GetWeaponPatch(curWeaponDef);
+                        preChange?.Invoke();
                     }, indent: 20f);
                 }
             }
@@ -659,7 +714,7 @@ namespace CeManualPatcher
 
                 listing.ButtonX("MP_AmmoSet".Translate(), 200f, ammoUser.ammoSet?.LabelCap ?? "null", () =>
                 {
-                    manager.GetWeaponPatch(curWeaponDef);
+                    preChange?.Invoke();
                     Find.WindowStack.Add(new Dialog_SetDefaultProjectile(verb as VerbPropertiesCE, ammoUser));
                 }, indent: 20f);
 
@@ -667,7 +722,7 @@ namespace CeManualPatcher
                 {
                     listing.FieldLineReflexion($"MP_AmmoUser.{item}".Translate(), item, ammoUser, newValue =>
                     {
-                        manager.GetWeaponPatch(curWeaponDef);
+                        preChange?.Invoke();
                     }, indent: 20f);
                 }
             }

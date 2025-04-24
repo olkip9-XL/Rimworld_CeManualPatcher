@@ -1,6 +1,9 @@
-﻿using CeManualPatcher.Misc;
+﻿using CeManualPatcher.Manager;
+using CeManualPatcher.Misc;
+using CeManualPatcher.Misc.Manager;
 using CeManualPatcher.Saveable;
 using CeManualPatcher.Saveable.Apparel;
+using CeManualPatcher.Saveable.Weapon;
 using CombatExtended;
 using RimWorld;
 using System;
@@ -16,15 +19,12 @@ namespace CeManualPatcher.Patch
 {
     internal class ApparelPatch : PatchBase<ThingDef>
     {
-        //private string apparelDefString;
-        //public ThingDef apparelDef
-        //{
-        //    get => DefDatabase<ThingDef>.GetNamed(apparelDefString, false);
-        //    set => apparelDefString = value?.defName ?? "Null";
-        //}
 
-        private StatSaveable statSaveable;
+        private StatSaveable stats;
+        private StatOffsetSaveable statOffsets;
         private PartialArmorExtSaveable partialArmorExtSaveable;
+
+        private ApparelManager manager => ApparelManager.instance;
 
         public ApparelPatch() { }
         public ApparelPatch(ThingDef apparelDef)
@@ -36,7 +36,8 @@ namespace CeManualPatcher.Patch
 
             this.targetDef = apparelDef;
 
-            statSaveable = new StatSaveable(apparelDef);
+            stats = new StatSaveable(apparelDef);
+            statOffsets = new StatOffsetSaveable(apparelDef);
             partialArmorExtSaveable = new PartialArmorExtSaveable(apparelDef);
         }
 
@@ -44,7 +45,8 @@ namespace CeManualPatcher.Patch
         {
             base.ExposeData();
             //Scribe_Values.Look(ref apparelDefString, "apparelDef");
-            Scribe_Deep.Look(ref statSaveable, "statBase");
+            Scribe_Deep.Look(ref stats, "statBase");
+            Scribe_Deep.Look(ref statOffsets, "statOffsets");
             Scribe_Deep.Look(ref partialArmorExtSaveable, "partialArmorExt");
 
             if (Scribe.mode == LoadSaveMode.LoadingVars)
@@ -65,13 +67,20 @@ namespace CeManualPatcher.Patch
                 return;
             }
 
-            statSaveable?.PostLoadInit(targetDef);
+            stats?.PostLoadInit(targetDef);
+            statOffsets?.PostLoadInit(targetDef);
             partialArmorExtSaveable?.PostLoadInit(targetDef);
+
+            if (stats != null)
+            {
+                stats = new StatSaveable(targetDef);
+            }
         }
 
         public override void Reset()
         {
-            statSaveable?.Reset();
+            stats?.Reset();
+            statOffsets?.Reset();
             partialArmorExtSaveable?.Reset();
         }
 
@@ -87,11 +96,12 @@ namespace CeManualPatcher.Patch
             string filePath = Path.Combine(folderPath, targetDef.defName + ".xml");
 
             // 创建XML文档
-            XmlElement rootPatchElement = null; 
+            XmlElement rootPatchElement = null;                                                                                                                                                                           
             XmlDocument xmlDoc = XMLUtility.CreateBasePatchDoc(ref rootPatchElement);
 
             XMLUtility.Replace_StatBase(xmlDoc, rootPatchElement, targetDef.defName, targetDef.statBases);
             XMLUtility.AddModExt_PartialArmor(xmlDoc, rootPatchElement, targetDef.defName, targetDef.GetModExtension<PartialArmorExt>());
+            XMLUtility.Replace_StatOffsets(xmlDoc, rootPatchElement, targetDef.defName, targetDef.equippedStatOffsets);
 
             xmlDoc.Save(filePath);
         }

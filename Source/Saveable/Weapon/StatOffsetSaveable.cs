@@ -2,20 +2,19 @@
 using RimWorld;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Verse;
 
-namespace CeManualPatcher.Saveable
+namespace CeManualPatcher.Saveable.Weapon
 {
-    internal class StatSaveable : SaveableBase
+    internal class StatOffsetSaveable : SaveableBase
     {
         private Dictionary<string, float> modifierDic = new Dictionary<string, float>();
 
         //private
-        private List<StatModifier> statBases
+        private List<StatModifier> statOffsets
         {
             get
             {
@@ -23,30 +22,24 @@ namespace CeManualPatcher.Saveable
                 {
                     return null;
                 }
-                return thingDef.statBases;
+                return thingDef.equippedStatOffsets;
             }
         }
 
         private List<StatModifier> originalData = new List<StatModifier>();
         public List<StatModifier> OriginalStats => originalData;
 
-        public StatSaveable() { }
-        public StatSaveable(ThingDef thingDef) : base(thingDef)
+        public StatOffsetSaveable() { }
+        public StatOffsetSaveable(ThingDef thingDef) : base(thingDef)
         {
         }
-
-        protected override bool NullCheck()
-        {
-            return statBases.NullOrEmpty();
-        }
-
         public override void ExposeData()
         {
             if (Scribe.mode == LoadSaveMode.Saving &&
-                this.thingDef != null)
+               this.statOffsets != null)
             {
                 modifierDic.Clear();
-                foreach (var statModifier in this.thingDef.statBases)
+                foreach (var statModifier in this.statOffsets)
                 {
                     if (statModifier.stat != null)
                     {
@@ -55,7 +48,7 @@ namespace CeManualPatcher.Saveable
                 }
             }
 
-            Scribe_Collections.Look(ref modifierDic, "stats", LookMode.Value, LookMode.Value);
+            Scribe_Collections.Look(ref modifierDic, "statOffsets", LookMode.Value, LookMode.Value);
             if (Scribe.mode == LoadSaveMode.LoadingVars)
             {
                 if (modifierDic == null)
@@ -67,10 +60,10 @@ namespace CeManualPatcher.Saveable
 
         public override void Reset()
         {
-            if (thingDef == null)
+            if (this.thingDef == null)
                 return;
 
-            thingDef.statBases = this.originalData;
+            thingDef.equippedStatOffsets = this.originalData;
             InitOriginalData();
         }
 
@@ -78,7 +71,11 @@ namespace CeManualPatcher.Saveable
         {
             if (thingDef == null)
                 return;
-            thingDef.statBases.Clear();
+
+            if(!modifierDic.NullOrEmpty() && thingDef.equippedStatOffsets == null)
+                thingDef.equippedStatOffsets = new List<StatModifier>();
+
+            thingDef.equippedStatOffsets?.Clear();
             foreach (var item in modifierDic)
             {
                 StatModifier statModifier = new StatModifier()
@@ -87,20 +84,25 @@ namespace CeManualPatcher.Saveable
                     value = item.Value,
                 };
                 if (statModifier.stat != null)
-                    thingDef.statBases.Add(statModifier);
+                    thingDef.equippedStatOffsets.Add(statModifier);
             }
 
         }
 
-
         protected override void InitOriginalData()
         {
-            if (this.statBases == null)
+            if(this.thingDef == null)
                 return;
 
-            originalData = CopyUtility.CopyStats(thingDef.statBases);
+            if(thingDef.equippedStatOffsets.NullOrEmpty())
+            {
+                this.originalData = null;
+            }
+            else
+            {
+                originalData = CopyUtility.CopyStats(thingDef.equippedStatOffsets);
+            }
+
         }
-
-
     }
 }

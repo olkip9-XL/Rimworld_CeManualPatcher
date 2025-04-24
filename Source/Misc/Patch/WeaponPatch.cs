@@ -23,6 +23,8 @@ namespace CeManualPatcher.Patch
         //字段
         internal StatSaveable statBase;
 
+        internal StatOffsetSaveable statOffsets;
+
         internal VerbPropertiesCESaveable verbProperties;
 
         internal List<ToolCESaveable> tools = new List<ToolCESaveable>();
@@ -46,6 +48,7 @@ namespace CeManualPatcher.Patch
             targetDef = thingDef;
 
             statBase = new StatSaveable(thingDef);
+            statOffsets = new StatOffsetSaveable(thingDef);
 
             if (!thingDef.Verbs.NullOrEmpty() && thingDef.Verbs[0] is VerbPropertiesCE)
                 verbProperties = new VerbPropertiesCESaveable(thingDef);
@@ -98,6 +101,7 @@ namespace CeManualPatcher.Patch
             //Scribe_Values.Look(ref weaponDefString, "defName");
 
             Scribe_Deep.Look(ref statBase, "statBase");
+            Scribe_Deep.Look(ref statOffsets, "statOffsets");
             Scribe_Deep.Look(ref verbProperties, "verbProperties");
             Scribe_Deep.Look(ref ammoUser, "ammoUser");
             Scribe_Deep.Look(ref fireMode, "fireMode");
@@ -127,6 +131,7 @@ namespace CeManualPatcher.Patch
         public override void Reset()
         {
             statBase?.Reset();
+            statOffsets?.Reset();
             verbProperties?.Reset();
 
             if (targetDef.tools != null)
@@ -149,6 +154,8 @@ namespace CeManualPatcher.Patch
             {
                 this.statBase?.PostLoadInit(targetDef);
 
+                this.statOffsets?.PostLoadInit(targetDef);
+
                 this.verbProperties?.PostLoadInit(targetDef);
 
                 if (targetDef.tools != null)
@@ -161,13 +168,17 @@ namespace CeManualPatcher.Patch
                 this.ammoUser?.PostLoadInit(targetDef);
                 this.fireMode?.PostLoadInit(targetDef);
 
+                this.weaponTags?.PostLoadInit(targetDef);
+
+                //new add 
                 if (weaponTags == null && targetDef.weaponTags != null)
                 {
                     weaponTags = new WeaponTagsSaveable(targetDef);
                 }
-                else
+                
+                if(statOffsets == null)
                 {
-                    this.weaponTags?.PostLoadInit(targetDef);
+                    statOffsets = new StatOffsetSaveable(targetDef);
                 }
             }
         }

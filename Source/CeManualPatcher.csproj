@@ -107,6 +107,7 @@
     <Compile Include="Saveable\Comps\CompAmmoUserSaveable.cs" />
     <Compile Include="Saveable\Comps\CompFireModesSaveable.cs" />
     <Compile Include="Saveable\SaveableBase.cs" />
+    <Compile Include="Saveable\Weapon\StatOffsetSaveable.cs" />
     <Compile Include="Saveable\Weapon\StatSaveable.cs" />
     <Compile Include="Saveable\Weapon\ToolCESaveable.cs" />
     <Compile Include="Saveable\Weapon\VerbPropertiesCESaveable.cs" />

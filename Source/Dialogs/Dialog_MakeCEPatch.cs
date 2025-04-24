@@ -75,12 +75,13 @@ namespace CeManualPatcher.Dialogs
             (innerListing) =>
             {
 
-                //Rect_WeaponInfo.DrawStat(innerListing, patcher.stats);
-                RenderRectUtility.DrawStats(innerListing, patcher.stats, MP_Options.statDefs_Weapon, null);
+                RenderRectUtility.DrawStats(innerListing, ref patcher.stats, MP_Options.statDefs_Weapon, null);
+                RenderRectUtility.DrawStats(innerListing, ref patcher.statOffsets, MP_Options.statDefs_WeaponOffset, null, headLabel: "MP_StatOffset".Translate());
 
+                Rect_WeaponInfo.DrawWeaponTags(innerListing, patcher.weaponTags, null);
                 Rect_WeaponInfo.DrawVebs(innerListing, patcher.verbProperties, patcher.ammoUser, null);
-                Rect_WeaponInfo.DrawTools(innerListing, patcher.tools);
-                Rect_WeaponInfo.DrawComps(innerListing, patcher.fireMode, patcher.ammoUser, patcher.verbProperties);
+                Rect_WeaponInfo.DrawTools(innerListing, patcher.tools, null);
+                Rect_WeaponInfo.DrawComps(innerListing, patcher.fireMode, patcher.ammoUser, patcher.verbProperties, null);
             });
 
             Rect buttonRect = new Rect(0, 0, 100f, 30f).CenterIn(listing.GetRect(30f));

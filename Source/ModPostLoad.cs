@@ -15,8 +15,6 @@ namespace CeManualPatcher
     {
         static ModPostLoad()
         {
-            Log.Message("CE Manual Patcher: Post-load patching...");
-
             //init
             Mod_CEManualPatcher.settings.PostLoad();
         }

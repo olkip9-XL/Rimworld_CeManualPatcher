@@ -33,34 +33,29 @@ namespace CeManualPatcher.Misc.Manager
             Rect rightRect = rect.RightPart(0.7f);
             leftRect.width -= 20f;
 
-            rect_ApparelList.DoWindowContents(leftRect);
-            rect_ApparelInfo.DoWindowContents(rightRect);
+            try
+            {
+                rect_ApparelList.DoWindowContents(leftRect);
+            }
+            catch (Exception e)
+            {
+                Log.ErrorOnce($"[CeManualPatcher] ApparelManager apparel list error: {e}", e.GetHashCode());
+            }
+
+            try
+            {
+                rect_ApparelInfo.DoWindowContents(rightRect);
+            }
+            catch (Exception e)
+            {
+                Log.ErrorOnce($"[CeManualPatcher] ApparelManager apparel info error on thing {curApparelDef?.defName ?? "null"} form {curApparelDef?.modContentPack?.Name ?? "null"} : {e}", e.GetHashCode());
+            }
         }
 
         protected override void NewPatch(ref PatchBase<ThingDef> patch, ThingDef def)
         {
             patch = new ApparelPatch(def);
         }
-
-        //public ApparelPatch GetPatch(ThingDef thing)
-        //{
-        //    ApparelPatch patch = (ApparelPatch)patches.FirstOrDefault(x => x?.targetDef == thing);
-        //    if (patch == null)
-        //    {
-        //        try
-        //        {
-        //            patch = new ApparelPatch(thing);
-        //            patches.Add(patch);
-        //        }
-        //        catch (Exception e)
-        //        {
-        //            Log.Error($"[CeManualPatcher] ApparelManager Trying create patch for item {thing?.defName ?? "Null"}: {e}");
-        //        }
-        //    }
-
-        //    return patch;
-        //}
-
 
         public bool HasPatch(ThingDef thing)
         {

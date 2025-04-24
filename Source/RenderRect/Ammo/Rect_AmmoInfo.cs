@@ -40,7 +40,15 @@ namespace CeManualPatcher
 
                 foreach (var item in curAmmoSet.ammoList)
                 {
-                    DrawAmmo(scrollListing, item);
+                    try
+                    {
+                        DrawAmmo(scrollListing, item);
+                    }
+                    catch (Exception e)
+                    {
+                        Log.ErrorOnce($"[CeManualPatcher] Error while drawing Ammo info {item?.DefName ?? "null"} : {e}", e.GetHashCode());
+                    }
+
                 }
             });
 
