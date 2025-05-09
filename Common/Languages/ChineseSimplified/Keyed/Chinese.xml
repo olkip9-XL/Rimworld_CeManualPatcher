@@ -5,6 +5,7 @@
   <MP_Weapon>武器</MP_Weapon>
   <MP_Ammo>弹药</MP_Ammo>
   <MP_Bionic>植入物</MP_Bionic>
+  <MP_CustomAmmo>自定义弹药</MP_CustomAmmo>
 
   <!--UI 武器-->
   <MP_Source>来源：</MP_Source>
@@ -125,5 +126,38 @@
   <MP_CEPatchExportMsg>CE补丁已导出至{0}</MP_CEPatchExportMsg>
 
   <MP_Accept>确定</MP_Accept>
+
+  <MP_SaveSuccess>已保存至本地mod目录, 重启生效</MP_SaveSuccess>
+  
+  <!--Custom Ammo-->
+  <MP_AddCustomAmmo>添加自定义弹药</MP_AddCustomAmmo>
+  
+  <MP_ConfirmDelete>你确定要删除{0}吗？</MP_ConfirmDelete>
+  <MP_C_BaseInfo>基础属性</MP_C_BaseInfo>
+  <MP_DefNameBase>defName基础</MP_DefNameBase>
+  <MP_Description>描述</MP_Description>
+  <MP_CategoryIcon>分类图标</MP_CategoryIcon>
+  <MP_AmmoParent>弹药父类</MP_AmmoParent>
+
+  <MP_ProjectileGraphic>投射物纹理</MP_ProjectileGraphic>
+  <MP_ProjectileSpeed>投射物飞行速度</MP_ProjectileSpeed>
+
+  <MP_TradeTags>贸易标签</MP_TradeTags>
+  <MP_Suffix>后缀</MP_Suffix>
+
+  <MP_AmmoGraphic>弹药纹理</MP_AmmoGraphic>
+  <MP_AmmoClass>弹药类</MP_AmmoClass>
+
+  <MP_Projectile>投射物</MP_Projectile>
+
+  <MP_DamageAmountBase>基础伤害</MP_DamageAmountBase>
+  <MP_DamageDef>伤害类型</MP_DamageDef>
+
+  <MP_SecondaryDamage>次要伤害</MP_SecondaryDamage>
+
+  <MP_GraphicTexture>纹理</MP_GraphicTexture>
+  <MP_GraphicClass>图像类</MP_GraphicClass>
+
+  <MP_Save>保存</MP_Save>
 
 </LanguageData>

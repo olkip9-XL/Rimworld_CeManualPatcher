@@ -76,7 +76,6 @@ namespace CeManualPatcher.Misc
             }
         }
 
-
         public static void AddChildElement(XmlDocument doc, XmlElement parent, string name, string value)
         {
             XmlElement element = doc.CreateElement(name);
@@ -445,5 +444,38 @@ namespace CeManualPatcher.Misc
             }
 
         }
+    
+    
+    
+    
+        // Defs
+        public static XmlDocument CreateBaseDefDoc(ref XmlElement rootElement)
+        {
+            // 创建XML文档
+            XmlDocument xmlDoc = new XmlDocument();
+            // 声明XML头部
+            XmlDeclaration xmlDeclaration = xmlDoc.CreateXmlDeclaration("1.0", "utf-8", null);
+            xmlDoc.AppendChild(xmlDeclaration);
+            //Defs根元素
+            rootElement = xmlDoc.CreateElement("Defs");
+            xmlDoc.AppendChild(rootElement);
+           
+            return xmlDoc;
+        }
+
+        public static void AddChildElementList(XmlDocument doc, XmlElement root, string listName, List<string> list)
+        {
+            if (list == null)
+                return;
+
+            XmlElement liElement = doc.CreateElement(listName);
+            root.AppendChild(liElement);
+            foreach (var item in list)
+            {
+                AddChildElement(doc, liElement, "li", item);
+            }
+        }
+    
+    
     }
 }

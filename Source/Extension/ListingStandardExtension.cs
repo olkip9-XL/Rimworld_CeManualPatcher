@@ -114,7 +114,7 @@ namespace CeManualPatcher.Extension
                 bool temp = (bool)(object)value;
 
                 Widgets.Checkbox(new Vector2(fieldRect.x, fieldRect.y), ref temp);
-                if(temp != (bool)(object)value)
+                if (temp != (bool)(object)value)
                 {
                     onChange((T)(object)temp);
                     value = (T)(object)temp;
@@ -147,7 +147,10 @@ namespace CeManualPatcher.Extension
             rect.width -= indent;
 
             Widgets.Label(rect, label);
-            Rect fieldRect = rect.RightPartPixels(fieldWidth);
+
+            float width = Math.Max(Text.CalcSize(buttonLabel).x + 6f, fieldWidth);
+
+            Rect fieldRect = rect.RightPartPixels(width);
             if (Widgets.ButtonText(fieldRect, buttonLabel))
             {
                 onClick();
@@ -227,7 +230,6 @@ namespace CeManualPatcher.Extension
             }
 
         }
-
         public static void LabelLine(this Listing_Standard listing, TaggedString label, string tooltip = null, float indent = 0f)
         {
             Rect rect = listing.GetRect(Text.LineHeight);
@@ -243,6 +245,36 @@ namespace CeManualPatcher.Extension
 
             listing.Gap(listing.verticalSpacing);
         }
+        public static void FieldLine(this Listing_Standard listing, string label, ref string value, float fieldWidth = 100f, string tooltip = null, float indent = 0)
+        {
+            float width = Math.Max(Text.CalcSize(value).x, fieldWidth);
 
+            float maxInputFieldWidth = listing.ColumnWidth / 2f;
+
+            int lineCount = (int)(width / maxInputFieldWidth) + 1;
+            Rect rect = listing.GetRect(Text.LineHeight * lineCount);
+            rect.x += indent;
+            rect.width -= indent;
+
+            Widgets.Label(rect, label);
+
+            if (lineCount == 1)
+            {
+                Rect fieldRect = rect.RightPartPixels(width);
+                value = Widgets.TextField(fieldRect, value);
+            }
+            else
+            {
+                Rect fieldRect = rect.RightPartPixels(maxInputFieldWidth);
+                value = Widgets.TextArea(fieldRect, value);
+            }
+
+            Widgets.DrawHighlightIfMouseover(rect);
+            if (!tooltip.NullOrEmpty())
+            {
+                TooltipHandler.TipRegion(rect, tooltip);
+            }
+            listing.Gap(listing.verticalSpacing);
+        }
     }
 }

@@ -1,10 +1,10 @@
 <ModMetaData>
-	<name>CE Manual Patcher</name>
-	<author>LotusLand</author>
-    <packageId>LotusLand.CEManualPatcher</packageId>
-	<supportedVersions>
-		<li>1.5</li>
-	</supportedVersions>
+  <name>CE Manual Patcher</name>
+  <author>LotusLand</author>
+  <packageId>LotusLand.CEManualPatcher</packageId>
+  <supportedVersions>
+    <li>1.5</li>
+  </supportedVersions>
   <modDependencies>
     <li>
       <packageId>CETeam.CombatExtended</packageId>
@@ -16,6 +16,6 @@
   <loadAfter>
     <li>CETeam.CombatExtended</li>
   </loadAfter>
-	<description>Make CE patches by yourself</description>
-	<url>https://steamcommunity.com/id/LotusLand/myworkshopfiles/?appid=294100</url>
+  <description>Make CE patches by yourself</description>
+  <url>https://steamcommunity.com/id/LotusLand/myworkshopfiles/?appid=294100</url>
 </ModMetaData>

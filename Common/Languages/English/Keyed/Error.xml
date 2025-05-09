@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" ?>  
+<LanguageData>  
+
+ <!--CustomAmmo-->  
+ <MP_Error_NoTexturePath>Texture is empty</MP_Error_NoTexturePath>  
+ <MP_Error_NoAmmoClass>Ammo class is empty</MP_Error_NoAmmoClass>  
+ <MP_Error_NoMass>Mass is empty</MP_Error_NoMass>  
+ <MP_Error_NoBulk>Bulk is empty</MP_Error_NoBulk>  
+
+ <!--CustomProjectile-->  
+ <MP_Error_NoDamageAmount>No base damage specified</MP_Error_NoDamageAmount>  
+
+ <!--CustomAmmoSet-->  
+ <MP_Error_SpaceInDefName>There is a space in defName</MP_Error_SpaceInDefName>  
+ <MP_Error_NoDescription>No description provided</MP_Error_NoDescription>  
+ <MP_Error_NoLabel>No label provided</MP_Error_NoLabel>  
+ <MP_Error_NoDefName>No defName provided</MP_Error_NoDefName>  
+ <MP_Error_NoBaseProjectileTexturePath>No base projectile texture</MP_Error_NoBaseProjectileTexturePath>  
+ <MP_Error_NoBaseMass>No base mass</MP_Error_NoBaseMass>  
+ <MP_Error_NoBaseBulk>No base bulk</MP_Error_NoBaseBulk>  
+ <MP_Error_NoAmmoTypes>No custom ammo</MP_Error_NoAmmoTypes>  
+
+</LanguageData>

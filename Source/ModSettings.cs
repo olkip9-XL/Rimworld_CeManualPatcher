@@ -19,8 +19,9 @@ namespace CeManualPatcher
     {
         Weapon,
         Ammo,
+        CustomAmmo,
         Bionic,
-        Apparel
+        Apparel,
     }
 
     public class ModSetting_CEManualPatcher : ModSettings
@@ -30,6 +31,8 @@ namespace CeManualPatcher
         internal AmmoManager ammoManager = new AmmoManager();
         internal WeaponManager weaponManager = new WeaponManager();
         internal ApparelManager apparelManager = new ApparelManager();
+
+        internal CustomAmmoManager customAmmoManager = new CustomAmmoManager();
 
         //CEPatcher
         internal CEPatchManager patchManager = new CEPatchManager();
@@ -41,6 +44,7 @@ namespace CeManualPatcher
             Scribe_Deep.Look(ref weaponManager, "weaponManager");
             Scribe_Deep.Look(ref patchManager, "patchManager");
             Scribe_Deep.Look(ref apparelManager, "apparelManager");
+            Scribe_Deep.Look(ref customAmmoManager, "customAmmoManager");
 
             if (Scribe.mode == LoadSaveMode.LoadingVars)
             {
@@ -60,7 +64,10 @@ namespace CeManualPatcher
                 {
                     apparelManager = new ApparelManager();
                 }
-
+                if (customAmmoManager == null)
+                {
+                    customAmmoManager = new CustomAmmoManager();
+                }
             }
         }
 
@@ -68,6 +75,7 @@ namespace CeManualPatcher
         {
             //init
             patchManager?.PostLoadInit();
+            customAmmoManager?.PostLoadInit();
 
             ammoManager?.PostLoadInit();
             weaponManager?.PostLoadInit();
@@ -80,6 +88,7 @@ namespace CeManualPatcher
 
             patchManager?.ExportAll();
             apparelManager?.ExportAll();
+            customAmmoManager?.ExportAll();
 
             string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "CE Patches");
             Messages.Message($"MP_CEPatchExportMsg".Translate(path), MessageTypeDefOf.NeutralEvent);
@@ -140,10 +149,13 @@ namespace CeManualPatcher
                 case MP_SettingTab.Apparel:
                     settings.apparelManager.DoWindowContents(inRect);
                     break;
+                case MP_SettingTab.CustomAmmo:
+                    settings.customAmmoManager.DoWindowContents(inRect);
+                    break;
             }
 
             string curId = GUI.GetNameOfFocusedControl();
-            if(WidgetsUtility.curId != curId)
+            if (WidgetsUtility.curId != curId)
             {
                 WidgetsUtility.curId = curId;
                 WidgetsUtility.curBuffer = null;
@@ -152,23 +164,6 @@ namespace CeManualPatcher
         }
 
         //test
-        private float field1;
-        private float field2 = 0f;
-        private void DrawTestField(Rect rect)
-        {
-            Listing_Standard listing = new Listing_Standard();
-            listing.Begin(rect);
-
-            WidgetsUtility.TextFieldOnChange(listing.GetRect(24f), ref field1, (x) =>
-            {
-            });
-
-            WidgetsUtility.TextFieldOnChange(listing.GetRect(24f), ref field2, (x) =>
-            {
-            });
-
-            listing.End();
-        }
 
         private void DebugLogAllButtonImage(Rect rect)
         {

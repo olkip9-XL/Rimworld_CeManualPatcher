@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using Verse;
 
-namespace CeManualPatcher.Manager
+namespace CeManualPatcher.Misc.Manager
 {
     internal abstract class MP_DefManagerBase<T> : IExposable where T : Def
     {

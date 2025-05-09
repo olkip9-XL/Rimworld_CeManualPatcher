@@ -5,6 +5,7 @@
   <MP_Weapon>Weapon</MP_Weapon>
   <MP_Ammo>Ammo</MP_Ammo>
   <MP_Bionic>Bionics</MP_Bionic>
+  <MP_CustomAmmo>Custom Ammo</MP_CustomAmmo>
 
   <!--UI 武器-->
   <MP_Source>Source: </MP_Source>
@@ -124,5 +125,38 @@
   <MP_CEPatchExportMsg>CE Patch Exported To {0}</MP_CEPatchExportMsg>
 
   <MP_Accept>Accept</MP_Accept>
+
+  <MP_SaveSuccess>Saved to local mod directory, restart to take effect.</MP_SaveSuccess>
+
+  <!--Custom Ammo-->
+  
+   <MP_AddCustomAmmo>Add Custom Ammo</MP_AddCustomAmmo>
+  
+   <MP_ConfirmDelete>Are you sure you want to delete {0}?</MP_ConfirmDelete>
+   <MP_C_BaseInfo>Base ammo Info</MP_C_BaseInfo>
+   <MP_DefNameBase>defName Base</MP_DefNameBase>
+   <MP_Description>Description</MP_Description>
+   <MP_CategoryIcon>Category Icon</MP_CategoryIcon>
+   <MP_AmmoParent>Ammo Parent</MP_AmmoParent>
+  
+   <MP_ProjectileGraphic>Projectile Texture</MP_ProjectileGraphic>
+   <MP_ProjectileSpeed>Projectile Speed</MP_ProjectileSpeed>
+  
+   <MP_TradeTags>Trade Tags</MP_TradeTags>
+   <MP_Suffix>Suffix</MP_Suffix>
+  
+   <MP_AmmoGraphic>Ammo Texture</MP_AmmoGraphic>
+   <MP_AmmoClass>Ammo Class</MP_AmmoClass>
+  
+   <MP_Projectile>Projectile</MP_Projectile>
+   <MP_DamageAmountBase>Damage amount Base</MP_DamageAmountBase>
+   <MP_DamageDef>Damage Type</MP_DamageDef>
+  
+   <MP_SecondaryDamage>Secondary Damage</MP_SecondaryDamage>
+  
+   <MP_GraphicTexture>Texture</MP_GraphicTexture>
+   <MP_GraphicClass>Graphic Class</MP_GraphicClass>
+
+  <MP_Save>Save</MP_Save>
 
 </LanguageData>

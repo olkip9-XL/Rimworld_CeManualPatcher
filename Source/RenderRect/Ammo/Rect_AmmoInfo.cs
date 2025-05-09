@@ -1,4 +1,5 @@
-﻿using CeManualPatcher.Extension;
+﻿using CeManualPatcher.Dialogs;
+using CeManualPatcher.Extension;
 using CeManualPatcher.Manager;
 using CeManualPatcher.Misc;
 using CombatExtended;
@@ -23,6 +24,8 @@ namespace CeManualPatcher
         private float viewHeight = 0f;
 
         private readonly float damageButtonWidth = 150f;
+
+        public MP_Ammo copiedAmmo = null;
 
         public override void DoWindowContents(Rect rect)
         {
@@ -62,6 +65,7 @@ namespace CeManualPatcher
         {
             Rect rect = listing.GetRect(Text.LineHeight);
 
+            //Reset all
             Rect rect1 = rect.LeftPartPixels(100f);
             if (Widgets.ButtonText(rect1, "MP_ResetAll".Translate()))
             {
@@ -170,11 +174,11 @@ namespace CeManualPatcher
                         (x) => delegate
                         {
                             manager.GetAmmoPatch(ammo);
-                            compProps.fragments.Add(new ThingDefCountClass()
+
+                            if (!compProps.fragments.Any(y => y.thingDef == x))
                             {
-                                thingDef = x,
-                                count = 1
-                            });
+                                compProps.fragments.Add(new ThingDefCountClass(x, 1));
+                            }
                         }
                     );
                 }
@@ -248,8 +252,6 @@ namespace CeManualPatcher
 
             Widgets.DrawTextureFitted(iconRect, ammo.Icon, 0.7f);
 
-            //Widgets.Label(labelRect, ammo.Label);
-
             ref string label = ref ammo.projectile.label;
             if (ammo.ammo != null)
             {
@@ -267,7 +269,100 @@ namespace CeManualPatcher
                 manager.Reset(ammo.projectile);
             }
 
+            //copy
+            Rect copyRect = resetRect.LeftAdjoin(rect.height);
+            if (Widgets.ButtonImage(copyRect, TexButton.Copy))
+            {
+                copiedAmmo = ammo;
+            }
+
+            Rect pasteRect = copyRect.LeftAdjoin(rect.height);
+            if (copiedAmmo != null && Widgets.ButtonImage(pasteRect, TexButton.Paste))
+            {
+                manager.GetAmmoPatch(ammo);
+                copyAmmo(copiedAmmo, ammo);
+                copiedAmmo = null;
+            }
+
+
             listing.Gap(listing.verticalSpacing);
+        }
+
+        private void copyAmmo(MP_Ammo source, MP_Ammo target)
+        {
+            if (source == null || target == null || source == target)
+                return;
+
+            ProjectilePropertiesCE sourcePrj = source.projectile.projectile as ProjectilePropertiesCE;
+            ProjectilePropertiesCE targetPrj = target.projectile.projectile as ProjectilePropertiesCE;
+
+            if (sourcePrj == null || targetPrj == null)
+            {
+                Log.Error($"[CeManualPatcher] Copy ammo failed, source: {source?.DefName ?? "null"}, target: {target?.DefName ?? "null"}");
+            }
+
+            //common
+            targetPrj.damageDef = sourcePrj.damageDef;
+            FieldInfo fieldInfo = typeof(ProjectileProperties).GetField("armorPenetrationBase", BindingFlags.NonPublic | BindingFlags.Instance);
+            fieldInfo.SetValue(targetPrj, fieldInfo.GetValue(sourcePrj));
+            targetPrj.suppressionFactor = sourcePrj.suppressionFactor;
+            targetPrj.stoppingPower = sourcePrj.stoppingPower;
+
+            //explosive
+            if (target.isExplosive && source.isExplosive)
+            {
+                targetPrj.explosionRadius = sourcePrj.explosionRadius;
+                targetPrj.postExplosionGasType = sourcePrj.postExplosionGasType;
+            }
+
+            //non explosive
+            if (!target.isExplosive && !source.isExplosive)
+            {
+                targetPrj.armorPenetrationSharp = sourcePrj.armorPenetrationSharp;
+                targetPrj.armorPenetrationBlunt = sourcePrj.armorPenetrationBlunt;
+
+                sourcePrj.secondaryDamage?.Clear();
+                if (!targetPrj.secondaryDamage.NullOrEmpty())
+                {
+                    foreach (var item in targetPrj.secondaryDamage)
+                    {
+                        sourcePrj.secondaryDamage.Add(new SecondaryDamage()
+                        {
+                            def = item.def,
+                            amount = item.amount
+                        });
+                    }
+                }
+            }
+
+            //comps
+            if (target.projectile.HasComp<CompFragments>() && source.projectile.HasComp<CompFragments>())
+            {
+                CompProperties_Fragments targetComp = target.projectile.GetCompProperties<CompProperties_Fragments>();
+                CompProperties_Fragments sourceComp = source.projectile.GetCompProperties<CompProperties_Fragments>();
+
+                targetComp.fragments.Clear();
+                foreach (var item in sourceComp.fragments)
+                {
+                    targetComp.fragments.Add(new ThingDefCountClass()
+                    {
+                        thingDef = item.thingDef,
+                        count = item.count
+                    });
+                }
+            }
+
+            if (target.projectile.HasComp<CompExplosiveCE>() && source.projectile.HasComp<CompExplosiveCE>())
+            {
+                CompProperties_ExplosiveCE targetComp = target.projectile.GetCompProperties<CompProperties_ExplosiveCE>();
+                CompProperties_ExplosiveCE sourceComp = source.projectile.GetCompProperties<CompProperties_ExplosiveCE>();
+
+                targetComp.explosiveDamageType = sourceComp.explosiveDamageType;
+                targetComp.damageAmountBase = sourceComp.damageAmountBase;
+                targetComp.explosiveRadius = sourceComp.explosiveRadius;
+                targetComp.postExplosionGasType = sourceComp.postExplosionGasType;
+            }
+
         }
 
         private void DrawAmmoDamageEx(Listing_Standard listing, MP_Ammo ammo)

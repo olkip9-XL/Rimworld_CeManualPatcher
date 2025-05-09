@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LanguageData>
+
+  <!--CustomAmmo-->
+  <MP_Error_NoTexturePath>纹理为空</MP_Error_NoTexturePath>
+  <MP_Error_NoAmmoClass>弹药类为空</MP_Error_NoAmmoClass>
+  <MP_Error_NoMass>质量为空</MP_Error_NoMass>
+  <MP_Error_NoBulk>体积为空</MP_Error_NoBulk>
+  
+  <!--CustomProjectile-->
+  <MP_Error_NoDamageAmount>没有填写基础伤害</MP_Error_NoDamageAmount>
+  
+  <!--CustomAmmoSet-->
+  <MP_Error_SpaceInDefName>defName中有空格</MP_Error_SpaceInDefName>
+  <MP_Error_NoDescription>没有填写描述</MP_Error_NoDescription>
+  <MP_Error_NoLabel>没有填写标签</MP_Error_NoLabel>
+  <MP_Error_NoDefName>没有填写defName</MP_Error_NoDefName>
+  <MP_Error_NoBaseProjectileTexturePath>没有基础投射物纹理</MP_Error_NoBaseProjectileTexturePath>
+  <MP_Error_NoBaseMass>没有基础质量</MP_Error_NoBaseMass>
+  <MP_Error_NoBaseBulk>没有基础体积</MP_Error_NoBaseBulk>
+  <MP_Error_NoAmmoTypes>没有自定义弹药</MP_Error_NoAmmoTypes>
+
+</LanguageData>

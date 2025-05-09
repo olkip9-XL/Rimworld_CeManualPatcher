@@ -57,7 +57,7 @@ namespace CeManualPatcher.RenderRect
 
                 if (!keyWords.NullOrEmpty())
                 {
-                    list = list.Where(x => x.label.ToLower().Contains(keyWords.ToLower())).ToList();
+                    list = list.Where(x=> x.label.ContainsIgnoreCase(keyWords)).ToList();
                 }
 
                 if (curSourceMod != null)

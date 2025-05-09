@@ -43,10 +43,9 @@ namespace CeManualPatcher.Misc
                 temp = default(T);
             }
 
-            //if (!EqualityComparer<T>.Default.Equals(temp, value))
             if(value.ToString() != buffer)
             {
-                onChange(temp);
+                onChange?.Invoke(temp);
                 value = temp;
             }
         }

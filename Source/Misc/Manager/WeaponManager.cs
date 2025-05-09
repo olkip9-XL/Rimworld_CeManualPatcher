@@ -1,4 +1,5 @@
-﻿using CeManualPatcher.Patch;
+﻿using CeManualPatcher.Misc.Manager;
+using CeManualPatcher.Patch;
 using CeManualPatcher.RenderRect;
 using CombatExtended;
 using System;

@@ -8,6 +8,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine;
 using Verse;
 
 namespace CeManualPatcher
@@ -310,7 +311,6 @@ namespace CeManualPatcher
             }
         }
 
-
         private static ReadOnlyCollection<StatDef> statDefs_WeaponInt = null;
         public static ReadOnlyCollection<StatDef> statDefs_Weapon
         {
@@ -381,7 +381,6 @@ namespace CeManualPatcher
             }
         }
 
-
         private static ReadOnlyCollection<StatDef> statDefs_WeaponOffsetInt;
         public static ReadOnlyCollection<StatDef> statDefs_WeaponOffset
         {
@@ -391,19 +390,19 @@ namespace CeManualPatcher
                 {
                     List<StatCategoryDef> categoryDefs = new List<StatCategoryDef>();
 
-                    foreach (var item in DefDatabase<ThingDef>.AllDefs.Where(x=> x.IsWeapon))
+                    foreach (var item in DefDatabase<ThingDef>.AllDefs.Where(x => x.IsWeapon))
                     {
-                       if(item.equippedStatOffsets!= null)
+                        if (item.equippedStatOffsets != null)
                         {
                             foreach (var stat in item.equippedStatOffsets)
                             {
-                               categoryDefs.AddDistinct(stat.stat.category);
+                                categoryDefs.AddDistinct(stat.stat.category);
                             }
                         }
                     }
 
                     List<StatDef> list = new List<StatDef>();
-                    foreach(var item in DefDatabase<StatDef>.AllDefsListForReading)
+                    foreach (var item in DefDatabase<StatDef>.AllDefsListForReading)
                     {
                         if (categoryDefs.Contains(item.category))
                         {
@@ -448,5 +447,175 @@ namespace CeManualPatcher
                 return statDefs_ApparelOffsetInt;
             }
         }
+
+
+        private static ReadOnlyCollection<ThingCategoryDef> ammoCategoryDefsInt = null;
+        public static ReadOnlyCollection<ThingCategoryDef> ammoCategoryDefs
+        {
+            get
+            {
+                if (ammoCategoryDefsInt == null)
+                {
+                    List<ThingCategoryDef> list = new List<ThingCategoryDef>();
+                    list.AddRange(DefDatabase<ThingCategoryDef>.AllDefs.Where(x => x.parent == MP_ThingCategoryDefOf.Ammo));
+                    ammoCategoryDefsInt = list.AsReadOnly();
+                }
+                return ammoCategoryDefsInt;
+            }
+        }
+
+        private static ReadOnlyCollection<string> ammoCategoryIconsInt = null;
+        public static ReadOnlyCollection<string> ammoCategoryIcons
+        {
+            get
+            {
+                if (ammoCategoryIconsInt == null)
+                {
+                    List<string> list = new List<string>();
+
+                    LookChildCategory(MP_ThingCategoryDefOf.Ammo);
+
+                    void LookChildCategory(ThingCategoryDef categoryDef)
+                    {
+                        if (categoryDef != null && categoryDef.icon != null)
+                        {
+                            if (!list.Contains(categoryDef.iconPath))
+                            {
+                                list.Add(categoryDef.iconPath);
+                            }
+                        }
+
+                        if (!categoryDef.childCategories.NullOrEmpty())
+                        {
+                            foreach (var item in categoryDef.childCategories)
+                            {
+                                LookChildCategory(item);
+                            }
+                        }
+                    }
+
+                    ammoCategoryIconsInt = list.AsReadOnly();
+                }
+                return ammoCategoryIconsInt;
+            }
+        }
+
+
+        private static ReadOnlyCollection<string> projectileTexPathInt = null;
+        public static ReadOnlyCollection<string> projectileTexPath
+        {
+            get
+            {
+                if (projectileTexPathInt == null)
+                {
+                    List<string> list = new List<string>();
+                    foreach (var item in DefDatabase<ThingDef>.AllDefs.Where(x => x.projectile != null))
+                    {
+                        if (!list.Contains(item.graphicData.texPath))
+                        {
+                            list.Add(item.graphicData.texPath);
+                        }
+                    }
+                    projectileTexPathInt = list.AsReadOnly();
+                }
+                return projectileTexPathInt;
+            }
+
+        }
+
+
+        private static ReadOnlyDictionary<Type, List<string>> ammoTexInt = null;
+        public static ReadOnlyDictionary<Type, List<string>> ammoTex
+        {
+            get
+            {
+                if (ammoTexInt == null)
+                {
+                    Dictionary<Type, List<string>> dict = new Dictionary<Type, List<string>>();
+                    foreach (var item in DefDatabase<AmmoDef>.AllDefs)
+                    {
+                        if (!dict.ContainsKey(item.graphicData.graphicClass))
+                        {
+                            dict.Add(item.graphicData.graphicClass, new List<string>() { item.graphicData.texPath });
+                        }
+                        else
+                        {
+                            if (!dict[item.graphicData.graphicClass].Contains(item.graphicData.texPath))
+                            {
+                                dict[item.graphicData.graphicClass].Add(item.graphicData.texPath);
+                            }
+                        }
+                    }
+                    ammoTexInt = new ReadOnlyDictionary<Type, List<string>>(dict);
+                }
+                return ammoTexInt;
+            }
+        }
+
+        private static ReadOnlyDictionary<Type, List<string>> projectileTexInt = null;
+        public static ReadOnlyDictionary<Type, List<string>> projectileTex
+        {
+            get
+            {
+                if (projectileTexInt == null)
+                {
+                    Dictionary<Type, List<string>> dict = new Dictionary<Type, List<string>>();
+                    foreach (var item in DefDatabase<ThingDef>.AllDefs.Where(x => x.projectile != null))
+                    {
+                        if (item.graphicData == null)
+                            continue;
+
+                        if (!dict.ContainsKey(item.graphicData.graphicClass))
+                        {
+                            dict.Add(item.graphicData.graphicClass, new List<string>() { item.graphicData.texPath });
+                        }
+                        else
+                        {
+                            if (!dict[item.graphicData.graphicClass].Contains(item.graphicData.texPath))
+                            {
+                                dict[item.graphicData.graphicClass].Add(item.graphicData.texPath);
+                            }
+                        }
+                    }
+                    projectileTexInt = new ReadOnlyDictionary<Type, List<string>>(dict);
+                }
+                return projectileTexInt;
+            }
+
+        }
+   
+
+        private static ReadOnlyCollection<string> tradeTagsInt = null;
+        public static ReadOnlyCollection<string> tradeTags
+        {
+            get
+            {
+                if (tradeTagsInt == null)
+                {
+                    List<string> list = new List<string>();
+                    foreach (var item in DefDatabase<AmmoDef>.AllDefs.Where(x => x.tradeTags != null))
+                    {
+                        foreach (var tag in item.tradeTags)
+                        {
+                            if (!list.Contains(tag))
+                            {
+                                list.Add(tag);
+                            }
+                        }
+                    }
+
+                    list.Remove("CE_AmmoInjector");
+                    list.Remove("CE_Ammo");
+                    list.Remove("CE_MediumAmmo");
+                    list.Remove("CE_HeavyAmmo");
+
+                    list.Sort();
+                    tradeTagsInt = list.AsReadOnly();
+                }
+                return tradeTagsInt;
+            }
+        }
+       
+
     }
 }

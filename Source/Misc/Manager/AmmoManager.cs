@@ -1,4 +1,5 @@
 ﻿using CeManualPatcher.Misc;
+using CeManualPatcher.Misc.Manager;
 using CeManualPatcher.Patch;
 using CeManualPatcher.RenderRect.Ammo;
 using RimWorld;
@@ -19,6 +20,12 @@ namespace CeManualPatcher.Manager
 
         private Rect_AmmoList rect_AmmoList = new Rect_AmmoList();
         private Rect_AmmoInfo rect_AmmoInfo = new Rect_AmmoInfo();
+
+        public MP_Ammo copiedAmmo
+        {
+            get=> rect_AmmoInfo.copiedAmmo;
+            set=> rect_AmmoInfo.copiedAmmo = value;
+        }
 
         public AmmoManager()
         {
@@ -87,14 +94,7 @@ namespace CeManualPatcher.Manager
         public override void ExposeData()
         {
             base.ExposeData();
-            //Scribe_Collections.Look(ref ammoPatches, "ammoPatches", LookMode.Deep);
-            //if (Scribe.mode == LoadSaveMode.LoadingVars)
-            //{
-            //    if (ammoPatches == null)
-            //    {
-            //        ammoPatches = new List<AmmoPatch>();
-            //    }
-            //}
+
             if (Scribe.mode == LoadSaveMode.LoadingVars)
             {
                 List<AmmoPatch> ammoPatches = new List<AmmoPatch>();

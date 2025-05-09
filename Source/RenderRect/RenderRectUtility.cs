@@ -15,10 +15,63 @@ namespace CeManualPatcher.RenderRect
 {
     internal static class RenderRectUtility
     {
+        //public static void DrawItemRow(Listing_Standard listing, ThingDef item, ref ThingDef curItem)
+        //{
+        //    if (item == null)
+        //        return;
+
+        //    float rowHeight = 30f;
+
+        //    Rect rect = listing.GetRect(rowHeight);
+
+        //    if (Widgets.ButtonInvisible(rect))
+        //    {
+        //        curItem = item;
+        //        Messages.Message(item.defName, MessageTypeDefOf.SilentInput);
+        //    }
+
+        //    Rect iconRect = rect.LeftPartPixels(rowHeight);
+        //    Rect labelRect = new Rect(iconRect.xMax, rect.y, rect.width - iconRect.width, rowHeight);
+
+        //    Texture2D uiTexture = item.uiIcon ?? BaseContent.BadTex;
+        //    Widgets.DrawTextureFitted(iconRect, uiTexture, 0.7f);
+
+        //    Text.Anchor = TextAnchor.MiddleLeft;
+        //    Widgets.Label(labelRect, item.label);
+        //    Text.Anchor = TextAnchor.UpperLeft;
+
+        //    if (curItem == item)
+        //    {
+        //        Widgets.DrawHighlightSelected(rect);
+        //    }
+
+        //    TooltipHandler.TipRegion(rect, $"{item.description}\n\n{"MP_Source".Translate()} {item.modContentPack.Name}");
+        //}
+
         public static void DrawItemRow(Listing_Standard listing, ThingDef item, ref ThingDef curItem)
         {
             if (item == null)
                 return;
+
+
+            string description = $"{item.description}\n\n{"MP_Source".Translate()} {item.modContentPack.Name}";
+
+
+            bool changed = false;
+            DrawItemRow(listing, item.uiIcon, item.label, description, () =>
+            {
+                changed = true;
+                Messages.Message(item.defName, MessageTypeDefOf.SilentInput);
+            }, curItem == item);
+
+            if (changed)
+            {
+                curItem = item;
+            }
+        }
+
+        public static void DrawItemRow(Listing_Standard listing, Texture2D icon, TaggedString label, string description, Action onClick, bool drawHighlight)
+        {
 
             float rowHeight = 30f;
 
@@ -26,28 +79,27 @@ namespace CeManualPatcher.RenderRect
 
             if (Widgets.ButtonInvisible(rect))
             {
-                curItem = item;
-                Messages.Message(item.defName, MessageTypeDefOf.SilentInput);
+                onClick();
             }
 
             Rect iconRect = rect.LeftPartPixels(rowHeight);
             Rect labelRect = new Rect(iconRect.xMax, rect.y, rect.width - iconRect.width, rowHeight);
 
-            Texture2D uiTexture = item.uiIcon ?? BaseContent.BadTex;
+            Texture2D uiTexture = icon ?? BaseContent.BadTex;
             Widgets.DrawTextureFitted(iconRect, uiTexture, 0.7f);
 
             Text.Anchor = TextAnchor.MiddleLeft;
-            Widgets.Label(labelRect, item.label);
+            Widgets.Label(labelRect, label);
             Text.Anchor = TextAnchor.UpperLeft;
 
-            if (curItem == item)
+            if (drawHighlight)
             {
                 Widgets.DrawHighlightSelected(rect);
             }
 
-            TooltipHandler.TipRegion(rect, $"{item.description}\n\n{"MP_Source".Translate()} {item.modContentPack.Name}");
-        }
+            TooltipHandler.TipRegion(rect, description);
 
+        }
 
 
         //Stats dic
