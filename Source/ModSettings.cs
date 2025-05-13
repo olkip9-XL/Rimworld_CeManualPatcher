@@ -31,6 +31,7 @@ namespace CeManualPatcher
         internal AmmoManager ammoManager = new AmmoManager();
         internal WeaponManager weaponManager = new WeaponManager();
         internal ApparelManager apparelManager = new ApparelManager();
+        //internal BodyDefManager bodyDefManager = new BodyDefManager();
 
         internal CustomAmmoManager customAmmoManager = new CustomAmmoManager();
 
@@ -145,6 +146,7 @@ namespace CeManualPatcher
                     settings.ammoManager.DoWindowContents(inRect);
                     break;
                 case MP_SettingTab.Bionic:
+                    //settings.bodyDefManager.DoWindowContents(inRect);
                     break;
                 case MP_SettingTab.Apparel:
                     settings.apparelManager.DoWindowContents(inRect);
@@ -154,13 +156,7 @@ namespace CeManualPatcher
                     break;
             }
 
-            string curId = GUI.GetNameOfFocusedControl();
-            if (WidgetsUtility.curId != curId)
-            {
-                WidgetsUtility.curId = curId;
-                WidgetsUtility.curBuffer = null;
-            }
-
+            WidgetsUtility.UtilityTick();
         }
 
         //test

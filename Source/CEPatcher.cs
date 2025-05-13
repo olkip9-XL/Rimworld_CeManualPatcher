@@ -61,7 +61,7 @@ namespace CeManualPatcher
                 weaponManager.GetWeaponPatch(thingDef).AddVerb();
             }
 
-            if (ammoUser != null)
+            if (ammoUser != null && ammoUser.ammoSet!=null)
             {
                 weaponManager.GetWeaponPatch(thingDef).AddAmmoUser();
             }
@@ -105,7 +105,7 @@ namespace CeManualPatcher
             //comps
             if (thingDef.comps != null)
             {
-                if (!thingDef.HasComp<CompAmmoUser>() && ammoUser != null)
+                if (!thingDef.HasComp<CompAmmoUser>() && ammoUser != null && ammoUser.ammoSet!=null)
                 {
                     thingDef.comps.Add(ammoUser);
                 }

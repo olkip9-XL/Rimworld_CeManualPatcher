@@ -96,11 +96,11 @@ namespace CeManualPatcher.Extension
         }
 
         //*********************************************
-        public static void FieldLine<T>(this Listing_Standard listing, string label, ref T value, float fieldWidth = 100f, string tooltip = null, float indent = 0, float min = float.MinValue, float max = float.MaxValue) where T : struct
+        public static void FieldLine<T>(this Listing_Standard listing, TaggedString label, ref T value, float fieldWidth = 100f, string tooltip = null, float indent = 0, float min = float.MinValue, float max = float.MaxValue) where T : struct
         {
             listing.FieldLineOnChange(label, ref value, (x) => { }, fieldWidth, tooltip, indent, min, max);
         }
-        public static void FieldLineOnChange<T>(this Listing_Standard listing, string label, ref T value, Action<T> onChange, float fieldWidth = 100f, string tooltip = null, float indent = 0, float min = float.MinValue, float max = float.MaxValue) where T : struct
+        public static void FieldLineOnChange<T>(this Listing_Standard listing, TaggedString label, ref T value, Action<T> onChange, float fieldWidth = 100f, string tooltip = null, float indent = 0, float min = float.MinValue, float max = float.MaxValue) where T : struct
         {
             Rect rect = listing.GetRect(Text.LineHeight);
             rect.x += indent;
@@ -245,7 +245,7 @@ namespace CeManualPatcher.Extension
 
             listing.Gap(listing.verticalSpacing);
         }
-        public static void FieldLine(this Listing_Standard listing, string label, ref string value, float fieldWidth = 100f, string tooltip = null, float indent = 0)
+        public static void FieldLine(this Listing_Standard listing, TaggedString label, ref string value, float fieldWidth = 100f, string tooltip = null, float indent = 0)
         {
             float width = Math.Max(Text.CalcSize(value).x, fieldWidth);
 

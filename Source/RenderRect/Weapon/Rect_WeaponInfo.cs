@@ -2,6 +2,7 @@
 using CeManualPatcher.Extension;
 using CeManualPatcher.Manager;
 using CeManualPatcher.Misc;
+using CeManualPatcher.Patch;
 using CeManualPatcher.RenderRect;
 using CeManualPatcher.Saveable;
 using CeManualPatcher.Saveable.Weapon;
@@ -63,9 +64,18 @@ namespace CeManualPatcher
 
                 DrawVebs(innerListing, curWeaponDef.Verbs.FirstOrDefault(), curWeaponDef.GetCompProperties<CompProperties_AmmoUser>(), preChange);
                 DrawTools(innerListing, curWeaponDef.tools, preChange);
+
+                CompProperties_AmmoUser ammoUser = curWeaponDef.GetCompProperties<CompProperties_AmmoUser>();
+                if (manager.HasWeaponPatch(curWeaponDef) && ammoUser == null)
+                {
+                    WeaponPatch patch = manager.GetWeaponPatch(curWeaponDef);
+                    ammoUser = patch.ammoUser?.reservedData;
+                }
+
                 DrawComps(innerListing,
                     curWeaponDef.GetCompProperties<CompProperties_FireModes>(),
-                    curWeaponDef.GetCompProperties<CompProperties_AmmoUser>(),
+                    //curWeaponDef.GetCompProperties<CompProperties_AmmoUser>(),
+                    ammoUser,
                     curWeaponDef.Verbs.FirstOrDefault(),
                     preChange);
             });
@@ -152,7 +162,7 @@ namespace CeManualPatcher
                     weaponTags.Remove(item);
                     needBreak = true;
                 }, indent: 40f);
-                if(needBreak)
+                if (needBreak)
                 {
                     break;
                 }
@@ -467,7 +477,7 @@ namespace CeManualPatcher
                 DrawToolContent(listing, toolCE, preChange);
             }
         }
-        public static void DrawToolContent(Listing_Standard listing, ToolCE tool,Action preChange, float indent = 20f)
+        public static void DrawToolContent(Listing_Standard listing, ToolCE tool, Action preChange, float indent = 20f)
         {
             if (tool == null)
             {
@@ -577,7 +587,7 @@ namespace CeManualPatcher
 
             foreach (var item in tool.surpriseAttack.extraMeleeDamages)
             {
-                if (DrawExtraDamageRow(listing, item,preChange, indent: 40f))
+                if (DrawExtraDamageRow(listing, item, preChange, indent: 40f))
                 {
                     preChange?.Invoke();
                     tool.surpriseAttack.extraMeleeDamages.Remove(item);
@@ -636,7 +646,7 @@ namespace CeManualPatcher
 
             listing.Gap(listing.verticalSpacing);
         }
-        private static bool DrawExtraDamageRow(Listing_Standard listing, ExtraDamage extraDamage,Action preChange, float indent = 20f)
+        private static bool DrawExtraDamageRow(Listing_Standard listing, ExtraDamage extraDamage, Action preChange, float indent = 20f)
         {
             Rect rect = listing.GetRect(Text.LineHeight);
             rect.x += indent;
@@ -710,9 +720,14 @@ namespace CeManualPatcher
             if (ammoUser != null)
             {
                 listing.GapLine(6f);
-                listing.Label("<b>" + "MP_AmmoUser".Translate() + "</b>");
 
-                listing.ButtonX("MP_AmmoSet".Translate(), 200f, ammoUser.ammoSet?.LabelCap ?? "null", () =>
+                Color fontColor = Color.white;
+                if (ammoUser.ammoSet == null)
+                    fontColor = MP_Color.Grey;
+
+                listing.Label($"<b>{"MP_AmmoUser".Translate()}</b>".Colorize(fontColor));
+
+                listing.ButtonTextLine("MP_AmmoSet".Translate().Colorize(fontColor), ammoUser.ammoSet?.LabelCap ?? "null", () =>
                 {
                     preChange?.Invoke();
                     Find.WindowStack.Add(new Dialog_SetDefaultProjectile(verb as VerbPropertiesCE, ammoUser));
@@ -720,7 +735,7 @@ namespace CeManualPatcher
 
                 foreach (var item in CompAmmoUserSaveable.propNames)
                 {
-                    listing.FieldLineReflexion($"MP_AmmoUser.{item}".Translate(), item, ammoUser, newValue =>
+                    listing.FieldLineReflexion($"MP_AmmoUser.{item}".Translate().Colorize(fontColor), item, ammoUser, newValue =>
                     {
                         preChange?.Invoke();
                     }, indent: 20f);

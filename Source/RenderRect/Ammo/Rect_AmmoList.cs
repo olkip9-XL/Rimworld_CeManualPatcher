@@ -126,7 +126,12 @@ namespace CeManualPatcher.RenderRect.Ammo
                 {
                     try
                     {
-                        DrawRow(listing, item);
+                        //DrawRow(listing, item);
+                        RenderRectUtility.DrawItemRow(listing, item.Icon, item.Label, item.Description, () =>
+                        {
+                            curAmmoSet = item;
+                            Messages.Message(item.DefName, MessageTypeDefOf.SilentInput);
+                        }, curAmmoSet == item);
                     }
                     catch (Exception e)
                     {

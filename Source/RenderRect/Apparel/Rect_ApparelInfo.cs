@@ -270,21 +270,21 @@ namespace CeManualPatcher.RenderRect.Apparel
                     }, indent: 0f);
                     if (needBreak) break;
 
-                    listing.FieldLineOnChange("MP_UseStaticValue".Translate(), ref item.useStatic, (x) =>
+                    listing.FieldLineOnChange("MP_UseStaticValue".Translate(), ref item.isStatValueStatic, (x) =>
                     {
                         manager.GetPatch(curApparel);
                     }, indent: 20f);
 
-                    if (item.useStatic)
+                    if (item.isStatValueStatic)
                     {
-                        listing.FieldLineOnChange("MP_StaticValue".Translate(), ref item.staticValue, (x) =>
+                        listing.FieldLineOnChange("MP_StaticValue".Translate(), ref item.statValue, (x) =>
                         {
                             manager.GetPatch(curApparel);
                         }, indent: 20f);
                     }
                     else
                     {
-                        listing.FieldLineOnChange("MP_MultValue".Translate(), ref item.mult, (x) =>
+                        listing.FieldLineOnChange("MP_MultValue".Translate(), ref item.statValue, (x) =>
                         {
                             manager.GetPatch(curApparel);
                         }, indent: 20f);

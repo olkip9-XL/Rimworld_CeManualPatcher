@@ -13,13 +13,6 @@ namespace CeManualPatcher.Patch
 {
     public class WeaponPatch : PatchBase<ThingDef>
     {
-        //private string weaponDefString;
-        //public ThingDef weaponDef
-        //{
-        //    get => DefDatabase<ThingDef>.GetNamed(weaponDefString, false);
-        //    set => weaponDefString = value?.defName ?? "null";
-        //}
-
         //字段
         internal StatSaveable statBase;
 

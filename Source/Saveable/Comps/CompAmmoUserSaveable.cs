@@ -46,12 +46,14 @@ namespace CeManualPatcher.Saveable
 
         private CompProperties_AmmoUser originalData;
 
+        public CompProperties_AmmoUser reservedData;
+
         public CompAmmoUserSaveable() { }
 
         public CompAmmoUserSaveable(ThingDef thingDef, bool forceAdd = false)
         {
             this.thingDef = thingDef;
-            if(compProps == null && !forceAdd)
+            if (compProps == null && !forceAdd)
             {
                 return;
             }
@@ -61,34 +63,53 @@ namespace CeManualPatcher.Saveable
 
         protected override void Apply()
         {
-            if(compProps == null)
+            if (compProps == null)
             {
                 return;
             }
 
             foreach (var item in propNames)
             {
-               PropUtility.SetPropValueString(compProps, item, this.propDic[item]);
+                PropUtility.SetPropValueString(compProps, item, this.propDic[item]);
             }
 
             compProps.ammoSet = ammoSet;
+
+            if (ammoSet == null)
+            {
+                thingDef.comps.RemoveWhere(x => x is CompProperties_AmmoUser);
+            }
+
         }
         public override void ExposeData()
         {
-            if(Scribe.mode == LoadSaveMode.Saving && compProps != null)
+            if (Scribe.mode == LoadSaveMode.Saving && (compProps != null || reservedData != null))
             {
+                if (reservedData == null)
+                    reservedData = compProps;
+
                 foreach (var item in propNames)
                 {
-                    propDic[item] = PropUtility.GetPropValue(compProps, item).ToString();
+                    propDic[item] = PropUtility.GetPropValue(reservedData, item).ToString();
                 }
 
-                this.ammoSet = compProps.ammoSet;
+                //this.ammoSet = compProps.ammoSet;
+                if (compProps != null && reservedData.ammoSet == null)
+                {
+                    thingDef.comps.RemoveWhere(x => x is CompProperties_AmmoUser);
+                }
+                else if (compProps == null && reservedData.ammoSet != null)
+                {
+                    thingDef.comps.Add(reservedData);
+                }
+
+                this.ammoSet = reservedData.ammoSet;
             }
 
             Scribe_Collections.Look(ref propDic, "propDic", LookMode.Value, LookMode.Value);
             Scribe_Values.Look(ref ammoSetString, "ammoSet", null);
 
-            if(Scribe.mode == LoadSaveMode.LoadingVars)
+            if (Scribe.mode == LoadSaveMode.LoadingVars)
             {
                 if (propDic == null)
                 {
@@ -99,12 +120,17 @@ namespace CeManualPatcher.Saveable
 
         public override void Reset()
         {
-            if(compProps == null)
+            if (compProps == null && reservedData != null)
+            {
+                thingDef.comps.Add(reservedData);
+            }
+
+            if (compProps == null)
             {
                 return;
             }
 
-            if(originalData == null)
+            if (originalData == null)
             {
                 thingDef.comps.RemoveWhere(x => x is CompProperties_AmmoUser);
             }
@@ -134,6 +160,8 @@ namespace CeManualPatcher.Saveable
             }
             originalData = new CompProperties_AmmoUser();
             PropUtility.CopyPropValue(compProps, originalData);
+
+            reservedData = compProps;
         }
 
     }

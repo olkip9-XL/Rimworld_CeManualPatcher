@@ -101,8 +101,10 @@ namespace CeManualPatcher.Misc.Manager
             }
         }
 
-        public void SaveToLocal()
+        public bool SaveToLocal()
         {
+            bool result = true;
+
             //remove ammo dir
             string modAmmoPath = CustomAmmoSet.ModDefDir;
             if (Directory.Exists(modAmmoPath))
@@ -114,6 +116,7 @@ namespace CeManualPatcher.Misc.Manager
                 catch (Exception e)
                 {
                     Log.Error($"[CeManualPatcher] Custom Ammo manager error while deleting ammo dir {modAmmoPath}: {e}");
+                    result = false;
                 }
             }
 
@@ -127,10 +130,12 @@ namespace CeManualPatcher.Misc.Manager
                 catch (Exception e)
                 {
                     Log.Error($"[CeManualPatcher] Custom Ammo manager error while saving ammo set {item?.defNameBase ?? "null"} to local mod dirctory: {e}");
+                    result = false;
                 }
             }
 
-            Messages.Message("MP_SaveSuccess".Translate(), MessageTypeDefOf.PositiveEvent);
+            return result;
+
         }
 
         public void PostLoadInit()

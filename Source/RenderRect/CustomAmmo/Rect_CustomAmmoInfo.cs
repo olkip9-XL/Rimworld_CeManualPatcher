@@ -106,7 +106,8 @@ namespace CeManualPatcher.RenderRect
             Rect saveRect = rect.LeftPartPixels(100f);
             if (Widgets.ButtonText(saveRect, "MP_Save".Translate()))
             {
-                manager.SaveToLocal();
+                if (manager.SaveToLocal())
+                    Messages.Message("MP_SaveSuccess".Translate(), MessageTypeDefOf.PositiveEvent);
             }
 
             //export

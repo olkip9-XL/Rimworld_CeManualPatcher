@@ -71,6 +71,9 @@ namespace CeManualPatcher.Dialogs
             if(ammoUser != null)
             {
                 ammoUser.ammoSet = AmmoManager.curAmmoSet.ammoSetDef;
+
+                if(ammoUser.ammoSet == null && verbProperties != null)
+                    verbProperties.verbClass = typeof(Verb_Shoot);
             }
 
             this.Close();

@@ -125,5 +125,22 @@ namespace CeManualPatcher.Misc
 
         }
 
+        public static void UtilityTick()
+        {
+            string curId = GUI.GetNameOfFocusedControl();
+            if (WidgetsUtility.curId != curId)
+            {
+                WidgetsUtility.curId = curId;
+                WidgetsUtility.curBuffer = null;
+            }
+        }
+
+        public static void ResetTextFieldBuffer()
+        {
+            GUI.FocusControl("");
+            WidgetsUtility.curId = "";
+            WidgetsUtility.curBuffer = null;
+        }
+
     }
 }

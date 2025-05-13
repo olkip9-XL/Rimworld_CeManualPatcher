@@ -66,8 +66,8 @@ namespace CeManualPatcher.Misc.Manager
                 }
                 patches.Remove(patch);
             }
-            GUI.FocusControl("");
-            WidgetsUtility.curId = "";
+
+            WidgetsUtility.ResetTextFieldBuffer();
         }
 
         public virtual void ResetAll()
@@ -84,8 +84,7 @@ namespace CeManualPatcher.Misc.Manager
                 }
             }
             patches.Clear();
-            GUI.FocusControl("");
-            WidgetsUtility.curId = "";
+            WidgetsUtility.ResetTextFieldBuffer();
         }
 
 

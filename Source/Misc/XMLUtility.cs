@@ -154,14 +154,14 @@ namespace CeManualPatcher.Misc
                 XmlElement statElement = xmlDoc.CreateElement("li");
                 statsElement.AppendChild(statElement);
 
-                if (stat.useStatic)
+                if (stat.isStatValueStatic)
                 {
-                    AddChildElement(xmlDoc, statElement, stat.stat.defName, stat.staticValue.ToString());
+                    AddChildElement(xmlDoc, statElement, stat.stat.defName, stat.statValue.ToString());
                     AddChildElement(xmlDoc, statElement, "useStatic", "true");
                 }
                 else
                 {
-                    AddChildElement(xmlDoc, statElement, stat.stat.defName, stat.mult.ToString());
+                    AddChildElement(xmlDoc, statElement, stat.stat.defName, stat.statValue.ToString());
                 }
 
                 XmlElement partsElement = xmlDoc.CreateElement("parts");
@@ -338,11 +338,14 @@ namespace CeManualPatcher.Misc
                 //ammo user
                 if (thingDef.HasComp<CompAmmoUser>())
                 {
-                    XmlElement ammoUserElement = xmlDoc.CreateElement("AmmoUser");
-                    cePatchElement.AppendChild(ammoUserElement);
-
                     CompProperties_AmmoUser defaultAmmoUser = new CompProperties_AmmoUser();
                     CompProperties_AmmoUser currentAmmoUser = thingDef.GetCompProperties<CompProperties_AmmoUser>();
+
+                    if (currentAmmoUser.ammoSet == null)
+                        return;
+
+                    XmlElement ammoUserElement = xmlDoc.CreateElement("AmmoUser");
+                    cePatchElement.AppendChild(ammoUserElement);
 
                     foreach (var propName in CompAmmoUserSaveable.propNames)
                     {
@@ -444,9 +447,6 @@ namespace CeManualPatcher.Misc
             }
 
         }
-    
-    
-    
     
         // Defs
         public static XmlDocument CreateBaseDefDoc(ref XmlElement rootElement)
