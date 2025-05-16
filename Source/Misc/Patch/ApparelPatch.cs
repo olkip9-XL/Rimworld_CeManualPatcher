@@ -1,6 +1,7 @@
 ﻿using CeManualPatcher.Manager;
 using CeManualPatcher.Misc;
 using CeManualPatcher.Misc.Manager;
+using CeManualPatcher.Misc.Patch;
 using CeManualPatcher.Saveable;
 using CeManualPatcher.Saveable.Apparel;
 using CeManualPatcher.Saveable.Weapon;

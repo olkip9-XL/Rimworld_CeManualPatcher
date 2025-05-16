@@ -1,4 +1,5 @@
 ﻿using CeManualPatcher.Misc;
+using CeManualPatcher.Misc.Patch;
 using CeManualPatcher.Saveable;
 using CeManualPatcher.Saveable.Weapon;
 using CombatExtended;

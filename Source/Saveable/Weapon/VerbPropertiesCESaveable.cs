@@ -13,7 +13,7 @@ using CeManualPatcher.Misc;
 
 namespace CeManualPatcher.Saveable
 {
-    internal class VerbPropertiesCESaveable : SaveableBase
+    internal class VerbPropertiesCESaveable : SaveableBase<ThingDef>
     {
 
         public static ReadOnlyCollection<string> propNames = new List<string>()
@@ -65,15 +65,15 @@ namespace CeManualPatcher.Saveable
         {
             get
             {
-                if (thingDef == null)
+                if (def == null)
                 {
                     return null;
                 }
-                if (thingDef.Verbs.NullOrEmpty())
+                if (def.Verbs.NullOrEmpty())
                 {
                     return null;
                 }
-                return thingDef.Verbs[0] as VerbPropertiesCE;
+                return def.Verbs[0] as VerbPropertiesCE;
             }
         }
 
@@ -81,7 +81,7 @@ namespace CeManualPatcher.Saveable
         internal VerbPropertiesCESaveable() { }
         internal VerbPropertiesCESaveable(ThingDef thingDef, bool forceAdd = false)
         {
-            this.thingDef = thingDef;
+            this.def = thingDef;
             if (verbPropertiesCE == null && !forceAdd)
             {
                 return;
@@ -151,14 +151,14 @@ namespace CeManualPatcher.Saveable
             if (verbPropertiesCE == null)
                 return;
 
-            thingDef.Verbs[0] = this.originalData;
+            def.Verbs[0] = this.originalData;
 
 
             InitOriginalData();
         }
         public override void PostLoadInit(ThingDef thingDef)
         {
-            this.thingDef = thingDef;
+            this.def = thingDef;
 
             if (thingDef.Verbs.NullOrEmpty())
                 return;
@@ -179,7 +179,7 @@ namespace CeManualPatcher.Saveable
             if (verbPropertiesCE != null)
                 this.originalData = new VerbPropertiesCE();
 
-            PropUtility.CopyPropValue(thingDef.Verbs[0], this.originalData);
+            PropUtility.CopyPropValue(def.Verbs[0], this.originalData);
         }
 
 

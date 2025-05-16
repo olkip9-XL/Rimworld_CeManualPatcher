@@ -7,7 +7,7 @@ using Verse;
 
 namespace CeManualPatcher.Saveable.Ammo
 {
-    internal class AmmoDefSaveable : SaveableBase
+    internal class AmmoDefSaveable : SaveableBase<ThingDef>
     {
         //字段
         private string label;
@@ -23,16 +23,16 @@ namespace CeManualPatcher.Saveable.Ammo
                 return;
             }
 
-            this.thingDef = ammoDef;
+            this.def = ammoDef;
 
             InitOriginalData();
         }
 
         public override void ExposeData()
         {
-            if (Scribe.mode == LoadSaveMode.Saving && thingDef != null)
+            if (Scribe.mode == LoadSaveMode.Saving && def != null)
             {
-                this.label = thingDef.label;
+                this.label = def.label;
             }
 
             Scribe_Values.Look(ref label, "ammoLabel");
@@ -40,36 +40,36 @@ namespace CeManualPatcher.Saveable.Ammo
 
         public override void Reset()
         {
-            if (thingDef == null)
+            if (def == null)
             {
                 return;
             }
-            thingDef.label = originalLabel;
+            def.label = originalLabel;
         }
 
         protected override void Apply()
         {
-            if (thingDef == null)
+            if (def == null)
             {
                 return;
             }
 
-            thingDef.label = label;
+            def.label = label;
         }
 
         protected override void InitOriginalData()
         {
-            if (thingDef == null)
+            if (def == null)
             {
                 return;
             }
 
-            this.originalLabel = thingDef.label;
+            this.originalLabel = def.label;
         }
 
         public override void PostLoadInit(ThingDef thingDef)
         {
-            this.thingDef = thingDef;
+            this.def = thingDef;
             if (thingDef == null)
             {
                 return;

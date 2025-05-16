@@ -15,7 +15,7 @@ using CeManualPatcher.Misc;
 namespace CeManualPatcher.Saveable
 {
 
-    internal class ProjectileDefSaveable : SaveableBase
+    internal class ProjectileDefSaveable : SaveableBase<ThingDef>
     {
         //字段
         public static ReadOnlyCollection<string> propNames = new List<string>()
@@ -53,11 +53,11 @@ namespace CeManualPatcher.Saveable
         {
             get
             {
-                if (thingDef == null || thingDef.projectile == null)
+                if (def == null || def.projectile == null)
                 {
                     return null;
                 }
-                return thingDef.projectile as ProjectilePropertiesCE;
+                return def.projectile as ProjectilePropertiesCE;
             }
         }
 
@@ -68,7 +68,7 @@ namespace CeManualPatcher.Saveable
         public ProjectileDefSaveable() { }
         public ProjectileDefSaveable(ThingDef thingDef)
         {
-            this.thingDef = thingDef;
+            this.def = thingDef;
             if (projectile == null)
             {
                 return;
@@ -108,7 +108,7 @@ namespace CeManualPatcher.Saveable
             projectile.postExplosionGasType = postExplosionGasType;
             fieldInfo_damageAmountBase.SetValue(projectile, damageAmountBase);
 
-            thingDef.label = this.label;
+            def.label = this.label;
         }
 
         public override void ExposeData()
@@ -124,7 +124,7 @@ namespace CeManualPatcher.Saveable
                 this.postExplosionGasType = projectile.postExplosionGasType;
                 this.damageAmountBase = (int)fieldInfo_damageAmountBase.GetValue(projectile);
 
-                this.label = thingDef.label;
+                this.label = def.label;
             }
 
             Scribe_Collections.Look(ref propDic, "propDic", LookMode.Value, LookMode.Value);
@@ -152,7 +152,7 @@ namespace CeManualPatcher.Saveable
 
             PropUtility.CopyPropValue(originalData, projectile);
 
-            thingDef.label = originalLabel;
+            def.label = originalLabel;
 
             //damageAmountBase
             fieldInfo_damageAmountBase.SetValue(projectile, fieldInfo_damageAmountBase.GetValue(originalData));
@@ -164,7 +164,7 @@ namespace CeManualPatcher.Saveable
 
         public override void PostLoadInit(ThingDef thingDef)
         {
-            this.thingDef = thingDef;
+            this.def = thingDef;
             if (projectile == null)
             {
                 return;
@@ -188,7 +188,7 @@ namespace CeManualPatcher.Saveable
             originalData = new ProjectilePropertiesCE();
             PropUtility.CopyPropValue(projectile, originalData);
 
-            this.originalLabel = thingDef.label;
+            this.originalLabel = def.label;
 
             //damageAmountBase
             fieldInfo_damageAmountBase.SetValue(originalData, fieldInfo_damageAmountBase.GetValue(projectile));

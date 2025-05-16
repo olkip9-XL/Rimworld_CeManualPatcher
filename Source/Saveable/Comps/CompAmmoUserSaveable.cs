@@ -10,7 +10,7 @@ using Verse;
 
 namespace CeManualPatcher.Saveable
 {
-    internal class CompAmmoUserSaveable : SaveableBase
+    internal class CompAmmoUserSaveable : SaveableBase<ThingDef>
     {
         public static ReadOnlyCollection<string> propNames = new List<string>()
         {
@@ -36,11 +36,11 @@ namespace CeManualPatcher.Saveable
         {
             get
             {
-                if (thingDef == null || !thingDef.HasComp<CompAmmoUser>())
+                if (def == null || !def.HasComp<CompAmmoUser>())
                 {
                     return null;
                 }
-                return thingDef.GetCompProperties<CompProperties_AmmoUser>();
+                return def.GetCompProperties<CompProperties_AmmoUser>();
             }
         }
 
@@ -52,7 +52,7 @@ namespace CeManualPatcher.Saveable
 
         public CompAmmoUserSaveable(ThingDef thingDef, bool forceAdd = false)
         {
-            this.thingDef = thingDef;
+            this.def = thingDef;
             if (compProps == null && !forceAdd)
             {
                 return;
@@ -77,7 +77,7 @@ namespace CeManualPatcher.Saveable
 
             if (ammoSet == null)
             {
-                thingDef.comps.RemoveWhere(x => x is CompProperties_AmmoUser);
+                def.comps.RemoveWhere(x => x is CompProperties_AmmoUser);
             }
 
         }
@@ -96,11 +96,11 @@ namespace CeManualPatcher.Saveable
                 //this.ammoSet = compProps.ammoSet;
                 if (compProps != null && reservedData.ammoSet == null)
                 {
-                    thingDef.comps.RemoveWhere(x => x is CompProperties_AmmoUser);
+                    def.comps.RemoveWhere(x => x is CompProperties_AmmoUser);
                 }
                 else if (compProps == null && reservedData.ammoSet != null)
                 {
-                    thingDef.comps.Add(reservedData);
+                    def.comps.Add(reservedData);
                 }
 
                 this.ammoSet = reservedData.ammoSet;
@@ -122,7 +122,7 @@ namespace CeManualPatcher.Saveable
         {
             if (compProps == null && reservedData != null)
             {
-                thingDef.comps.Add(reservedData);
+                def.comps.Add(reservedData);
             }
 
             if (compProps == null)
@@ -132,7 +132,7 @@ namespace CeManualPatcher.Saveable
 
             if (originalData == null)
             {
-                thingDef.comps.RemoveWhere(x => x is CompProperties_AmmoUser);
+                def.comps.RemoveWhere(x => x is CompProperties_AmmoUser);
             }
             else
             {
@@ -142,7 +142,7 @@ namespace CeManualPatcher.Saveable
 
         public override void PostLoadInit(ThingDef thingDef)
         {
-            this.thingDef = thingDef;
+            this.def = thingDef;
             InitOriginalData();
 
             if (!thingDef.HasComp<CompAmmoUser>())

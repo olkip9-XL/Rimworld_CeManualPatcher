@@ -10,7 +10,7 @@ using Verse;
 
 namespace CeManualPatcher.Saveable
 {
-    internal class StatSaveable : SaveableBase
+    internal class StatSaveable : SaveableBase<ThingDef>
     {
         private Dictionary<string, float> modifierDic = new Dictionary<string, float>();
 
@@ -19,11 +19,11 @@ namespace CeManualPatcher.Saveable
         {
             get
             {
-                if (thingDef == null)
+                if (def == null)
                 {
                     return null;
                 }
-                return thingDef.statBases;
+                return def.statBases;
             }
         }
 
@@ -43,10 +43,10 @@ namespace CeManualPatcher.Saveable
         public override void ExposeData()
         {
             if (Scribe.mode == LoadSaveMode.Saving &&
-                this.thingDef != null)
+                this.def != null)
             {
                 modifierDic.Clear();
-                foreach (var statModifier in this.thingDef.statBases)
+                foreach (var statModifier in this.def.statBases)
                 {
                     if (statModifier.stat != null)
                     {
@@ -67,18 +67,18 @@ namespace CeManualPatcher.Saveable
 
         public override void Reset()
         {
-            if (thingDef == null)
+            if (def == null)
                 return;
 
-            thingDef.statBases = this.originalData;
+            def.statBases = this.originalData;
             InitOriginalData();
         }
 
         protected override void Apply()
         {
-            if (thingDef == null)
+            if (def == null)
                 return;
-            thingDef.statBases.Clear();
+            def.statBases.Clear();
             foreach (var item in modifierDic)
             {
                 StatModifier statModifier = new StatModifier()
@@ -87,7 +87,7 @@ namespace CeManualPatcher.Saveable
                     value = item.Value,
                 };
                 if (statModifier.stat != null)
-                    thingDef.statBases.Add(statModifier);
+                    def.statBases.Add(statModifier);
             }
 
         }
@@ -98,7 +98,7 @@ namespace CeManualPatcher.Saveable
             if (this.statBases == null)
                 return;
 
-            originalData = CopyUtility.CopyStats(thingDef.statBases);
+            originalData = CopyUtility.CopyStats(def.statBases);
         }
 
 

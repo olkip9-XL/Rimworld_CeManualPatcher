@@ -20,7 +20,7 @@ namespace CeManualPatcher.Saveable.Ammo
             Scribe_Values.Look(ref damageAmount, "damageAmount");
         }
     }
-    internal class SecondaryDamageSaveable : SaveableBase
+    internal class SecondaryDamageSaveable : SaveableBase<ThingDef>
     {
         private List<SecondaryDamageExpo> secondaryDamagesExpo = new List<SecondaryDamageExpo>();
 
@@ -32,12 +32,12 @@ namespace CeManualPatcher.Saveable.Ammo
         {
             get
             {
-                if (thingDef == null || thingDef.projectile == null || !(thingDef.projectile is ProjectilePropertiesCE))
+                if (def == null || def.projectile == null || !(def.projectile is ProjectilePropertiesCE))
                 {
                     return null;
                 }
 
-                return (thingDef.projectile as ProjectilePropertiesCE).secondaryDamage;
+                return (def.projectile as ProjectilePropertiesCE).secondaryDamage;
             }
         }
 
@@ -47,7 +47,7 @@ namespace CeManualPatcher.Saveable.Ammo
 
         public SecondaryDamageSaveable(ThingDef thingDef)
         {
-            this.thingDef = thingDef;
+            this.def = thingDef;
             if (secondaryDamages.NullOrEmpty())
             {
                 return;
@@ -109,7 +109,7 @@ namespace CeManualPatcher.Saveable.Ammo
                 return;
             }
 
-            ProjectilePropertiesCE projectile = thingDef.projectile as ProjectilePropertiesCE;
+            ProjectilePropertiesCE projectile = def.projectile as ProjectilePropertiesCE;
 
             //projectile.secondaryDamage = this.originalData;
             projectile.secondaryDamage.Clear();
@@ -120,7 +120,7 @@ namespace CeManualPatcher.Saveable.Ammo
 
         public override void PostLoadInit(ThingDef thingDef)
         {
-           this.thingDef = thingDef;
+           this.def = thingDef;
             if (secondaryDamages == null)
             {
                 return;

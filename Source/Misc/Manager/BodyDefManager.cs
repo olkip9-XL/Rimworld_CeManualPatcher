@@ -1,4 +1,5 @@
-﻿using CeManualPatcher.Patch;
+﻿using CeManualPatcher.Misc.Patch;
+using CeManualPatcher.Patch;
 using CeManualPatcher.RenderRect.Body;
 using System;
 using System.Collections.Generic;
@@ -26,19 +27,22 @@ namespace CeManualPatcher.Misc.Manager
             {
                 if (iconDicInt == null)
                 {
-                    iconDicInt = new Dictionary<BodyDef, Texture2D>();
-
-                    foreach (var item in DefDatabase<BodyDef>.AllDefs)
-                    {
-                        Texture2D texture = DefDatabase<ThingDef>.AllDefs.FirstOrDefault(x => x.race?.body == item)?.uiIcon;
-
-                        if(texture == null)
-                            texture = BaseContent.BadTex;
-
-                        iconDicInt.Add(item, texture);
-                    }
+                   InitDics();
                 }
                 return iconDicInt;
+            }
+        }
+
+        private Dictionary<BodyDef, string> descriptionDicInt = null;
+        public Dictionary<BodyDef, string> descriptionDic
+        {
+            get
+            {
+                if(descriptionDicInt == null)
+                {
+                   InitDics();
+                }
+                return descriptionDicInt;
             }
         }
 
@@ -58,6 +62,33 @@ namespace CeManualPatcher.Misc.Manager
 
         protected override void NewPatch(ref PatchBase<BodyDef> patch, BodyDef def)
         {
+            patch = new BodyDefPatch(def);
         }
+
+        public bool HasPatch(BodyDef def)
+        {
+           return patches.Any(x => x?.targetDef == def);
+        }
+
+        private void InitDics()
+        {
+            iconDicInt = new Dictionary<BodyDef, Texture2D>();
+            descriptionDicInt = new Dictionary<BodyDef, string>();
+
+            foreach (var item in DefDatabase<BodyDef>.AllDefs)
+            {
+                ThingDef thingDef = DefDatabase<ThingDef>.AllDefs.FirstOrDefault(x => x.race?.body == item);
+
+                Texture2D texture = thingDef?.uiIcon;
+                string desc = thingDef?.description;
+
+                if (texture == null)
+                    texture = BaseContent.BadTex;
+
+                iconDicInt.Add(item, texture);
+                descriptionDicInt.Add(item, desc);
+            }
+        }
+      
     }
 }

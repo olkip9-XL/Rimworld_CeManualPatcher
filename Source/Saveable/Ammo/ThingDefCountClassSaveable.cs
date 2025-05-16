@@ -20,7 +20,7 @@ namespace CeManualPatcher.Saveable.Ammo
         }
     }
 
-    internal class ThingDefCountClassSaveable : SaveableBase
+    internal class ThingDefCountClassSaveable : SaveableBase<ThingDef>
     {
 
         private List<ThingDefCountClassExpo> fragmentsExpo = new List<ThingDefCountClassExpo>();
@@ -31,21 +31,21 @@ namespace CeManualPatcher.Saveable.Ammo
         {
             get
             {
-                if (thingDef == null)
+                if (def == null)
                 {
                     return null;
                 }
-                if (!thingDef.HasComp<CompFragments>())
+                if (!def.HasComp<CompFragments>())
                 {
                     return null;
                 }
-                return thingDef.GetCompProperties<CompProperties_Fragments>();
+                return def.GetCompProperties<CompProperties_Fragments>();
             }
         }
         public ThingDefCountClassSaveable() { }
         public ThingDefCountClassSaveable(ThingDef thingDef, bool isOriginal = false)
         {
-            this.thingDef = thingDef;
+            this.def = thingDef;
             if (compProps == null)
             {
                 return;
@@ -74,7 +74,7 @@ namespace CeManualPatcher.Saveable.Ammo
 
         public override void ExposeData()
         {
-            if (Scribe.mode == LoadSaveMode.Saving && compProps!=null)
+            if (Scribe.mode == LoadSaveMode.Saving && compProps != null)
             {
                 fragmentsExpo.Clear();
                 foreach (var fragment in compProps.fragments)
@@ -88,7 +88,7 @@ namespace CeManualPatcher.Saveable.Ammo
             }
 
             Scribe_Collections.Look(ref fragmentsExpo, "fragments", LookMode.Deep);
-            if(Scribe.mode == LoadSaveMode.LoadingVars && fragmentsExpo == null)
+            if (Scribe.mode == LoadSaveMode.LoadingVars && fragmentsExpo == null)
             {
                 fragmentsExpo = new List<ThingDefCountClassExpo>();
             }
@@ -96,7 +96,7 @@ namespace CeManualPatcher.Saveable.Ammo
 
         public override void Reset()
         {
-            if(compProps == null)
+            if (compProps == null)
             {
                 return;
             }
@@ -108,7 +108,7 @@ namespace CeManualPatcher.Saveable.Ammo
 
         public override void PostLoadInit(ThingDef thingDef)
         {
-           this.thingDef = thingDef;
+            this.def = thingDef;
             if (compProps == null)
             {
                 return;

@@ -23,7 +23,7 @@ namespace CeManualPatcher.Saveable
         }
     }
 
-    internal class ToolCESaveable : SaveableBase
+    internal class ToolCESaveable : SaveableBase<ThingDef>
     {
         public static ReadOnlyCollection<string> propNames = new List<string>()
         {
@@ -54,15 +54,15 @@ namespace CeManualPatcher.Saveable
         {
             get
             {
-                if (thingDef == null)
+                if (def == null)
                 {
                     return null;
                 }
-                if (thingDef.tools.NullOrEmpty())
+                if (def.tools.NullOrEmpty())
                 {
                     return null;
                 }
-                return thingDef.tools.FirstOrDefault(t => t.id == id) as ToolCE;
+                return def.tools.FirstOrDefault(t => t.id == id) as ToolCE;
             }
         }
 
@@ -71,7 +71,7 @@ namespace CeManualPatcher.Saveable
         public ToolCESaveable(ThingDef thingDef, string id)
         {
             this.id = id;
-            this.thingDef = thingDef;
+            this.def = thingDef;
             if (tool == null)
             {
                 return;
@@ -83,7 +83,7 @@ namespace CeManualPatcher.Saveable
         {
             if (tool == null)
             {
-                thingDef.tools.Add(new ToolCE()
+                def.tools.Add(new ToolCE()
                 {
                     id = this.id,
                     label = this.label
@@ -166,7 +166,7 @@ namespace CeManualPatcher.Saveable
                 tool.capacities?.ForEach(x => this.capacitiesString.Add(x.defName));
                 if (tool.capacities.NullOrEmpty())
                 {
-                    Log.Error($"[CeManualPatcher] Capacities (Damage types) is Empty, this could cause some errors, thing: {thingDef.defName} ({thingDef.LabelCap}), tool: {tool.label}");
+                    Log.Error($"[CeManualPatcher] Capacities (Damage types) is Empty, this could cause some errors, thing: {def.defName} ({def.LabelCap}), tool: {tool.label}");
                 }
 
                 //surprise attack
@@ -234,7 +234,7 @@ namespace CeManualPatcher.Saveable
         }
         public override void PostLoadInit(ThingDef thingDef)
         {
-            this.thingDef = thingDef;
+            this.def = thingDef;
             InitOriginalData();
             this.Apply();
         }

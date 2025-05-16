@@ -1,4 +1,5 @@
-﻿using CeManualPatcher.Saveable;
+﻿using CeManualPatcher.Misc.Patch;
+using CeManualPatcher.Saveable;
 using CeManualPatcher.Saveable.Ammo;
 using CombatExtended;
 using RimWorld;

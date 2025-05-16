@@ -10,7 +10,7 @@ using Verse;
 
 namespace CeManualPatcher.Saveable.Weapon
 {
-    internal class WeaponTagsSaveable : SaveableBase
+    internal class WeaponTagsSaveable : SaveableBase<ThingDef>
     {
         public static readonly string tagOneHandWeaponCE = "CE_OneHandedWeapon";
 
@@ -21,11 +21,11 @@ namespace CeManualPatcher.Saveable.Weapon
         {
             get
             {
-                if (thingDef == null || thingDef.weaponTags == null)
+                if (def == null || def.weaponTags == null)
                 {
                     return null;
                 }
-                return thingDef.weaponTags;
+                return def.weaponTags;
             }
         }
 

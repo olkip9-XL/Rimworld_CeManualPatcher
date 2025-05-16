@@ -87,6 +87,7 @@
     <Compile Include="Misc\MP_Options.cs" />
     <Compile Include="Misc\MP_Texture.cs" />
     <Compile Include="Misc\Patch\ApparelPatch.cs" />
+    <Compile Include="Misc\Patch\BodyDefPatch.cs" />
     <Compile Include="Misc\Patch\PatchBase.cs" />
     <Compile Include="Misc\PropUtility.cs" />
     <Compile Include="Misc\WidgetsUtility.cs" />
@@ -114,6 +115,7 @@
     <Compile Include="Saveable\Ammo\ThingDefCountClassSaveable.cs" />
     <Compile Include="Saveable\Apparel\PartialArmorExtItem.cs" />
     <Compile Include="Saveable\Apparel\PartialArmorExtSaveable.cs" />
+    <Compile Include="Saveable\Body\BodyPartRecordSaveable.cs" />
     <Compile Include="Saveable\Comps\CompAmmoUserSaveable.cs" />
     <Compile Include="Saveable\Comps\CompFireModesSaveable.cs" />
     <Compile Include="Saveable\SaveableBase.cs" />

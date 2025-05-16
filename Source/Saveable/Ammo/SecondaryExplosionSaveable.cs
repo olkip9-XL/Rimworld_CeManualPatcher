@@ -10,7 +10,7 @@ using Verse;
 
 namespace CeManualPatcher.Saveable.Ammo
 {
-    internal class SecondaryExplosionSaveable : SaveableBase
+    internal class SecondaryExplosionSaveable : SaveableBase<ThingDef>
     {
         public static ReadOnlyCollection<string> propNames = new List<string>()
         {
@@ -33,15 +33,15 @@ namespace CeManualPatcher.Saveable.Ammo
         {
             get
             {
-                if (thingDef == null)
+                if (def == null)
                 {
                     return null;
                 }
-                if (!thingDef.HasComp<CompExplosiveCE>())
+                if (!def.HasComp<CompExplosiveCE>())
                 {
                     return null;
                 }
-                return thingDef.GetCompProperties<CompProperties_ExplosiveCE>();
+                return def.GetCompProperties<CompProperties_ExplosiveCE>();
             }
         }
 
@@ -50,7 +50,7 @@ namespace CeManualPatcher.Saveable.Ammo
         public SecondaryExplosionSaveable() { }
         public SecondaryExplosionSaveable(ThingDef thingDef)
         {
-            this.thingDef = thingDef;
+            this.def = thingDef;
             if (compProps == null)
             {
                 return;
@@ -108,7 +108,7 @@ namespace CeManualPatcher.Saveable.Ammo
 
         public override void PostLoadInit(ThingDef thingDef)
         {
-            this.thingDef = thingDef;
+            this.def = thingDef;
             if (compProps == null)
             {
                 return;

@@ -7,14 +7,14 @@ using Verse;
 
 namespace CeManualPatcher.Saveable
 {
-    internal abstract class SaveableBase : IExposable
+    internal abstract class SaveableBase<T> : IExposable where T : Def
     {
-        protected ThingDef thingDef;
+        protected T def;
         public SaveableBase() { }
-        public SaveableBase(ThingDef thingDef)
+        public SaveableBase(T def)
         {
-            this.thingDef = thingDef;
-            if(NullCheck())
+            this.def = def;
+            if (NullCheck())
             {
                 return;
             }
@@ -24,9 +24,9 @@ namespace CeManualPatcher.Saveable
         protected abstract void Apply();
         public abstract void Reset();
         public abstract void ExposeData();
-        public virtual void PostLoadInit(ThingDef thingDef)
+        public virtual void PostLoadInit(T def)
         {
-            this.thingDef = thingDef;
+            this.def = def;
             if (NullCheck())
             {
                 return;
@@ -40,7 +40,7 @@ namespace CeManualPatcher.Saveable
 
         protected virtual bool NullCheck()
         {
-            return thingDef == null;
+            return def == null;
         }
 
     }

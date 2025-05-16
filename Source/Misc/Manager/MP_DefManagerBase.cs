@@ -1,4 +1,5 @@
 ﻿using CeManualPatcher.Misc;
+using CeManualPatcher.Misc.Patch;
 using CeManualPatcher.Patch;
 using System;
 using System.Collections.Generic;

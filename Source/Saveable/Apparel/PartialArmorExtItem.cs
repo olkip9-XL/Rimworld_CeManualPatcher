@@ -11,7 +11,7 @@ using Verse;
 
 namespace CeManualPatcher.Saveable.Apparel
 {
-    internal class PartialArmorExtItem : SaveableBase
+    internal class PartialArmorExtItem : SaveableBase<ThingDef>
     {
         public static ReadOnlyCollection<string> propNames = new ReadOnlyCollection<string>(new List<string>()
         {
@@ -36,13 +36,13 @@ namespace CeManualPatcher.Saveable.Apparel
         {
             get
             {
-                if (thingDef == null)
+                if (def == null)
                 {
                     return null;
                 }
-                if (thingDef.HasModExtension<PartialArmorExt>())
+                if (def.HasModExtension<PartialArmorExt>())
                 {
-                    return thingDef.GetModExtension<PartialArmorExt>();
+                    return def.GetModExtension<PartialArmorExt>();
                 }
                 else
                 {
@@ -138,7 +138,7 @@ namespace CeManualPatcher.Saveable.Apparel
 
         public override void PostLoadInit(ThingDef thingDef)
         {
-            this.thingDef = thingDef;
+            this.def = thingDef;
             if(partialArmorExt == null)
             {
                 return;

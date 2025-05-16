@@ -23,6 +23,8 @@ namespace CeManualPatcher.Extension
                     return "MP_Apparel".Translate();
                 case MP_SettingTab.CustomAmmo:
                     return "MP_CustomAmmo".Translate();
+                case MP_SettingTab.Body:
+                    return "MP_Body".Translate();
                 default:
                     return "Unknown";
             }

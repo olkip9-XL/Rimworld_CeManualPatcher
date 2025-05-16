@@ -1,4 +1,5 @@
 ﻿using CeManualPatcher.Manager;
+using CeManualPatcher.Misc.Patch;
 using CeManualPatcher.Patch;
 using CeManualPatcher.RenderRect;
 using CeManualPatcher.RenderRect.Apparel;

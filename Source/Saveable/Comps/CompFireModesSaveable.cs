@@ -10,7 +10,7 @@ using Verse;
 
 namespace CeManualPatcher.Saveable
 {
-    internal class CompFireModesSaveable : SaveableBase
+    internal class CompFireModesSaveable : SaveableBase<ThingDef>
     {
         //字段
         public static ReadOnlyCollection<string> propNames = new List<string>()
@@ -30,11 +30,11 @@ namespace CeManualPatcher.Saveable
         {
             get
             {
-                if (thingDef == null || !thingDef.HasComp<CompFireModes>())
+                if (def == null || !def.HasComp<CompFireModes>())
                 {
                     return null;
                 }
-                return thingDef.GetCompProperties<CompProperties_FireModes>();
+                return def.GetCompProperties<CompProperties_FireModes>();
             }
         }
 
@@ -43,7 +43,7 @@ namespace CeManualPatcher.Saveable
 
         public CompFireModesSaveable(ThingDef thingDef, bool forceAdd = false)
         {
-            this.thingDef = thingDef;
+            this.def = thingDef;
             if (compProps == null && !forceAdd)
             {
                 return;
@@ -99,7 +99,7 @@ namespace CeManualPatcher.Saveable
 
             if(originalData == null)
             {
-                thingDef.comps.RemoveWhere(x => x is CompProperties_FireModes);
+                def.comps.RemoveWhere(x => x is CompProperties_FireModes);
             }
             else
             {
@@ -109,7 +109,7 @@ namespace CeManualPatcher.Saveable
 
         public override void PostLoadInit(ThingDef thingDef)
         {
-            this.thingDef = thingDef;
+            this.def = thingDef;
 
             InitOriginalData();
 

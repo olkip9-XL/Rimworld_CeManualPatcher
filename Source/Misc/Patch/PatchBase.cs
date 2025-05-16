@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Verse;
 
-namespace CeManualPatcher.Patch
+namespace CeManualPatcher.Misc.Patch
 {
     public abstract class PatchBase<T> : IExposable where T : Def
     {

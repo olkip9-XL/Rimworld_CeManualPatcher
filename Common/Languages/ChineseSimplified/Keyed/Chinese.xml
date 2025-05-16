@@ -6,6 +6,7 @@
   <MP_Ammo>弹药</MP_Ammo>
   <MP_Bionic>植入物</MP_Bionic>
   <MP_CustomAmmo>自定义弹药</MP_CustomAmmo>
+  <MP_Body>身体</MP_Body>
 
   <!--UI 武器-->
   <MP_Source>来源：</MP_Source>
@@ -159,5 +160,11 @@
   <MP_GraphicClass>图像类</MP_GraphicClass>
 
   <MP_Save>保存</MP_Save>
+  
+  <!--Body-->
+  <MP_Height>高度</MP_Height>
+  <MP_Depth>深度</MP_Depth>
+  <MP_Coverage>覆盖率</MP_Coverage>
+  <MP_CoverdByArmor>有护甲覆盖</MP_CoverdByArmor>
 
 </LanguageData>

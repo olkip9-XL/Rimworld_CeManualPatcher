@@ -6,6 +6,7 @@
   <MP_Ammo>Ammo</MP_Ammo>
   <MP_Bionic>Bionics</MP_Bionic>
   <MP_CustomAmmo>Custom Ammo</MP_CustomAmmo>
+  <MP_Body>Body</MP_Body>
 
   <!--UI 武器-->
   <MP_Source>Source: </MP_Source>
@@ -158,5 +159,11 @@
    <MP_GraphicClass>Graphic Class</MP_GraphicClass>
 
   <MP_Save>Save</MP_Save>
+
+  <!--Body-->
+  <MP_Height>Height</MP_Height>
+  <MP_Depth>Depth</MP_Depth>
+  <MP_Coverage>Coverage</MP_Coverage>
+  <MP_CoverdByArmor>Coverd By Armor</MP_CoverdByArmor>
 
 </LanguageData>

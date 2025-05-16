@@ -22,6 +22,7 @@ namespace CeManualPatcher
         CustomAmmo,
         Bionic,
         Apparel,
+        Body,
     }
 
     public class ModSetting_CEManualPatcher : ModSettings
@@ -31,7 +32,7 @@ namespace CeManualPatcher
         internal AmmoManager ammoManager = new AmmoManager();
         internal WeaponManager weaponManager = new WeaponManager();
         internal ApparelManager apparelManager = new ApparelManager();
-        //internal BodyDefManager bodyDefManager = new BodyDefManager();
+        internal BodyDefManager bodyDefManager = new BodyDefManager();
 
         internal CustomAmmoManager customAmmoManager = new CustomAmmoManager();
 
@@ -46,6 +47,7 @@ namespace CeManualPatcher
             Scribe_Deep.Look(ref patchManager, "patchManager");
             Scribe_Deep.Look(ref apparelManager, "apparelManager");
             Scribe_Deep.Look(ref customAmmoManager, "customAmmoManager");
+            Scribe_Deep.Look(ref bodyDefManager, "bodyDefManager");
 
             if (Scribe.mode == LoadSaveMode.LoadingVars)
             {
@@ -69,6 +71,10 @@ namespace CeManualPatcher
                 {
                     customAmmoManager = new CustomAmmoManager();
                 }
+                if (bodyDefManager == null)
+                {
+                    bodyDefManager = new BodyDefManager();
+                }
             }
         }
 
@@ -81,6 +87,7 @@ namespace CeManualPatcher
             ammoManager?.PostLoadInit();
             weaponManager?.PostLoadInit();
             apparelManager?.PostLoadInit();
+            bodyDefManager?.PostLoadInit();
         }
 
         public void ExportPatch()
@@ -90,6 +97,7 @@ namespace CeManualPatcher
             patchManager?.ExportAll();
             apparelManager?.ExportAll();
             customAmmoManager?.ExportAll();
+            bodyDefManager?.ExportAll();
 
             string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "CE Patches");
             Messages.Message($"MP_CEPatchExportMsg".Translate(path), MessageTypeDefOf.NeutralEvent);
@@ -146,13 +154,15 @@ namespace CeManualPatcher
                     settings.ammoManager.DoWindowContents(inRect);
                     break;
                 case MP_SettingTab.Bionic:
-                    //settings.bodyDefManager.DoWindowContents(inRect);
                     break;
                 case MP_SettingTab.Apparel:
                     settings.apparelManager.DoWindowContents(inRect);
                     break;
                 case MP_SettingTab.CustomAmmo:
                     settings.customAmmoManager.DoWindowContents(inRect);
+                    break;
+                case MP_SettingTab.Body:
+                    settings.bodyDefManager.DoWindowContents(inRect);
                     break;
             }
 
@@ -170,8 +180,11 @@ namespace CeManualPatcher
 
             //TexButton tex = new TexButton();
 
+            Type type = typeof(TexButton);
+            //Type type = typeof(Widgets);
+
             //显示TexButton类下的所有按钮
-            foreach (var field in typeof(Widgets).GetFields())
+            foreach (var field in type.GetFields())
             {
                 if (field.FieldType == typeof(Texture2D))
                 {

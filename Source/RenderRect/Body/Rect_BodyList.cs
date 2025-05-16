@@ -17,9 +17,6 @@ namespace CeManualPatcher.RenderRect.Body
         //scroll
         private Vector2 scrollPosition = Vector2.zero;
         private float scrollHeight = 0f;
-
-
-
         private BodyDefManager manager => BodyDefManager.instance;
         private BodyDef body
         {
@@ -50,7 +47,7 @@ namespace CeManualPatcher.RenderRect.Body
                 {
                     try
                     {
-                        RenderRectUtility.DrawItemRow(innerListing, manager.iconDic[item], item.label ?? "No Label", item.description ?? "No Description", () =>
+                        RenderRectUtility.DrawItemRow(innerListing, manager.iconDic[item], item.label ?? "No Label", manager.descriptionDic[item] ?? "No Description", () =>
                         {
                             body = item;
                             Messages.Message(item.defName, MessageTypeDefOf.SilentInput);

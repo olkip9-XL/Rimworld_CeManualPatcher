@@ -51,7 +51,7 @@ namespace CeManualPatcher
                 manager.GetPatch(curWeaponDef);
             };
 
-            WidgetsUtility.ScrollView(listing.GetRect(rect.height - listing.CurHeight - Text.LineHeight - 0.1f), ref scrollPosition, ref innerHeight, (innerListing) =>
+            WidgetsUtility.ScrollView(listing.GetRect(rect.height - listing.CurHeight - 30f - 0.1f), ref scrollPosition, ref innerHeight, (innerListing) =>
             {
                 RenderRectUtility.DrawStats(innerListing, ref curWeaponDef.statBases, MP_Options.statDefs_Weapon, preChange);
 
@@ -172,7 +172,7 @@ namespace CeManualPatcher
 
         private void DrawControlPannel(Listing_Standard listing)
         {
-            Rect rect = listing.GetRect(Text.LineHeight);
+            Rect rect = listing.GetRect(30f);
 
             Rect resetAllRect = rect.LeftPartPixels(100f);
             if (Widgets.ButtonText(resetAllRect, "MP_ResetAll".Translate()))

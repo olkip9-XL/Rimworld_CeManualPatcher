@@ -10,7 +10,7 @@ using Verse.AI;
 
 namespace CeManualPatcher.Saveable.Apparel
 {
-    internal class PartialArmorExtSaveable : SaveableBase
+    internal class PartialArmorExtSaveable : SaveableBase<ThingDef>
     {
 
         List<PartialArmorExtItem> stats = new List<PartialArmorExtItem>();
@@ -20,13 +20,13 @@ namespace CeManualPatcher.Saveable.Apparel
         {
             get
             {
-                if (thingDef == null)
+                if (def == null)
                 {
                     return null;
                 }
-                if (thingDef.HasModExtension<PartialArmorExt>())
+                if (def.HasModExtension<PartialArmorExt>())
                 {
-                    return thingDef.GetModExtension<PartialArmorExt>();
+                    return def.GetModExtension<PartialArmorExt>();
                 }
                 else
                 {
@@ -41,7 +41,7 @@ namespace CeManualPatcher.Saveable.Apparel
 
         public PartialArmorExtSaveable(ThingDef thingDef)
         {
-            this.thingDef = thingDef;
+            this.def = thingDef;
             if (partialArmorExt == null)
             {
                 return;
@@ -60,7 +60,7 @@ namespace CeManualPatcher.Saveable.Apparel
                     this.stats.Add(new PartialArmorExtItem(item));
                     if (item.parts.NullOrEmpty())
                     {
-                        Log.Error($"[CeManualPatcher] Body parts of Partial Armor is Empty, this could cause some errors, thing: {thingDef.defName} ({thingDef.LabelCap})");
+                        Log.Error($"[CeManualPatcher] Body parts of Partial Armor is Empty, this could cause some errors, thing: {def.defName} ({def.LabelCap})");
                     }
                 }
             }
@@ -109,7 +109,7 @@ namespace CeManualPatcher.Saveable.Apparel
 
         public override void PostLoadInit(ThingDef thingDef)
         {
-            this.thingDef = thingDef;
+            this.def = thingDef;
             if (partialArmorExt == null)
             {
                 thingDef.AddModExtension(new PartialArmorExt()

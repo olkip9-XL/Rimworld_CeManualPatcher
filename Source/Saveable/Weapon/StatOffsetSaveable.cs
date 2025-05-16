@@ -9,7 +9,7 @@ using Verse;
 
 namespace CeManualPatcher.Saveable.Weapon
 {
-    internal class StatOffsetSaveable : SaveableBase
+    internal class StatOffsetSaveable : SaveableBase<ThingDef>
     {
         private Dictionary<string, float> modifierDic = new Dictionary<string, float>();
 
@@ -18,11 +18,11 @@ namespace CeManualPatcher.Saveable.Weapon
         {
             get
             {
-                if (thingDef == null)
+                if (def == null)
                 {
                     return null;
                 }
-                return thingDef.equippedStatOffsets;
+                return def.equippedStatOffsets;
             }
         }
 
@@ -60,22 +60,22 @@ namespace CeManualPatcher.Saveable.Weapon
 
         public override void Reset()
         {
-            if (this.thingDef == null)
+            if (this.def == null)
                 return;
 
-            thingDef.equippedStatOffsets = this.originalData;
+            def.equippedStatOffsets = this.originalData;
             InitOriginalData();
         }
 
         protected override void Apply()
         {
-            if (thingDef == null)
+            if (def == null)
                 return;
 
-            if(!modifierDic.NullOrEmpty() && thingDef.equippedStatOffsets == null)
-                thingDef.equippedStatOffsets = new List<StatModifier>();
+            if(!modifierDic.NullOrEmpty() && def.equippedStatOffsets == null)
+                def.equippedStatOffsets = new List<StatModifier>();
 
-            thingDef.equippedStatOffsets?.Clear();
+            def.equippedStatOffsets?.Clear();
             foreach (var item in modifierDic)
             {
                 StatModifier statModifier = new StatModifier()
@@ -84,23 +84,23 @@ namespace CeManualPatcher.Saveable.Weapon
                     value = item.Value,
                 };
                 if (statModifier.stat != null)
-                    thingDef.equippedStatOffsets.Add(statModifier);
+                    def.equippedStatOffsets.Add(statModifier);
             }
 
         }
 
         protected override void InitOriginalData()
         {
-            if(this.thingDef == null)
+            if(this.def == null)
                 return;
 
-            if(thingDef.equippedStatOffsets.NullOrEmpty())
+            if(def.equippedStatOffsets.NullOrEmpty())
             {
                 this.originalData = null;
             }
             else
             {
-                originalData = CopyUtility.CopyStats(thingDef.equippedStatOffsets);
+                originalData = CopyUtility.CopyStats(def.equippedStatOffsets);
             }
 
         }
