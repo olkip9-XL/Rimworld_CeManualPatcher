@@ -297,29 +297,35 @@ namespace CeManualPatcher
 
             //comps
             //AmmoUser
-            if (copiedThing.HasComp<CompAmmoUser>())
+            if (copiedThing.HasComp<CompAmmoUser>() && curWeaponDef.HasComp<CompAmmoUser>())
             {
-                CompProperties_AmmoUser propCopy = curWeaponDef.GetCompProperties<CompProperties_AmmoUser>();
-                if (propCopy == null)
-                {
-                    propCopy = new CompProperties_AmmoUser();
-                    curWeaponDef.comps.Add(propCopy);
-                }
-                CopyUtility.CopyComp(copiedThing.GetCompProperties<CompProperties_AmmoUser>(), propCopy);
+                //CompProperties_AmmoUser propCopy = curWeaponDef.GetCompProperties<CompProperties_AmmoUser>();
+                //if (propCopy == null)
+                //{
+                //    propCopy = new CompProperties_AmmoUser();
+                //    curWeaponDef.comps.Add(propCopy);
+                //}
+                CopyUtility.CopyComp(
+                    copiedThing.GetCompProperties<CompProperties_AmmoUser>(),
+                    curWeaponDef.GetCompProperties<CompProperties_AmmoUser>());
             }
 
             //FireModes
-            if (copiedThing.HasComp<CompFireModes>())
+            if (copiedThing.HasComp<CompFireModes>() && curWeaponDef.HasComp<CompFireModes>())
             {
-                CompProperties_FireModes propCopy = curWeaponDef.GetCompProperties<CompProperties_FireModes>();
-                if (propCopy == null)
-                {
-                    propCopy = new CompProperties_FireModes();
-                    curWeaponDef.comps.Add(propCopy);
-                }
-                CopyUtility.CopyComp(copiedThing.GetCompProperties<CompProperties_FireModes>(), propCopy);
-            }
+                //CompProperties_FireModes propCopy = curWeaponDef.GetCompProperties<CompProperties_FireModes>();
+                //if (propCopy == null)
+                //{
+                //    propCopy = new CompProperties_FireModes();
+                //    curWeaponDef.comps.Add(propCopy);
+                //}
+                //CopyUtility.CopyComp(copiedThing.GetCompProperties<CompProperties_FireModes>(), propCopy);
 
+                CopyUtility.CopyComp(
+                   copiedThing.GetCompProperties<CompProperties_FireModes>(),
+                   curWeaponDef.GetCompProperties<CompProperties_FireModes>());
+
+            }
 
         }
 

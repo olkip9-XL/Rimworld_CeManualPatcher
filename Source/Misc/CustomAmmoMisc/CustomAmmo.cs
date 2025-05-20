@@ -77,13 +77,13 @@ namespace CeManualPatcher.Misc.CustomAmmoMisc
             ammoElement.SetAttribute("ParentName", parentSet.BaseAmmoName);
             root.AppendChild(ammoElement);
 
-            XMLUtility.AddChildElement(doc, ammoElement, "defName", DefName);
-            XMLUtility.AddChildElement(doc, ammoElement, "label", label);
+            XmlUtility.AddChildElement(doc, ammoElement, "defName", DefName);
+            XmlUtility.AddChildElement(doc, ammoElement, "label", label);
 
             XmlElement graphicElement = doc.CreateElement("graphicData");
             ammoElement.AppendChild(graphicElement);
-            XMLUtility.AddChildElement(doc, graphicElement, "texPath", graphicWarpper.texPath);
-            XMLUtility.AddChildElement(doc, graphicElement, "graphicClass", graphicWarpper.graphicClass.ToString());
+            XmlUtility.AddChildElement(doc, graphicElement, "texPath", graphicWarpper.texPath);
+            XmlUtility.AddChildElement(doc, graphicElement, "graphicClass", graphicWarpper.graphicClass.ToString());
 
             //stat
             List<string> list = new List<string>();
@@ -100,12 +100,12 @@ namespace CeManualPatcher.Misc.CustomAmmoMisc
             {
                 XmlElement statBaseElement = doc.CreateElement("statBases");
                 ammoElement.AppendChild(statBaseElement);
-                XMLUtility.AddChildElement(doc, statBaseElement, "Mass", mass.ToString());
-                XMLUtility.AddChildElement(doc, statBaseElement, "Bulk", bulk.ToString());
+                XmlUtility.AddChildElement(doc, statBaseElement, "Mass", mass.ToString());
+                XmlUtility.AddChildElement(doc, statBaseElement, "Bulk", bulk.ToString());
             }
 
-            XMLUtility.AddChildElement(doc, ammoElement, "ammoClass", ammoCategoryDef.defName);
-            XMLUtility.AddChildElement(doc, ammoElement, "cookOffProjectile", projectile.DefName);
+            XmlUtility.AddChildElement(doc, ammoElement, "ammoClass", ammoCategoryDef.defName);
+            XmlUtility.AddChildElement(doc, ammoElement, "cookOffProjectile", projectile.DefName);
         }
 
         public void ExposeData()

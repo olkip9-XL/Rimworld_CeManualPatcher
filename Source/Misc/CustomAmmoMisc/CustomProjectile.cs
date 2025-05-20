@@ -94,10 +94,10 @@ namespace CeManualPatcher.Misc.CustomAmmoMisc
             xmlElement.SetAttribute("ParentName", parentSet.BaseProjectileName);
             root.AppendChild(xmlElement);
 
-            XMLUtility.AddChildElement(doc, xmlElement, "defName", DefName);
+            XmlUtility.AddChildElement(doc, xmlElement, "defName", DefName);
             if (!label.NullOrEmpty())
             {
-                XMLUtility.AddChildElement(doc, xmlElement, "label", label);
+                XmlUtility.AddChildElement(doc, xmlElement, "label", label);
             }
 
             //graphic
@@ -107,8 +107,8 @@ namespace CeManualPatcher.Misc.CustomAmmoMisc
 
                 XmlElement graphicElement = doc.CreateElement("graphicData");
                 xmlElement.AppendChild(graphicElement);
-                XMLUtility.AddChildElement(doc, graphicElement, "texPath", graphicWarpper.texPath);
-                XMLUtility.AddChildElement(doc, graphicElement, "graphicClass", graphicWarpper.graphicClass.ToString());
+                XmlUtility.AddChildElement(doc, graphicElement, "texPath", graphicWarpper.texPath);
+                XmlUtility.AddChildElement(doc, graphicElement, "graphicClass", graphicWarpper.graphicClass.ToString());
             }
 
             //projectile
@@ -123,21 +123,21 @@ namespace CeManualPatcher.Misc.CustomAmmoMisc
 
                 if (damageAmount != -1)
                 {
-                    XMLUtility.AddChildElement(doc, projectileElement, "damageAmountBase", damageAmount.ToString());
+                    XmlUtility.AddChildElement(doc, projectileElement, "damageAmountBase", damageAmount.ToString());
                 }
 
                 if (this.damageDef != DamageDefOf.Bullet)
                 {
-                    XMLUtility.AddChildElement(doc, projectileElement, "damageDef", damageDefString);
+                    XmlUtility.AddChildElement(doc, projectileElement, "damageDef", damageDefString);
                 }
 
                 if (Math.Abs(explosionRadius) > float.Epsilon)
                 {
-                    XMLUtility.AddChildElement(doc, projectileElement, "explosionRadius", explosionRadius.ToString());
+                    XmlUtility.AddChildElement(doc, projectileElement, "explosionRadius", explosionRadius.ToString());
 
                     if (gas != null)
                     {
-                        XMLUtility.AddChildElement(doc, projectileElement, "postExplosionGasType", gas.ToString());
+                        XmlUtility.AddChildElement(doc, projectileElement, "postExplosionGasType", gas.ToString());
                     }
 
                 }
@@ -145,11 +145,11 @@ namespace CeManualPatcher.Misc.CustomAmmoMisc
                 {
                     if (Math.Abs(armorPenetrationBlunt) > float.Epsilon)
                     {
-                        XMLUtility.AddChildElement(doc, projectileElement, "armorPenetrationBlunt", armorPenetrationBlunt.ToString());
+                        XmlUtility.AddChildElement(doc, projectileElement, "armorPenetrationBlunt", armorPenetrationBlunt.ToString());
                     }
                     if (Math.Abs(armorPenetrationSharp) > float.Epsilon)
                     {
-                        XMLUtility.AddChildElement(doc, projectileElement, "armorPenetrationSharp", armorPenetrationSharp.ToString());
+                        XmlUtility.AddChildElement(doc, projectileElement, "armorPenetrationSharp", armorPenetrationSharp.ToString());
                     }
 
                     if (!secondaryDamages.NullOrEmpty())
@@ -163,25 +163,25 @@ namespace CeManualPatcher.Misc.CustomAmmoMisc
                             XmlElement liElement = doc.CreateElement("li");
                             secondaryDamageElement.AppendChild(liElement);
 
-                            XMLUtility.AddChildElement(doc, liElement, "def", item.def.defName);
-                            XMLUtility.AddChildElement(doc, liElement, "amount", item.amount.ToString());
+                            XmlUtility.AddChildElement(doc, liElement, "def", item.def.defName);
+                            XmlUtility.AddChildElement(doc, liElement, "amount", item.amount.ToString());
                         }
                     }
                 }
 
                 if (Math.Abs(speed - parentSet.baseSpeed) > float.Epsilon)
                 {
-                    XMLUtility.AddChildElement(doc, projectileElement, "speed", speed.ToString());
+                    XmlUtility.AddChildElement(doc, projectileElement, "speed", speed.ToString());
                 }
 
                 if (Math.Abs(suppressionFactor - 1f) > float.Epsilon)
                 {
-                    XMLUtility.AddChildElement(doc, projectileElement, "suppressionFactor", suppressionFactor.ToString());
+                    XmlUtility.AddChildElement(doc, projectileElement, "suppressionFactor", suppressionFactor.ToString());
                 }
 
                 if (Math.Abs(stoppingPower - 0.5f) > float.Epsilon)
                 {
-                    XMLUtility.AddChildElement(doc, projectileElement, "stoppingPower", stoppingPower.ToString());
+                    XmlUtility.AddChildElement(doc, projectileElement, "stoppingPower", stoppingPower.ToString());
                 }
 
                 //comps
@@ -208,12 +208,12 @@ namespace CeManualPatcher.Misc.CustomAmmoMisc
                     XmlElement liElement = doc.CreateElement("li");
                     liElement.SetAttribute("Class", "CombatExtended.CompProperties_ExplosiveCE");
 
-                    XMLUtility.AddChildElement(doc, liElement, "damageAmountBase", secondaryExplosion.damageAmountBase.ToString());
-                    XMLUtility.AddChildElement(doc, liElement, "explosiveDamageType", secondaryExplosion.explosiveDamageType.defName);
-                    XMLUtility.AddChildElement(doc, liElement, "explosiveRadius", secondaryExplosion.explosiveRadius.ToString());
+                    XmlUtility.AddChildElement(doc, liElement, "damageAmountBase", secondaryExplosion.damageAmountBase.ToString());
+                    XmlUtility.AddChildElement(doc, liElement, "explosiveDamageType", secondaryExplosion.explosiveDamageType.defName);
+                    XmlUtility.AddChildElement(doc, liElement, "explosiveRadius", secondaryExplosion.explosiveRadius.ToString());
                     if (secondaryExplosion.postExplosionGasType != null)
                     {
-                        XMLUtility.AddChildElement(doc, liElement, "postExplosionGasType", secondaryExplosion.postExplosionGasType.ToString());
+                        XmlUtility.AddChildElement(doc, liElement, "postExplosionGasType", secondaryExplosion.postExplosionGasType.ToString());
                     }
 
                     return liElement;
@@ -232,7 +232,7 @@ namespace CeManualPatcher.Misc.CustomAmmoMisc
 
                     foreach (var item in fragments)
                     {
-                        XMLUtility.AddChildElement(doc, fragmentsElement, item.thingDef.defName, item.count.ToString());
+                        XmlUtility.AddChildElement(doc, fragmentsElement, item.thingDef.defName, item.count.ToString());
                     }
 
                     return liElement;

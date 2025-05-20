@@ -1,4 +1,6 @@
 ﻿using CeManualPatcher.Saveable.Body;
+using CombatExtended.Compatibility;
+using RimWorld;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -98,11 +100,11 @@ namespace CeManualPatcher.Misc.Patch
             string filePath = Path.Combine(folderPath, targetDef.defName + ".xml");
 
             XmlElement root = null;
-            XmlDocument xmlDocument = XMLUtility.CreateBasePatchDoc(ref root);
+            XmlDocument xmlDocument = XmlUtility.CreateBasePatchDoc(ref root);
 
             CreateGroupElement(targetDef.corePart, new List<string>());
             CreateArmorCoverage(targetDef.corePart, new List<int>());
-            CreateDataReplace(targetDef.corePart);
+            CreateDataReplace();
 
             xmlDocument.Save(filePath);
 
@@ -118,18 +120,18 @@ namespace CeManualPatcher.Misc.Patch
                     xpath += $"/parts/li[def=\"{item}\"]";
                 }
 
-                XMLUtility.AddChildElement(xmlDocument, liElement, "xpath", xpath + "/groups");
+                XmlUtility.AddChildElement(xmlDocument, liElement, "xpath", xpath + "/groups");
 
                 XmlElement nomatchElement = xmlDocument.CreateElement("nomatch");
                 nomatchElement.SetAttribute("Class", "PatchOperationAdd");
                 liElement.AppendChild(nomatchElement);
 
-                XMLUtility.AddChildElement(xmlDocument, nomatchElement, "xpath", xpath);
+                XmlUtility.AddChildElement(xmlDocument, nomatchElement, "xpath", xpath);
 
                 XmlElement valueElement = xmlDocument.CreateElement("value");
                 nomatchElement.AppendChild(valueElement);
 
-                XMLUtility.AddChildElement(xmlDocument, valueElement, "groups", "");
+                XmlUtility.AddChildElement(xmlDocument, valueElement, "groups", "");
 
                 if (!record.parts.NullOrEmpty())
                 {
@@ -156,12 +158,12 @@ namespace CeManualPatcher.Misc.Patch
 
                         string xpath = GetXpath(path);
 
-                        XMLUtility.AddChildElement(xmlDocument, liElement, "xpath", xpath + "/groups");
+                        XmlUtility.AddChildElement(xmlDocument, liElement, "xpath", xpath + "/groups");
 
                         XmlElement valueElement = xmlDocument.CreateElement("value");
                         liElement.AppendChild(valueElement);
 
-                        XMLUtility.AddChildElement(xmlDocument, valueElement, "li", "CoveredByNaturalArmor");
+                        XmlUtility.AddChildElement(xmlDocument, valueElement, "li", "CoveredByNaturalArmor");
                     }
 
                     if (!BodyPartRecordSaveable.GetCoverByArmor(record) && recordPatch.OriginalDataCoverByArmor)
@@ -170,7 +172,7 @@ namespace CeManualPatcher.Misc.Patch
                         liElement.SetAttribute("Class", "PatchOperationRemove");
                         root.AppendChild(liElement);
                         string xpath = GetXpath(path);
-                        XMLUtility.AddChildElement(xmlDocument, liElement, "xpath", xpath + "/groups/li[text()='CoveredByNaturalArmor']");
+                        XmlUtility.AddChildElement(xmlDocument, liElement, "xpath", xpath + "/groups/li[text()='CoveredByNaturalArmor']");
                     }
                 }
 
@@ -185,31 +187,30 @@ namespace CeManualPatcher.Misc.Patch
                 }
             }
 
-            void CreateDataReplace(BodyPartRecord record)
+            void CreateDataReplace()
             {
                 foreach (var item in this.records)
                 {
                     string xpath = GetXpath(item.path);
+                    BodyPartRecord record = item.bodyPart;
 
                     if (Math.Abs(record.coverage - item.OriginalData.coverage) > float.Epsilon)
                     {
-                        root.AppendChild(PatchReplace(xmlDocument, xpath, "coverage", record.coverage.ToString()));
+                        root.AppendChild(XmlUtility.PatchPropertie(xmlDocument, "coverage", record.coverage.ToString(), xpath));
                     }
                     if (record.height != item.OriginalData.height)
                     {
-                        root.AppendChild(PatchReplace(xmlDocument, xpath, "height", record.height.ToString()));
+                        root.AppendChild(XmlUtility.PatchPropertie(xmlDocument, "height", record.height.ToString(), xpath));
                     }
                     if (record.depth != item.OriginalData.depth)
                     {
-                        root.AppendChild(PatchReplace(xmlDocument, xpath, "depth", record.depth.ToString()));
+                        root.AppendChild(XmlUtility.PatchPropertie(xmlDocument, "depth", record.depth.ToString(), xpath));
                     }
                     if (record.customLabel != item.OriginalData.customLabel)
                     {
-                        root.AppendChild(PatchReplace(xmlDocument, xpath, "customLabel", record.customLabel.ToString()));
+                        root.AppendChild(XmlUtility.PatchPropertie(xmlDocument, "customLabel", record.customLabel.ToString(), xpath));
                     }
                 }
-
-
             }
 
             string GetXpath(List<int> path)
@@ -224,20 +225,6 @@ namespace CeManualPatcher.Misc.Patch
                 }
 
                 return xpath;
-            }
-
-            XmlElement PatchReplace(XmlDocument doc, string xpath, string propName, string value)
-            {
-
-                XmlElement liElement = doc.CreateElement("li");
-                liElement.SetAttribute("Class", "PatchOperationReplace");
-
-                XMLUtility.AddChildElement(doc, liElement, "xpath", xpath + "/" + propName);
-
-                XmlElement valueElement = doc.CreateElement("value");
-                liElement.AppendChild(valueElement);
-                XMLUtility.AddChildElement(doc, valueElement, propName, value);
-                return liElement;
             }
         }
 

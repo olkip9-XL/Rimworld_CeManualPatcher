@@ -5,6 +5,7 @@ using RimWorld;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -44,7 +45,7 @@ namespace CeManualPatcher.RenderRect
 
                 if (!keyWords.NullOrEmpty())
                 {
-                    list = list.Where(x => x.label.ToLower().Contains(keyWords.ToLower())).ToList();
+                    list = list.Where(x => x.label!=null && x.label.ContainsIgnoreCase(keyWords)).ToList();
                 }
 
                 if (curMod != null)

@@ -92,7 +92,7 @@ namespace CeManualPatcher
 
         public void ExportPatch()
         {
-            XMLUtility.CreateBasicFolders();
+            XmlUtility.CreateBasicFolders();
 
             patchManager?.ExportAll();
             apparelManager?.ExportAll();

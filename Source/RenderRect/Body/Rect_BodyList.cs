@@ -1,4 +1,5 @@
-﻿using CeManualPatcher.Manager;
+﻿using CeManualPatcher.Extension;
+using CeManualPatcher.Manager;
 using CeManualPatcher.Misc;
 using CeManualPatcher.Misc.Manager;
 using RimWorld;
@@ -17,6 +18,10 @@ namespace CeManualPatcher.RenderRect.Body
         //scroll
         private Vector2 scrollPosition = Vector2.zero;
         private float scrollHeight = 0f;
+
+        //filter
+        private string keyWords;
+
         private BodyDefManager manager => BodyDefManager.instance;
         private BodyDef body
         {
@@ -32,6 +37,11 @@ namespace CeManualPatcher.RenderRect.Body
 
                 list.AddRange(DefDatabase<BodyDef>.AllDefs);
 
+                if (!keyWords.NullOrEmpty())
+                {
+                    list = list.Where(x => x.label != null && x.label.ContainsIgnoreCase(keyWords)).ToList();
+                }
+
                 return list;
             }
         }
@@ -40,6 +50,8 @@ namespace CeManualPatcher.RenderRect.Body
         {
             Listing_Standard listing = new Listing_Standard();
             listing.Begin(rect);
+
+            listing.SearchBar(ref keyWords);
 
             WidgetsUtility.ScrollView(listing.GetRect(rect.height - listing.CurHeight - 0.1f), ref scrollPosition, ref scrollHeight, (innerListing) =>
             {

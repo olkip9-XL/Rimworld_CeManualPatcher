@@ -57,7 +57,7 @@ namespace CeManualPatcher.RenderRect
 
                 if (!keyWords.NullOrEmpty())
                 {
-                    list = list.Where(x=> x.label.ContainsIgnoreCase(keyWords)).ToList();
+                    list = list.Where(x => x.label != null && x.label.ContainsIgnoreCase(keyWords)).ToList();
                 }
 
                 if (curSourceMod != null)
@@ -100,7 +100,7 @@ namespace CeManualPatcher.RenderRect
                     {
                         RenderRectUtility.DrawItemRow(listing, item, ref WeaponManager.curWeaponDef);
                     }
-                    catch(Exception e)
+                    catch (Exception e)
                     {
                         Log.ErrorOnce($"[CeManualPatcher] Error while drawing Weapon tab {item?.defName ?? "null"} from {item?.modContentPack.Name ?? "null"} : {e}", e.GetHashCode());
                     }

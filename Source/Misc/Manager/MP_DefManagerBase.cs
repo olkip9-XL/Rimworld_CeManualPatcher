@@ -75,6 +75,12 @@ namespace CeManualPatcher.Misc.Manager
         {
             foreach (var patch in patches)
             {
+                if(patch == null || patch.targetDef == null)
+                {
+                    Log.Warning($"[CeManualPatcher] {typeof(T).Name} patch is null or targetDef is null, skipping reset.");
+                    continue;
+                }
+
                 try
                 {
                     patch.Reset();

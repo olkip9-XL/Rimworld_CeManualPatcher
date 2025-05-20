@@ -410,6 +410,11 @@ namespace CeManualPatcher
                         }
                     }
 
+                    list.Remove(StatDefOf.ShootingAccuracyFactor_Long);
+                    list.Remove(StatDefOf.ShootingAccuracyFactor_Medium);
+                    list.Remove(StatDefOf.ShootingAccuracyFactor_Short);
+                    list.Remove(StatDefOf.ShootingAccuracyFactor_Touch);
+
                     statDefs_WeaponOffsetInt = list.AsReadOnly();
                 }
                 return statDefs_WeaponOffsetInt;

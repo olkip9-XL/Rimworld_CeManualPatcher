@@ -292,11 +292,11 @@ namespace CeManualPatcher
 
             // 创建XML文档
             XmlElement rootPatchElement = null;
-            XmlDocument xmlDoc = XMLUtility.CreateBasePatchDoc(ref rootPatchElement);
+            XmlDocument xmlDoc = XmlUtility.CreateBasePatchDoc(ref rootPatchElement);
 
-            XMLUtility.Replace_Tools(xmlDoc, rootPatchElement, thingDef.defName, this.tools);
-            XMLUtility.MakeGunCECompatible(xmlDoc, rootPatchElement, thingDef);
-            XMLUtility.Replace_StatOffsets(xmlDoc, rootPatchElement, thingDef.defName, thingDef.equippedStatOffsets);
+            XmlUtility.Replace_Tools(xmlDoc, rootPatchElement, thingDef.defName, thingDef.tools);
+            XmlUtility.MakeGunCECompatible(xmlDoc, rootPatchElement, thingDef);
+            XmlUtility.Replace_StatOffsets(xmlDoc, rootPatchElement, thingDef.defName, thingDef.equippedStatOffsets);
 
             xmlDoc.Save(filePath);
         }

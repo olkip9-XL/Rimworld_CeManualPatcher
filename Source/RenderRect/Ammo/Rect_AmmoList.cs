@@ -78,7 +78,7 @@ namespace CeManualPatcher.RenderRect.Ammo
                 list.AddRange(AllAmmoSets);
                 if (!keyWords.NullOrEmpty())
                 {
-                    list = list.Where(x => x.Label.ContainsIgnoreCase(keyWords)).ToList();
+                    list = list.Where(x => x.Label != null && x.Label.ContainsIgnoreCase(keyWords)).ToList();
                 }
 
                 if (curCategory != null)

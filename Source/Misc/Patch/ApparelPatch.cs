@@ -98,11 +98,11 @@ namespace CeManualPatcher.Patch
 
             // 创建XML文档
             XmlElement rootPatchElement = null;                                                                                                                                                                           
-            XmlDocument xmlDoc = XMLUtility.CreateBasePatchDoc(ref rootPatchElement);
+            XmlDocument xmlDoc = XmlUtility.CreateBasePatchDoc(ref rootPatchElement);
 
-            XMLUtility.Replace_StatBase(xmlDoc, rootPatchElement, targetDef.defName, targetDef.statBases);
-            XMLUtility.AddModExt_PartialArmor(xmlDoc, rootPatchElement, targetDef.defName, targetDef.GetModExtension<PartialArmorExt>());
-            XMLUtility.Replace_StatOffsets(xmlDoc, rootPatchElement, targetDef.defName, targetDef.equippedStatOffsets);
+            XmlUtility.Replace_StatBase(xmlDoc, rootPatchElement, targetDef.defName, targetDef.statBases);
+            XmlUtility.AddModExt_PartialArmor(xmlDoc, rootPatchElement, targetDef.defName, targetDef.GetModExtension<PartialArmorExt>());
+            XmlUtility.Replace_StatOffsets(xmlDoc, rootPatchElement, targetDef.defName, targetDef.equippedStatOffsets);
 
             xmlDoc.Save(filePath);
         }

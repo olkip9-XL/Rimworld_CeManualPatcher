@@ -29,40 +29,10 @@ namespace CeManualPatcher.Saveable.Body
         public BodyPartRecord OriginalData => originalData;
         public bool OriginalDataCoverByArmor => originalDataCoverByArmor;
 
-        private BodyPartRecord bodyPartInt = null;
-        private BodyPartRecord bodyPart
+        public BodyPartRecord bodyPart
         {
             get
             {
-                //if (bodyPartInt == null)
-                //{
-                //    BodyPartRecord curPart;
-
-                //    if (body == null || body.corePart == null)
-                //    {
-                //        return null;
-                //    }
-
-                //    curPart = body.corePart;
-
-                //    foreach (var index in path)
-                //    {
-                //        if (curPart.parts == null || curPart.parts.Count <= index)
-                //        {
-                //            Log.Error($"[CE Manual Patcher] BodyPartRecordSaveable path error: {index} {curPart.parts.Count}");
-                //            return null;
-                //        }
-
-                //        curPart = curPart.parts[index];
-                //    }
-
-                //    bodyPartInt = curPart;
-
-                //}
-
-                //return bodyPartInt;
-
-
                 BodyPartRecord curPart = null;
                 if (body == null || body.corePart == null)
                 {

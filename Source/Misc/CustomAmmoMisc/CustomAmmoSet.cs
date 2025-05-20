@@ -113,7 +113,7 @@ namespace CeManualPatcher.Misc.CustomAmmoMisc
             string fileName = Path.Combine(dirPath, $"{AmmoSetDefName}.xml");
 
             XmlElement rootElement = null;
-            XmlDocument xmlDoc = XMLUtility.CreateBaseDefDoc(ref rootElement);
+            XmlDocument xmlDoc = XmlUtility.CreateBaseDefDoc(ref rootElement);
 
             //thingDef category
             CreateThingCategory();
@@ -163,10 +163,10 @@ namespace CeManualPatcher.Misc.CustomAmmoMisc
             void CreateThingCategory()
             {
                 XmlElement categoryElement = xmlDoc.CreateElement("ThingCategoryDef");
-                XMLUtility.AddChildElement(xmlDoc, categoryElement, "defName", AmmoCategoryDefName);
-                XMLUtility.AddChildElement(xmlDoc, categoryElement, "label", label);
-                XMLUtility.AddChildElement(xmlDoc, categoryElement, "parent", categoryDef.defName);
-                XMLUtility.AddChildElement(xmlDoc, categoryElement, "iconPath", categoryTexPath);
+                XmlUtility.AddChildElement(xmlDoc, categoryElement, "defName", AmmoCategoryDefName);
+                XmlUtility.AddChildElement(xmlDoc, categoryElement, "label", label);
+                XmlUtility.AddChildElement(xmlDoc, categoryElement, "parent", categoryDef.defName);
+                XmlUtility.AddChildElement(xmlDoc, categoryElement, "iconPath", categoryTexPath);
                 rootElement.AppendChild(categoryElement);
             }
 
@@ -175,14 +175,14 @@ namespace CeManualPatcher.Misc.CustomAmmoMisc
                 XmlElement ammoSetElement = xmlDoc.CreateElement("CombatExtended.AmmoSetDef");
                 rootElement.AppendChild(ammoSetElement);
 
-                XMLUtility.AddChildElement(xmlDoc, ammoSetElement, "defName", AmmoSetDefName);
-                XMLUtility.AddChildElement(xmlDoc, ammoSetElement, "label", label);
+                XmlUtility.AddChildElement(xmlDoc, ammoSetElement, "defName", AmmoSetDefName);
+                XmlUtility.AddChildElement(xmlDoc, ammoSetElement, "label", label);
 
                 XmlElement ammoTypesElement = xmlDoc.CreateElement("ammoTypes");
                 ammoSetElement.AppendChild(ammoTypesElement);
                 foreach (var ammoType in ammoTypes)
                 {
-                    XMLUtility.AddChildElement(xmlDoc, ammoTypesElement, ammoType.ammo.DefName, ammoType.projectile.DefName);
+                    XmlUtility.AddChildElement(xmlDoc, ammoTypesElement, ammoType.ammo.DefName, ammoType.projectile.DefName);
                 }
             }
 
@@ -195,15 +195,15 @@ namespace CeManualPatcher.Misc.CustomAmmoMisc
                 ammoBaseElement.SetAttribute("Abstract", "True");
                 rootElement.AppendChild(ammoBaseElement);
 
-                XMLUtility.AddChildElement(xmlDoc, ammoBaseElement, "description", description);
+                XmlUtility.AddChildElement(xmlDoc, ammoBaseElement, "description", description);
 
                 XmlElement statBaseElement = xmlDoc.CreateElement("statBases");
                 ammoBaseElement.AppendChild(statBaseElement);
-                XMLUtility.AddChildElement(xmlDoc, statBaseElement, "Mass", baseMass.ToString());
-                XMLUtility.AddChildElement(xmlDoc, statBaseElement, "Bulk", baseBulk.ToString());
+                XmlUtility.AddChildElement(xmlDoc, statBaseElement, "Mass", baseMass.ToString());
+                XmlUtility.AddChildElement(xmlDoc, statBaseElement, "Bulk", baseBulk.ToString());
 
-                XMLUtility.AddChildElementList(xmlDoc, ammoBaseElement, "tradeTags", tradeTags);
-                XMLUtility.AddChildElementList(xmlDoc, ammoBaseElement, "thingCategories", new List<string>()
+                XmlUtility.AddChildElementList(xmlDoc, ammoBaseElement, "tradeTags", tradeTags);
+                XmlUtility.AddChildElementList(xmlDoc, ammoBaseElement, "thingCategories", new List<string>()
                 {
                     AmmoCategoryDefName
                 });
@@ -219,15 +219,15 @@ namespace CeManualPatcher.Misc.CustomAmmoMisc
 
                 XmlElement graphicElement2 = xmlDoc.CreateElement("graphicData");
                 projectileBaseElement.AppendChild(graphicElement2);
-                XMLUtility.AddChildElement(xmlDoc, graphicElement2, "texPath", projectileGraphicWarpper.texPath);
-                XMLUtility.AddChildElement(xmlDoc, graphicElement2, "graphicClass", projectileGraphicWarpper.graphicClass.ToString());
+                XmlUtility.AddChildElement(xmlDoc, graphicElement2, "texPath", projectileGraphicWarpper.texPath);
+                XmlUtility.AddChildElement(xmlDoc, graphicElement2, "graphicClass", projectileGraphicWarpper.graphicClass.ToString());
 
                 XmlElement projectileElement = xmlDoc.CreateElement("projectile");
                 projectileElement.SetAttribute("Class", "CombatExtended.ProjectilePropertiesCE");
                 projectileBaseElement.AppendChild(projectileElement);
-                XMLUtility.AddChildElement(xmlDoc, projectileElement, "speed", baseSpeed.ToString());
-                XMLUtility.AddChildElement(xmlDoc, projectileElement, "damageDef", "Bullet");
-                XMLUtility.AddChildElement(xmlDoc, projectileElement, "dropsCasings", "true");
+                XmlUtility.AddChildElement(xmlDoc, projectileElement, "speed", baseSpeed.ToString());
+                XmlUtility.AddChildElement(xmlDoc, projectileElement, "damageDef", "Bullet");
+                XmlUtility.AddChildElement(xmlDoc, projectileElement, "dropsCasings", "true");
             }
 
 

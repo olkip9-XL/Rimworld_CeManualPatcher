@@ -15,9 +15,8 @@ namespace CeManualPatcher.Saveable.Apparel
     {
         public static ReadOnlyCollection<string> propNames = new ReadOnlyCollection<string>(new List<string>()
         {
-            "mult",
-            "staticValue",
-            "useStatic",
+            "statValue",
+            "isStatValueStatic",
         });
         private Dictionary<string, string> propDic = new Dictionary<string, string>();
 
@@ -78,7 +77,7 @@ namespace CeManualPatcher.Saveable.Apparel
                 }
             }
 
-            Scribe_Values.Look(ref statDefName, "stat");
+            Scribe_Values.Look(ref statDefName, "stat", "null");
             Scribe_Collections.Look(ref bodyPartsDefString, "parts", LookMode.Value);
             Scribe_Collections.Look(ref propDic, "props", LookMode.Value, LookMode.Value);
 

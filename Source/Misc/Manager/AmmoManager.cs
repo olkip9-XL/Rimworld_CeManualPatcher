@@ -96,6 +96,7 @@ namespace CeManualPatcher.Manager
         {
             base.ExposeData();
 
+            //old save
             if (Scribe.mode == LoadSaveMode.LoadingVars)
             {
                 List<AmmoPatch> ammoPatches = new List<AmmoPatch>();

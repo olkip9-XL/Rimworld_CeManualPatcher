@@ -72,6 +72,7 @@
     <Compile Include="Misc\CustomAmmoMisc\CustomAmmoSet.cs" />
     <Compile Include="Misc\CustomAmmoMisc\CustomAmmo_Base.cs" />
     <Compile Include="Misc\CustomAmmoMisc\CustomProjectile.cs" />
+    <Compile Include="Misc\DefSave.cs" />
     <Compile Include="Misc\Manager\AmmoManager.cs" />
     <Compile Include="Misc\Manager\ApparelManager.cs" />
     <Compile Include="Misc\Manager\BodyDefManager.cs" />
@@ -91,7 +92,7 @@
     <Compile Include="Misc\Patch\PatchBase.cs" />
     <Compile Include="Misc\PropUtility.cs" />
     <Compile Include="Misc\WidgetsUtility.cs" />
-    <Compile Include="Misc\XMLUtility.cs" />
+    <Compile Include="Misc\XmlUtility.cs" />
     <Compile Include="ModPostLoad.cs" />
     <Compile Include="ModSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

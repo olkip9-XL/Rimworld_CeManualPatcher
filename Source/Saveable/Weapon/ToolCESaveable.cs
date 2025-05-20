@@ -201,7 +201,7 @@ namespace CeManualPatcher.Saveable
             Scribe_Values.Look(ref id, "id");
             Scribe_Values.Look(ref label, "label");
 
-            Scribe_Values.Look(ref linkedBodyPartsGroupString, "linkedBodyPartsGroup");
+            Scribe_Values.Look(ref linkedBodyPartsGroupString, "linkedBodyPartsGroup", "null");
 
             Scribe_Collections.Look(ref capacitiesString, "capacities", LookMode.Value);
             Scribe_Collections.Look(ref surpriseAttackSave, "surpriseAttack", LookMode.Deep);
