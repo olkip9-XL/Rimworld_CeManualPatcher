@@ -35,7 +35,7 @@ namespace CeManualPatcher.Misc.Manager
                 }
                 catch (Exception e)
                 {
-                    Log.Error($"[CeManualPatcher] Trying create {typeof(T).Name} patch for item {def?.defName ?? "Null"}: {e}");
+                    MP_Log.Error($"Trying create {typeof(T).Name} patch for item {def?.defName ?? "Null"}", e);
                 }
             }
             return patch;
@@ -63,7 +63,7 @@ namespace CeManualPatcher.Misc.Manager
                 }
                 catch (Exception e)
                 {
-                    Log.Error($"[CeManualPatcher] Resetting {typeof(T).Name} patch {patch?.targetDef?.defName} failed : {e}");
+                    MP_Log.Error($"Resetting {typeof(T).Name} patch {patch?.targetDef?.defName} failed", e);
                 }
                 patches.Remove(patch);
             }
@@ -75,9 +75,9 @@ namespace CeManualPatcher.Misc.Manager
         {
             foreach (var patch in patches)
             {
-                if(patch == null || patch.targetDef == null)
+                if (patch == null || patch.targetDef == null)
                 {
-                    Log.Warning($"[CeManualPatcher] {typeof(T).Name} patch is null or targetDef is null, skipping reset.");
+                    MP_Log.Warning($"{typeof(T).Name} patch is null or targetDef is null, skipping reset.");
                     continue;
                 }
 
@@ -87,7 +87,7 @@ namespace CeManualPatcher.Misc.Manager
                 }
                 catch (Exception e)
                 {
-                    Log.Error($"[CeManualPatcher] Resetting {typeof(T).Name} patch {patch?.targetDef?.defName} failed : {e}");
+                    MP_Log.Error($"Resetting {typeof(T).Name} patch {patch?.targetDef?.defName} failed", e);
                 }
             }
             patches.Clear();
@@ -105,11 +105,11 @@ namespace CeManualPatcher.Misc.Manager
                 }
                 catch (Exception e)
                 {
-                    Log.Error($"[CeManualPatcher] PostLoadInit {typeof(T).Name} patch {patch?.targetDef?.defName} failed : {e}");
+                    MP_Log.Error($"PostLoadInit {typeof(T).Name} patch {patch?.targetDef?.defName} failed", e);
                 }
             }
         }
-    
+
         public virtual void ExportAll()
         {
             foreach (var patch in patches)
@@ -120,7 +120,7 @@ namespace CeManualPatcher.Misc.Manager
                 }
                 catch (Exception e)
                 {
-                    Log.Error($"[CeManualPatcher] Exporting {typeof(T).Name} patch {patch?.targetDef?.defName} failed : {e}");
+                    MP_Log.Error($"Exporting {typeof(T).Name} patch {patch?.targetDef?.defName} failed", e);
                 }
             }
         }

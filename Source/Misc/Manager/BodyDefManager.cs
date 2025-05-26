@@ -56,8 +56,24 @@ namespace CeManualPatcher.Misc.Manager
             Rect leftRect = rect.LeftPart(0.3f);
             Rect rightRect = rect.RightPart(0.7f);
 
-            rect_BodyList.DoWindowContents(leftRect);
-            rect_BodyInfo.DoWindowContents(rightRect);
+            try
+            {
+                rect_BodyList.DoWindowContents(leftRect);
+            }
+            catch (Exception e)
+            {
+                MP_Log.Error("BodyDefManager body list error", e);
+            }
+
+            try
+            {
+                rect_BodyInfo.DoWindowContents(rightRect);
+            }
+            catch (Exception e)
+            {
+                MP_Log.Error("BodyDefManager body info error", e, curBody);
+            }
+
         }
 
         protected override void NewPatch(ref PatchBase<BodyDef> patch, BodyDef def)

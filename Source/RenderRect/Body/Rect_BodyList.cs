@@ -67,7 +67,8 @@ namespace CeManualPatcher.RenderRect.Body
                     }
                     catch (Exception e)
                     {
-                        Log.ErrorOnce($"[CeManualPatcher] Error while drawing Body tab {item?.defName ?? "null"} from {item?.modContentPack.Name ?? "null"} : {e}", e.GetHashCode());
+                        //Log.ErrorOnce($"[CeManualPatcher] Error while drawing Body tab {item?.defName ?? "null"} from {item?.modContentPack.Name ?? "null"} : {e}", e.GetHashCode());
+                        MP_Log.Error("Error while drawing Body Def tab", e, item);
                     }
                 }
             });

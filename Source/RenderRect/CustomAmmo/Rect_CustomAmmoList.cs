@@ -49,7 +49,8 @@ namespace CeManualPatcher.RenderRect
                     }
                     catch (Exception e)
                     {
-                        Log.Error($"[CeManualPatcher] Error while drawing Custom Ammo Set tab {item?.defNameBase ?? "null"} : {e}");
+                        //Log.Error($"[CeManualPatcher] Error while drawing Custom Ammo Set tab {item?.defNameBase ?? "null"} : {e}");
+                        MP_Log.Error("Error while drawing Custom Ammo Set tab", e);
                     }
                 }
             });

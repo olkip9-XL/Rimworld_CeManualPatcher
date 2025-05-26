@@ -85,6 +85,7 @@
     <Compile Include="Misc\Ammo\MP_AmmoSet.cs" />
     <Compile Include="Misc\MP_Color.cs" />
     <Compile Include="Misc\MP_FilePath.cs" />
+    <Compile Include="Misc\MP_Log.cs" />
     <Compile Include="Misc\MP_Options.cs" />
     <Compile Include="Misc\MP_Texture.cs" />
     <Compile Include="Misc\Patch\ApparelPatch.cs" />

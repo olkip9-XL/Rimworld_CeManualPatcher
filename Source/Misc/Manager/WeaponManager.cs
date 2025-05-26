@@ -1,4 +1,5 @@
-﻿using CeManualPatcher.Misc.Manager;
+﻿using CeManualPatcher.Misc;
+using CeManualPatcher.Misc.Manager;
 using CeManualPatcher.Misc.Patch;
 using CeManualPatcher.Patch;
 using CeManualPatcher.RenderRect;
@@ -32,7 +33,7 @@ namespace CeManualPatcher.Manager
             patch = new WeaponPatch(def);
         }
 
-        public  WeaponPatch GetWeaponPatch(ThingDef thingDef)
+        public WeaponPatch GetWeaponPatch(ThingDef thingDef)
         {
             return base.GetPatch(thingDef) as WeaponPatch;
         }
@@ -54,7 +55,8 @@ namespace CeManualPatcher.Manager
             }
             catch (Exception e)
             {
-                Log.ErrorOnce($"[CeManualPatcher] WeaponManager weapon info error on thing {curWeaponDef?.defName ?? "null"} form {curWeaponDef?.modContentPack?.Name ?? "null"} : {e}", e.GetHashCode());
+                //Log.ErrorOnce($"[CeManualPatcher] WeaponManager weapon info error on thing {curWeaponDef?.defName ?? "null"} form {curWeaponDef?.modContentPack?.Name ?? "null"} : {e}", curWeaponDef?.GetHashCode() ?? e.GetHashCode());
+                MP_Log.Error("WeaponManager weapon info error", e, curWeaponDef);
             }
 
             try
@@ -63,9 +65,10 @@ namespace CeManualPatcher.Manager
             }
             catch (Exception e)
             {
-                Log.ErrorOnce($"[CeManualPatcher] WeaponManager weapon list error : {e}", e.GetHashCode());
+                //Log.ErrorOnce($"[CeManualPatcher] WeaponManager weapon list error : {e}", curWeaponDef?.GetHashCode() ?? e.GetHashCode());
+                MP_Log.Error("WeaponManager weapon list error", e);
             }
-           
+
         }
 
         public override void ExposeData()
@@ -78,7 +81,7 @@ namespace CeManualPatcher.Manager
                 Scribe_Collections.Look(ref weaponPatches, "weaponPatches", LookMode.Deep);
                 if (!weaponPatches.NullOrEmpty())
                 {
-                    foreach(var item in weaponPatches)
+                    foreach (var item in weaponPatches)
                     {
                         patches.Add(item);
                     }

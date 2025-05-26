@@ -45,7 +45,8 @@ namespace CeManualPatcher.Manager
             }
             catch (Exception e)
             {
-                Log.ErrorOnce($"[CeManualPatcher] AmmoManager ammo list error: {e}", e.GetHashCode());
+                //Log.ErrorOnce($"[CeManualPatcher] AmmoManager ammo list error: {e}", e.GetHashCode());
+                MP_Log.Error("AmmoManager ammo list error", e);
             }
 
             try
@@ -54,7 +55,8 @@ namespace CeManualPatcher.Manager
             }
             catch (Exception e)
             {
-                Log.ErrorOnce($"[CeManualPatcher] AmmoManager ammo info error: {e}", e.GetHashCode());
+                //Log.ErrorOnce($"[CeManualPatcher] AmmoManager ammo info error: {e}", e.GetHashCode());
+                MP_Log.Error("AmmoManager ammo info error", e, curAmmoSet?.ammoSetDef);
             }
 
         }

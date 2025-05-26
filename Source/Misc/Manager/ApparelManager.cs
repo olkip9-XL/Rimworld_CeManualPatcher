@@ -40,7 +40,8 @@ namespace CeManualPatcher.Misc.Manager
             }
             catch (Exception e)
             {
-                Log.ErrorOnce($"[CeManualPatcher] ApparelManager apparel list error: {e}", e.GetHashCode());
+                //Log.ErrorOnce($"[CeManualPatcher] ApparelManager apparel list error: {e}", e.GetHashCode());
+                MP_Log.Error("ApparelManager apparel list error", e);
             }
 
             try
@@ -49,7 +50,8 @@ namespace CeManualPatcher.Misc.Manager
             }
             catch (Exception e)
             {
-                Log.ErrorOnce($"[CeManualPatcher] ApparelManager apparel info error on thing {curApparelDef?.defName ?? "null"} form {curApparelDef?.modContentPack?.Name ?? "null"} : {e}", e.GetHashCode());
+                //Log.ErrorOnce($"[CeManualPatcher] ApparelManager apparel info error on thing {curApparelDef?.defName ?? "null"} form {curApparelDef?.modContentPack?.Name ?? "null"} : {e}", e.GetHashCode());
+                MP_Log.Error("ApparelManager apparel info error", e, curApparelDef);
             }
         }
 

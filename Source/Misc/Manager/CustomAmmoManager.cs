@@ -70,7 +70,8 @@ namespace CeManualPatcher.Misc.Manager
             }
             catch (Exception e)
             {
-                Log.Error($"[CeManualPatcher] Custom Ammo manager ammo info error: {e}");
+                //Log.Error($"[CeManualPatcher] Custom Ammo manager ammo info error: {e}");
+                MP_Log.Error("Custom Ammo manager ammo list error", e);
             }
 
             try
@@ -79,7 +80,8 @@ namespace CeManualPatcher.Misc.Manager
             }
             catch (Exception e)
             {
-                Log.Error($"[CeManualPatcher] Custom Ammo manager ammo info error: {e}");
+                //Log.Error($"[CeManualPatcher] Custom Ammo manager ammo info error: {e}");
+                MP_Log.Error("Custom Ammo manager ammo info error", e);
             }
 
         }
