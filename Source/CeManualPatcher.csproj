@@ -69,8 +69,8 @@
     <Compile Include="Extension\ThingDefExtension.cs" />
     <Compile Include="Misc\CopyUtility.cs" />
     <Compile Include="Misc\CustomAmmoMisc\CustomAmmo.cs" />
+    <Compile Include="Misc\CustomAmmoMisc\CustomAmmoRecipe.cs" />
     <Compile Include="Misc\CustomAmmoMisc\CustomAmmoSet.cs" />
-    <Compile Include="Misc\CustomAmmoMisc\CustomAmmo_Base.cs" />
     <Compile Include="Misc\CustomAmmoMisc\CustomProjectile.cs" />
     <Compile Include="Misc\DefSave.cs" />
     <Compile Include="Misc\Manager\AmmoManager.cs" />
@@ -111,6 +111,7 @@
     <Compile Include="RenderRect\Weapon\Rect_WeaponInfo.cs" />
     <Compile Include="Misc\Patch\AmmoPatch.cs" />
     <Compile Include="Saveable\Ammo\AmmoDefSaveable.cs" />
+    <Compile Include="Saveable\Ammo\AmmoRecipeDefSaveable.cs" />
     <Compile Include="Saveable\Ammo\ProjectileDefSaveable.cs" />
     <Compile Include="Saveable\Ammo\SecondaryDamageSaveable.cs" />
     <Compile Include="Saveable\Ammo\SecondaryExplosionSaveable.cs" />

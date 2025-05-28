@@ -40,7 +40,7 @@ namespace CeManualPatcher.Misc.CustomAmmoMisc
             graphicClass = typeof(Graphic_Single),
         };
         public float baseSpeed = 168f;
-       
+
         public List<string> tradeTags = new List<string>()
         {
             "CE_AutoEnableTrade",
@@ -88,7 +88,7 @@ namespace CeManualPatcher.Misc.CustomAmmoMisc
             this.description = "New Ammo Description";
             this.categoryDefString = "AmmoRifles";
             this.parentAmmo = "MediumAmmoBase";
-          
+
         }
         public void ExportToFile(string dirPath = null)
         {
@@ -136,7 +136,7 @@ namespace CeManualPatcher.Misc.CustomAmmoMisc
                 }
                 catch (Exception e)
                 {
-                    Log.Error($"[CeManualPatcher] Error while exporting ammo {item.ammo.DefName} to local: {e}");
+                    MP_Log.Error($"Error while exporting ammo {item.ammo.DefName} to local: {e}");
                 }
 
                 try
@@ -146,7 +146,16 @@ namespace CeManualPatcher.Misc.CustomAmmoMisc
                 }
                 catch (Exception e)
                 {
-                    Log.Error($"[CeManualPatcher] Error while exporting projectile {item.projectile.DefName} to local: {e}");
+                    MP_Log.Error($"Error while exporting projectile {item.projectile.DefName} to local: {e}");
+                }
+
+                try
+                {
+                    item.recipe.Export(xmlDoc, rootElement);
+                }
+                catch (Exception e)
+                {
+                    MP_Log.Error($"Error while exporting recipe {item.ammo.DefName} to local: {e}");
                 }
             }
 
@@ -272,7 +281,7 @@ namespace CeManualPatcher.Misc.CustomAmmoMisc
         }
         private IEnumerable<string> ConfigError()
         {
-            if(defNameBase.Contains(" "))
+            if (defNameBase.Contains(" "))
             {
                 //yield return $"has space in defName";
                 yield return "MP_Error_SpaceInDefName".Translate();
@@ -314,7 +323,7 @@ namespace CeManualPatcher.Misc.CustomAmmoMisc
                 yield return "MP_Error_NoBaseBulk".Translate();
             }
 
-            if(ammoTypes.NullOrEmpty())
+            if (ammoTypes.NullOrEmpty())
             {
                 yield return "MP_Error_NoAmmoTypes".Translate();
             }
@@ -335,6 +344,8 @@ namespace CeManualPatcher.Misc.CustomAmmoMisc
     {
         public CustomAmmo ammo;
         public CustomProjectile projectile;
+        public CustomAmmoRecipe recipe;
+
         public string suffix = "Default";
 
         public AmmoProjectilePair() { }
@@ -345,6 +356,7 @@ namespace CeManualPatcher.Misc.CustomAmmoMisc
 
             this.ammo = new CustomAmmo(parentSet, suffix);
             this.projectile = new CustomProjectile(parentSet);
+            this.recipe = new CustomAmmoRecipe(this);
 
             ammo.parentPair = this;
             projectile.parentPair = this;
@@ -353,12 +365,29 @@ namespace CeManualPatcher.Misc.CustomAmmoMisc
         {
             Scribe_Deep.Look(ref ammo, "ammo");
             Scribe_Deep.Look(ref projectile, "projectile");
-            Scribe_Values.Look(ref suffix, "null");
+            Scribe_Deep.Look(ref recipe, "recipe");
+            Scribe_Values.Look(ref suffix, "suffix");
+
             if (Scribe.mode == LoadSaveMode.LoadingVars)
             {
+                string str = null;
+                Scribe_Values.Look(ref str, "null");
+                if (str != null)
+                {
+                    suffix = str;
+                }
+
+
                 ammo.parentPair = this;
                 projectile.parentPair = this;
+
+                if (recipe == null)
+                {
+                    recipe = new CustomAmmoRecipe(this);
+                }
+                recipe.parentPair = this;
             }
+
         }
 
         string GenerateRandomLetters(int length)

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using Verse;
@@ -30,10 +31,20 @@ namespace CeManualPatcher.Misc
 
         }
 
+        public static void ErrorOnce(string message, int key, Exception e = null)
+        {
+            string errorMessage = $"[CE Manual Patcher] {message}";
+
+            if (e != null)
+                errorMessage += $" : {e}";
+
+            Log.ErrorOnce(errorMessage, key);
+        }
+
         public static void Warning(string message)
         {
             string warningMessage = $"[CE Manual Patcher] {message}";
-            
+
             Log.Warning(warningMessage);
         }
 

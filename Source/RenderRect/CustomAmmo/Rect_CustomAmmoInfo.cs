@@ -84,6 +84,7 @@ namespace CeManualPatcher.RenderRect
                         if (DrawAmmoHead(innerListing, item)) break;
                         DrawAmmo(innerListing, item.ammo);
                         DrawProjectile(innerListing, item.projectile);
+                        DrawRecipe(innerListing, item.recipe);
                     }
                     catch (Exception e)
                     {
@@ -728,5 +729,83 @@ namespace CeManualPatcher.RenderRect
             return texture ?? BaseContent.BadTex;
         }
 
+
+        private void DrawRecipe(Listing_Standard listing, CustomAmmoRecipe recipe)
+        {
+            //title
+            listing.LabelLine("<b>" + "MP_Recipe".Translate() + "</b>");
+
+            //parentClass
+            listing.ButtonTextLine("MP_RecipeParentClass".Translate(), recipe.parentRecipeClass, () =>
+            {
+                FloatMenuUtility.MakeMenu(MP_Options.parentAmmoRecipeClass,
+                    (x) => x,
+                    (x) => delegate
+                    {
+                        recipe.parentRecipeClass = x;
+                    });
+            }, indent:20f);
+
+            //properties
+            listing.FieldLine("MP_RecipeLabel".Translate(), ref recipe.label, indent: 20f);
+            listing.FieldLine("MP_RecipeDescription".Translate(), ref recipe.description, indent: 20f);
+            listing.FieldLine("MP_RecipeJobString".Translate(), ref recipe.jobString, indent: 20f);
+            listing.FieldLine("MP_RecipeWorkAmount".Translate(), ref recipe.workAmount, indent: 20f);
+            listing.FieldLine("MP_RecipeProductAmount".Translate(), ref recipe.productAmount, indent: 20f);
+
+            //ingredients
+            listing.ButtonImageLine("MP_RecipeIngredients".Translate(), TexButton.Add, () =>
+            {
+                List<FloatMenuOption> options = new List<FloatMenuOption>();
+                foreach (var item in MP_Options.ingredientsForAmmo)
+                {
+                    FloatMenuOption option = new FloatMenuOption(item.LabelCap, () =>
+                    {
+                        recipe.ingredients.Add(new MP_ThingDefCountClass_Save(item, 1));
+                    }, null, item.uiIcon);
+
+                    if (option != null)
+                    {
+                        options.Add(option);
+                    }
+                }
+                if (options.Any())
+                {
+                    Find.WindowStack.Add(new FloatMenu(options));
+                }
+
+            }, indent: 20f);
+
+            foreach (var item in recipe.ingredients)
+            {
+                Rect rect = listing.GetRect(Text.LineHeight);
+                rect.x += 40f;
+                rect.width -= 40f;
+
+                //icon
+                Rect rect4 = rect.LeftPartPixels(rect.height);
+                Widgets.DrawTextureFitted(rect4, item.thingDef.uiIcon, 1f);
+
+                //label
+                Rect rect5 = rect4.RightAdjoin(rect.width - rect.height);
+                Widgets.Label(rect5, item.thingDef?.LabelCap ?? "MP_Null".Translate());
+
+                //delete
+                Rect rect1 = rect.RightPartPixels(rect.height);
+                if (Widgets.ButtonImage(rect1, TexButton.Delete))
+                {
+                    recipe.ingredients.Remove(item);
+                    break;
+                }
+
+                //count
+                Rect rect2 = rect1.LeftAdjoin(100f);
+                WidgetsUtility.TextFieldOnChange(rect2, ref item.count, null);
+
+                Rect rect3 = rect2.LeftAdjoin(Text.CalcSize("x").x);
+                Widgets.Label(rect3, "x");
+            }
+
+        }
     }
 }

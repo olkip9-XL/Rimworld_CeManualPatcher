@@ -166,5 +166,19 @@
   <MP_Depth>深度</MP_Depth>
   <MP_Coverage>覆盖率</MP_Coverage>
   <MP_CoverdByArmor>有护甲覆盖</MP_CoverdByArmor>
+  
+  <!--Ammo Recipe-->
+  <MP_Recipe>制作清单</MP_Recipe>
+  <MP_RecipeParentClass>清单父类</MP_RecipeParentClass>
+  <MP_RecipeLabel>清单标签</MP_RecipeLabel>
+  <MP_RecipeDescription>清单描述</MP_RecipeDescription>
+  <MP_RecipeJobString>工作中描述</MP_RecipeJobString>
+  <MP_RecipeWorkAmount>工作量</MP_RecipeWorkAmount>
+  <MP_RecipeProductAmount>产物数量</MP_RecipeProductAmount>
+  <MP_RecipeIngredients>材料需求</MP_RecipeIngredients>
+
+  <MP_DefaultAmmoRecipeLabel>制作{0} x{1}</MP_DefaultAmmoRecipeLabel>
+  <MP_DefaultAmmoRecipeDescription>制作{0}枚{1}。</MP_DefaultAmmoRecipeDescription>
+  <MP_DefaultAmmoRecipeJobString>正在制作{0}。</MP_DefaultAmmoRecipeJobString>
 
 </LanguageData>

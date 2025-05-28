@@ -1,4 +1,5 @@
-﻿using CeManualPatcher.Misc.Patch;
+﻿using CeManualPatcher.Misc;
+using CeManualPatcher.Misc.Patch;
 using CeManualPatcher.Saveable;
 using CeManualPatcher.Saveable.Ammo;
 using CombatExtended;
@@ -15,14 +16,6 @@ namespace CeManualPatcher.Patch
 {
     internal class AmmoPatch : PatchBase<ThingDef>
     {
-        //private string thingDefString = "";
-        //public ThingDef projectileDef
-        //{
-        //    get => DefDatabase<ThingDef>.GetNamed(thingDefString, false);
-        //    set => thingDefString = value?.defName ?? "null";
-        //}
-        //old
-
         private string ammoDefString = "";
         public ThingDef ammoDef
         {
@@ -30,8 +23,38 @@ namespace CeManualPatcher.Patch
             set => ammoDefString = value?.defName ?? "null";
         }
 
+        private RecipeDef recipeDefInt = null;
+        public RecipeDef recipeDef
+        {
+            get
+            {
+
+                if (recipeDefInt == null && ammoDef != null)
+                {
+                    RecipeDef _recipe = DefDatabase<RecipeDef>.GetNamed("Make" + ammoDefString);
+                    if (_recipe != null)
+                    {
+                        recipeDefInt = _recipe;
+                        return recipeDefInt;
+                    }
+
+                    _recipe = DefDatabase<RecipeDef>.AllDefsListForReading
+                        .FirstOrDefault(x => x.products.Any(y => y.thingDef == ammoDef));
+                    if (_recipe != null)
+                    {
+                        recipeDefInt = _recipe;
+                        return recipeDefInt;
+                    }
+
+                    MP_Log.Error("Can't Find Recipe for ammo ", def: ammoDef);
+                }
+                return recipeDefInt;
+            }
+        }
+
         private ProjectileDefSaveable projectile;
         private AmmoDefSaveable ammo;
+        private AmmoRecipeDefSaveable recipe;
 
         public string sourceModName;
         public AmmoPatch() { }
@@ -56,6 +79,11 @@ namespace CeManualPatcher.Patch
                 this.ammo = new AmmoDefSaveable(ammoDef);
             }
 
+            if(recipeDef != null)
+            {
+                this.recipe = new AmmoRecipeDefSaveable(recipeDef);
+            }
+
             this.sourceModName = projectileDef.modContentPack?.Name ?? "Unknown";
         }
 
@@ -63,6 +91,7 @@ namespace CeManualPatcher.Patch
         {
             projectile?.Reset();
             ammo?.Reset();
+            recipe?.Reset();
         }
 
         public override void ExposeData()
@@ -74,6 +103,7 @@ namespace CeManualPatcher.Patch
 
             Scribe_Values.Look(ref ammoDefString, "ammoDefString");
             Scribe_Deep.Look(ref ammo, "ammo");
+            Scribe_Deep.Look(ref recipe, "recipe");
 
             Scribe_Values.Look(ref sourceModName, "sourceModName");
 
@@ -102,8 +132,21 @@ namespace CeManualPatcher.Patch
             {
                 ammo?.PostLoadInit(ammoDef);
             }
+
+            if (recipeDef != null)
+            {
+                if(recipe == null)
+                {
+                    recipe = new AmmoRecipeDefSaveable(recipeDef);
+                }
+                else
+                {
+                    recipe?.PostLoadInit(recipeDef);
+                }
+            }
         }
 
+        //skip
         public override void ExportPatch(string dirPath)
         {
             throw new NotImplementedException();

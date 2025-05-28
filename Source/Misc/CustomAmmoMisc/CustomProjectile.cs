@@ -401,6 +401,12 @@ namespace CeManualPatcher.Misc.CustomAmmoMisc
             this.count = thingDefCount.count;
             this.thingDef = thingDefCount.thingDef;
         }
+        public MP_ThingDefCountClass_Save(ThingDef thingDef, int count)
+        {
+            this.count = count;
+            this.thingDef = thingDef;
+        }
+
         public void ExposeData()
         {
             Scribe_Values.Look(ref count, "count");

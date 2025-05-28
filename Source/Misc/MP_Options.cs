@@ -588,7 +588,7 @@ namespace CeManualPatcher
             }
 
         }
-   
+
 
         private static ReadOnlyCollection<string> tradeTagsInt = null;
         public static ReadOnlyCollection<string> tradeTags
@@ -620,7 +620,61 @@ namespace CeManualPatcher
                 return tradeTagsInt;
             }
         }
-       
+
+        private static ReadOnlyCollection<ThingDef> ingredientsForAmmoInt = null;
+        public static ReadOnlyCollection<ThingDef> ingredientsForAmmo
+        {
+            get
+            {
+                if (ingredientsForAmmoInt == null)
+                {
+                    List<ThingDef> list = new List<ThingDef>();
+
+                    foreach (var item in DefDatabase<AmmoDef>.AllDefs)
+                    {
+                        RecipeDef recipeDef = DefDatabase<RecipeDef>.GetNamed($"Make{item.defName}", false);
+                        if (recipeDef != null)
+                        {
+                            list.AddRange(recipeDef.fixedIngredientFilter.AllowedThingDefs);
+                        }
+                    }
+
+                    list.RemoveDuplicates();
+
+                    ThingCategoryDef meatRaw = DefDatabase<ThingCategoryDef>.GetNamed("MeatRaw");
+                    list.RemoveWhere(x => x.IsWithinCategory(meatRaw));
+
+                    ingredientsForAmmoInt = list.AsReadOnly();
+                }
+                return ingredientsForAmmoInt;
+            }
+
+        }
+
+        private static ReadOnlyCollection<string> parentAmmoRecipeClassInt = null;
+
+        public static ReadOnlyCollection<string> parentAmmoRecipeClass
+        {
+            get
+            {
+                if(parentAmmoRecipeClassInt == null)
+                {
+                    parentAmmoRecipeClassInt = new List<string>()
+                    {
+                        "AmmoRecipeBase",
+                        "AdvancedAmmoRecipeBase",
+                        "ArtilleryAmmoRecipeBase",
+                        "LauncherAmmoRecipeBase",
+                        "CannonAmmoRecipeBase",
+                        "ChargeAmmoRecipeBase",
+                        "AmmoRecipeNeolithicBase",
+                        "GrenadeRecipeBase"
+                    }.AsReadOnly();
+                }
+
+                return parentAmmoRecipeClassInt;
+            }
+        }
 
     }
 }

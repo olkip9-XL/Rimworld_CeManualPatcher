@@ -2,6 +2,7 @@
 using CeManualPatcher.Extension;
 using CeManualPatcher.Manager;
 using CeManualPatcher.Misc;
+using CeManualPatcher.Misc.CustomAmmoMisc;
 using CombatExtended;
 using RimWorld;
 using System;
@@ -234,6 +235,105 @@ namespace CeManualPatcher
                     );
                 }, indent: 20f);
             }
+
+            //recipe
+            RecipeDef recipe = DefDatabase<RecipeDef>.GetNamed("Make" + ammo.ammo?.defName, false);
+            if (recipe != null)
+            {
+
+                listing.FieldLineOnChange("MP_RecipeWorkAmount".Translate(), ref recipe.workAmount, (newValue) =>
+                {
+                    manager.GetAmmoPatch(ammo);
+                });
+
+                ThingDefCountClass productCount = recipe.products.FirstOrDefault(x => x.thingDef == ammo.ammo);
+                if (productCount != null)
+                {
+                    listing.FieldLineOnChange("MP_RecipeProductAmount".Translate(), ref productCount.count, (newValue) =>
+                    {
+                        manager.GetAmmoPatch(ammo);
+                    });
+                }
+
+                //ingredients
+                listing.ButtonImageLine("MP_RecipeIngredients".Translate(), TexButton.Add, () =>
+                {
+                    List<FloatMenuOption> options = new List<FloatMenuOption>();
+                    foreach (var item in MP_Options.ingredientsForAmmo)
+                    {
+                        FloatMenuOption option = new FloatMenuOption(item.LabelCap, () =>
+                        {
+                            manager.GetAmmoPatch(ammo);
+
+                            ThingFilter filter = new ThingFilter();
+                            filter.SetAllow(item, true);
+
+                            IngredientCount ingredientCount = new IngredientCount();
+                            ingredientCount.filter = filter;
+                            ingredientCount.SetBaseCount(1);
+
+                            recipe.ingredients.Add(ingredientCount);
+
+                            recipe.fixedIngredientFilter.SetAllow(item, true);
+                        }, null, item.uiIcon);
+
+                        if (option != null)
+                        {
+                            options.Add(option);
+                        }
+                    }
+                    if (options.Any())
+                    {
+                        Find.WindowStack.Add(new FloatMenu(options));
+                    }
+
+
+                });
+
+                foreach (var item in recipe.ingredients)
+                {
+                    Rect rect = listing.GetRect(Text.LineHeight);
+                    rect.x += 20f;
+                    rect.width -= 20f;
+
+                    ThingDef ingredientDef = item.filter?.AllowedThingDefs?.FirstOrDefault();
+                    int count = (int)item.GetBaseCount();
+
+                    //icon
+                    Rect rect4 = rect.LeftPartPixels(rect.height);
+                    Widgets.DrawTextureFitted(rect4, ingredientDef.uiIcon, 1f);
+
+                    //label
+                    Rect rect5 = rect4.RightAdjoin(rect.width - rect.height);
+                    Widgets.Label(rect5, ingredientDef?.LabelCap ?? "MP_Null".Translate());
+
+                    //delete
+                    Rect rect1 = rect.RightPartPixels(rect.height);
+                    if (Widgets.ButtonImage(rect1, TexButton.Delete))
+                    {
+                        manager.GetAmmoPatch(ammo);
+
+                        recipe.ingredients.Remove(item);
+                        recipe.fixedIngredientFilter.SetAllow(ingredientDef, false);
+                        break;
+                    }
+
+                    //count
+                    Rect rect2 = rect1.LeftAdjoin(100f);
+                    WidgetsUtility.TextFieldOnChange(rect2, ref count, (newValue) =>
+                    {
+                        manager.GetAmmoPatch(ammo);
+
+                        item.SetBaseCount(newValue);
+                    });
+
+                    Rect rect3 = rect2.LeftAdjoin(Text.CalcSize("x").x);
+                    Widgets.Label(rect3, "x");
+                }
+
+
+            }
+
         }
 
         private void DrawAmmoHead(Listing_Standard listing, MP_Ammo ammo)

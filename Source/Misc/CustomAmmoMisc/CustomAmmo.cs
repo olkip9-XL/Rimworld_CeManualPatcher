@@ -19,8 +19,8 @@ namespace CeManualPatcher.Misc.CustomAmmoMisc
         private string ammoCategoryDefString = "FullMetalJacket";
         public AmmoCategoryDef ammoCategoryDef
         {
-            get=> DefDatabase<AmmoCategoryDef>.GetNamedSilentFail(ammoCategoryDefString);
-            set=> ammoCategoryDefString = value?.defName ?? null;
+            get => DefDatabase<AmmoCategoryDef>.GetNamedSilentFail(ammoCategoryDefString);
+            set => ammoCategoryDefString = value?.defName ?? null;
         }
 
         public string label;
@@ -63,7 +63,7 @@ namespace CeManualPatcher.Misc.CustomAmmoMisc
         public void Export(XmlDocument doc, XmlElement root)
         {
             IEnumerable<string> errors = ConfigError();
-            if(errors.Any())
+            if (errors.Any())
             {
                 foreach (string error in errors)
                 {
@@ -125,13 +125,13 @@ namespace CeManualPatcher.Misc.CustomAmmoMisc
                 yield return "MP_Error_NoTexturePath".Translate();
             }
 
-            if(ammoCategoryDef == null)
+            if (ammoCategoryDef == null)
             {
                 //yield return "has no ammo class";
                 yield return "MP_Error_NoAmmoClass".Translate();
             }
 
-            if(Math.Abs(mass)< float.Epsilon)
+            if (Math.Abs(mass) < float.Epsilon)
             {
                 //yield return "has no mass";
                 yield return "MP_Error_NoMass".Translate();

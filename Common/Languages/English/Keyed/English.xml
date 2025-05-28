@@ -165,5 +165,19 @@
   <MP_Depth>Depth</MP_Depth>
   <MP_Coverage>Coverage</MP_Coverage>
   <MP_CoverdByArmor>Coverd By Armor</MP_CoverdByArmor>
+  
+  <!--Ammo Recipe-->
+  <MP_Recipe>Recipe</MP_Recipe>
+  <MP_RecipeParentClass>Recipe Parent</MP_RecipeParentClass>
+  <MP_RecipeLabel>Recipe Label</MP_RecipeLabel>
+  <MP_RecipeDescription>Recipe Description </MP_RecipeDescription>
+  <MP_RecipeJobString>Recipe JobString</MP_RecipeJobString>
+  <MP_RecipeWorkAmount>Recipe Work Amount</MP_RecipeWorkAmount>
+  <MP_RecipeProductAmount>Recipe Product Amount</MP_RecipeProductAmount>
+  <MP_RecipeIngredients>Ingredients</MP_RecipeIngredients>
+
+  <MP_DefaultAmmoRecipeLabel>make {0} cartridge x{1}</MP_DefaultAmmoRecipeLabel>
+  <MP_DefaultAmmoRecipeDescription>Craft {0} {1} cartridges.</MP_DefaultAmmoRecipeDescription>
+  <MP_DefaultAmmoRecipeJobString>Making {0} cartridges.</MP_DefaultAmmoRecipeJobString>
 
 </LanguageData>
