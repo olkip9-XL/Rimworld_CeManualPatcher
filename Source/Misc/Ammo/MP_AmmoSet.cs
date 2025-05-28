@@ -17,12 +17,12 @@ namespace CeManualPatcher.Misc
 
         public MP_AmmoCategory category;
 
-        public string sourceModName { get;private set; }
+        public string sourceModName { get; private set; }
         public string Label
         {
             get
             {
-                if(ammoSetDef != null)
+                if (ammoSetDef != null)
                 {
                     return ammoSetDef.label;
                 }
@@ -72,8 +72,8 @@ namespace CeManualPatcher.Misc
         {
             get
             {
-               
-               if (ammoList.Any())
+
+                if (ammoList.Any())
                 {
                     return ammoList.First().Description;
                 }
@@ -88,29 +88,49 @@ namespace CeManualPatcher.Misc
         public MP_AmmoSet(AmmoSetDef ammoSetDef)
         {
             this.ammoSetDef = ammoSetDef;
-            foreach (var ammo in ammoSetDef.ammoTypes)
+
+            for(int i = 0; i < ammoSetDef.ammoTypes.Count; i++)
             {
-                ammoList.Add(new MP_Ammo(ammo));    
+                AmmoLink ammo = ammoSetDef.ammoTypes[i];
+
+                if (ammo.ammo == null)
+                {
+                    MP_Log.Warning($"MP_AmmoSet : ammoSetDef {ammoSetDef?.defName ?? "null"} From {ammoSetDef?.modContentPack.Name ?? "null"} has a NULL Ammo at [{i}] item , skipping");
+                    continue;
+                }
+
+                if (ammo.projectile == null || ammo.projectile.projectile == null)
+                {
+                    MP_Log.Warning($"MP_AmmoSet : ammoSetDef {ammoSetDef?.defName ?? "null"} From {ammoSetDef?.modContentPack.Name ?? "null"} has a Null Projectile at [{i}] item , skipping");
+                    continue;
+                }
+
+                ammoList.Add(new MP_Ammo(ammo));
             }
+           
             this.sourceModName = ammoSetDef.modContentPack?.Name;
 
-            List<ThingCategoryDef > categoryUnderAmmo = DefDatabase<ThingCategoryDef>.AllDefs.Where(x => x.parent == MP_ThingCategoryDefOf.Ammo).ToList();
-            ThingCategoryDef targetDef = categoryUnderAmmo.Find(x =>ammoSetDef.ammoTypes[0].ammo.IsWithinCategory(x));
-            //if(targetDef == null)
-            //{
-            //    Log.Warning("未找到弹药分类：" + ammoSetDef.ammoTypes[0].ammo.defName);
-            //    this.category = MP_Options.ammoCategories.Find(x => x.name == "Uncategorized");
-            //}
-            //else
-            //{
-            //    this.category = MP_Options.ammoCategories.Find(x => x.thingCategoryDef == targetDef);
-            //}
+            List<ThingCategoryDef> categoryUnderAmmo = DefDatabase<ThingCategoryDef>.AllDefs.Where(x => x.parent == MP_ThingCategoryDefOf.Ammo).ToList();
+            ThingCategoryDef targetDef = categoryUnderAmmo.Find(x => ammoSetDef.ammoTypes[0].ammo.IsWithinCategory(x));
+
             this.category = MP_Options.ammoCategories.Find(x => x.thingCategoryDef == targetDef);
         }
 
         //未分类专用
         public MP_AmmoSet(ThingDef ammo, ThingDef projectile, MP_AmmoCategory category)
         {
+            if (projectile == null)
+            {
+                MP_Log.Warning("MP_AmmoSet : projectile can't be null");
+                return;
+            }
+
+            if (projectile.projectile == null)
+            {
+                MP_Log.Warning("MP_AmmoSet : projectile must have a projectile propertie");
+                return;
+            }
+
             this.ammoSetDef = null;
             ammoList.Add(new MP_Ammo(projectile, ammo));
             this.sourceModName = projectile.modContentPack?.Name;

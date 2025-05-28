@@ -47,7 +47,14 @@ namespace CeManualPatcher.Dialogs
             Rect topRect = inRect.TopPartPixels(inRect.height - 35f);
             Rect bottomRect = inRect.BottomPartPixels(35f);
 
-            rect_AmmoList.DoWindowContents(topRect);
+            try
+            {
+                rect_AmmoList.DoWindowContents(topRect);
+            }
+            catch (Exception e)
+            {
+                MP_Log.Error("Dialog_SetDefaultProjectile ammo list error", e);
+            }
 
             Rect buttonRect = new Rect(0, 0, 100f, 30f);
             buttonRect = buttonRect.CenteredOnXIn(bottomRect);

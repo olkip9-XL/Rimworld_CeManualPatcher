@@ -49,12 +49,12 @@ namespace CeManualPatcher.Misc
                 }
             }
         }
-    
+
         public string DefName
         {
             get
             {
-               
+
                 if (this.projectile != null)
                 {
                     return this.projectile.defName;
@@ -65,7 +65,7 @@ namespace CeManualPatcher.Misc
                 }
             }
         }
-        
+
         public string Description
         {
             get
@@ -94,7 +94,7 @@ namespace CeManualPatcher.Misc
             this.projectile = projectile;
             this.ammo = ammo;
 
-            this.isExplosive = projectile.projectile.explosionRadius > 0;
+            this.isExplosive = projectile.projectile != null && projectile.projectile.explosionRadius > 0;
         }
 
         public MP_Ammo(AmmoLink ammoLink)
@@ -102,7 +102,7 @@ namespace CeManualPatcher.Misc
             this.projectile = ammoLink.projectile;
             this.ammo = ammoLink.ammo;
 
-            this.isExplosive = projectile.projectile.explosionRadius > 0;
+            this.isExplosive = projectile.projectile != null && projectile.projectile.explosionRadius > 0;
         }
 
 

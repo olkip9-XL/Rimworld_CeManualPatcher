@@ -33,18 +33,25 @@ namespace CeManualPatcher.Misc.Manager
         }
         public void ExposeData()
         {
-            if(Scribe.mode == LoadSaveMode.Saving)
+            if (Scribe.mode == LoadSaveMode.Saving)
             {
                 ammoSets.RemoveAll(x => x == null);
 
                 if (!ammoSets.Any())
                 {
-                    SaveToLocal();
+                    try
+                    {
+                        SaveToLocal();
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Error(e.ToString());
+                    }
                 }
             }
 
             Scribe_Collections.Look(ref ammoSets, "ammoSets", LookMode.Deep);
-            if(Scribe.mode == LoadSaveMode.LoadingVars)
+            if (Scribe.mode == LoadSaveMode.LoadingVars)
             {
                 if (ammoSets == null)
                 {
@@ -88,9 +95,9 @@ namespace CeManualPatcher.Misc.Manager
 
         public void ExportAll()
         {
-            string dirPath =  Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "CE Patches", "CE", "Defs", "Ammo");
+            string dirPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "CE Patches", "CE", "Defs", "Ammo");
 
-            foreach(var item in ammoSets)
+            foreach (var item in ammoSets)
             {
                 try
                 {

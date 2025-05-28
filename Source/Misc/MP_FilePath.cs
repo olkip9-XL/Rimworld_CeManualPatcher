@@ -22,8 +22,7 @@ namespace CeManualPatcher.Misc
 
                     if (mod == null)
                     {
-                        Log.Error($"[CeManualPatcher] Cannot find mod directory for CEManualPatcher");
-                        throw new Exception($"[CeManualPatcher] Cannot find mod directory for CEManualPatcher");
+                        throw new Exception($"[CE Manual Patcher] Cannot find mod directory for CEManualPatcher");
                     }
 
                     localModDirInt = mod?.RootDir;

@@ -37,10 +37,17 @@ namespace CeManualPatcher.RenderRect.Ammo
                     //normal
                     foreach (var item in DefDatabase<AmmoSetDef>.AllDefs)
                     {
-                        allAmmoSetsInt.Add(new MP_AmmoSet(item));
-                        foreach (var ammoLink in item.ammoTypes)
+                        try
                         {
-                            processedProjectiles.AddDistinct(ammoLink.projectile);
+                            allAmmoSetsInt.Add(new MP_AmmoSet(item));
+                            foreach (var ammoLink in item.ammoTypes)
+                            {
+                                processedProjectiles.AddDistinct(ammoLink.projectile);
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            MP_Log.Error("Error while creating ammo set from AmmoSetDef", e, item);
                         }
                     }
 
@@ -48,17 +55,43 @@ namespace CeManualPatcher.RenderRect.Ammo
                     MP_AmmoCategory grenadeCategory = MP_Options.ammoCategories.Find(x => x.name == "Grenades");
                     foreach (var item in DefDatabase<ThingDef>.AllDefs.Where(x => x.IsWithinCategory(MP_ThingCategoryDefOf.Grenades)))
                     {
-                        ThingDef defaultProjectile = item.Verbs.FirstOrDefault()?.defaultProjectile;
-                        allAmmoSetsInt.Add(new MP_AmmoSet(item, defaultProjectile, grenadeCategory));
+                        try
+                        {
+                            ThingDef defaultProjectile = item.Verbs.FirstOrDefault()?.defaultProjectile;
 
-                        processedProjectiles.AddDistinct(defaultProjectile);
+                            if (defaultProjectile == null || defaultProjectile.projectile == null)
+                            {
+                                continue;
+                            }
+
+                            MP_AmmoSet ammoSet = new MP_AmmoSet(item, defaultProjectile, grenadeCategory);
+
+                            if (ammoSet != null)
+                            {
+                                allAmmoSetsInt.Add(ammoSet);
+
+                                processedProjectiles.AddDistinct(defaultProjectile);
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            MP_Log.Error("Error while creating hand grenade ammo set", e, item);
+                        }
+
                     }
 
                     //uncategrized
                     MP_AmmoCategory unCategorized = MP_Options.ammoCategories.Find(x => x.name == "Uncategorized");
                     foreach (var item in DefDatabase<ThingDef>.AllDefs.Where(x => x.projectile != null).Except(processedProjectiles))
                     {
-                        allAmmoSetsInt.Add(new MP_AmmoSet(null, item, unCategorized));
+                        try
+                        {
+                            allAmmoSetsInt.Add(new MP_AmmoSet(null, item, unCategorized));
+                        }
+                        catch (Exception e)
+                        {
+                            MP_Log.Error("Error while creating uncategorized ammo set", e, item);
+                        }
                     }
                 }
                 return allAmmoSetsInt;
@@ -76,6 +109,7 @@ namespace CeManualPatcher.RenderRect.Ammo
             {
                 List<MP_AmmoSet> list = new List<MP_AmmoSet>();
                 list.AddRange(AllAmmoSets);
+
                 if (!keyWords.NullOrEmpty())
                 {
                     list = list.Where(x => x.Label != null && x.Label.ContainsIgnoreCase(keyWords)).ToList();
