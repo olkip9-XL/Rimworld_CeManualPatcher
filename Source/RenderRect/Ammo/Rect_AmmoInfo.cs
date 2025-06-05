@@ -72,6 +72,13 @@ namespace CeManualPatcher
             {
                 manager.ResetAll();
             }
+
+            //export
+            Rect exportCEPatchRect = rect.RightPartPixels(120f);
+            if (Widgets.ButtonText(exportCEPatchRect, "MP_Export".Translate()))
+            {
+                Mod_CEManualPatcher.settings.ExportPatch();
+            }
         }
 
         private void DrawHead(Listing_Standard listing)
@@ -95,7 +102,8 @@ namespace CeManualPatcher
             if (props == null)
             {
                 listing.Label($"Not CE Projectile, Projectile Class is {ammo.projectile.projectile.GetType()}");
-                DrawNonCEProjectile(listing, ammo.projectile);
+                //DrawNonCEProjectile(listing, ammo.projectile);
+                DrawNonCEProjectile(listing, ammo);
                 return;
             }
 
@@ -158,182 +166,228 @@ namespace CeManualPatcher
             });
 
             //comps
-            if (ammo.projectile.HasComp<CompFragments>())
+
+            DrawFragments();
+            DrawSecondaryExplosion();
+            DrawRecipe();
+
+            void DrawFragments()
             {
-                CompProperties_Fragments compProps = ammo.projectile.GetCompProperties<CompProperties_Fragments>();
-
-                //head
-                Rect headRect = listing.GetRect(Text.LineHeight);
-                Rect addRect = headRect.RightPartPixels(headRect.height);
-
-                Widgets.Label(headRect, "CE_DescFragments".Translate());
-                if (Widgets.ButtonImage(addRect, TexButton.Add))
+                if (ammo.projectile.HasComp<CompFragments>())
                 {
-                    List<ThingDef> list = MP_Options.fragments.ToList();
-                    FloatMenuUtility.MakeMenu(list,
-                        (x) => x.LabelCap,
-                        (x) => delegate
-                        {
-                            manager.GetAmmoPatch(ammo);
+                    CompProperties_Fragments compProps = ammo.projectile.GetCompProperties<CompProperties_Fragments>();
 
-                            if (!compProps.fragments.Any(y => y.thingDef == x))
-                            {
-                                compProps.fragments.Add(new ThingDefCountClass(x, 1));
-                            }
-                        }
-                    );
-                }
+                    Color fontColor = compProps.fragments.NullOrEmpty() ? MP_Color.Grey : Color.white;
 
-                //fragments
-                for (int i = 0; i < compProps.fragments.Count; i++)
-                {
-                    DrawFragmentsRow(listing, ammo, compProps, i);
-                }
-            }
+                    //head
+                    Rect headRect = listing.GetRect(Text.LineHeight);
+                    Rect addRect = headRect.RightPartPixels(headRect.height);
 
-            if (ammo.projectile.HasComp<CompExplosiveCE>())
-            {
-                CompProperties_ExplosiveCE compProps = ammo.projectile.GetCompProperties<CompProperties_ExplosiveCE>();
-
-                listing.Label("CE_DescSecondaryExplosion".Translate());
-
-                listing.DamageRow(compProps.explosiveDamageType.LabelCap, damageButtonWidth,
-                    () =>
+                    Widgets.Label(headRect, "CE_DescFragments".Translate().Colorize(fontColor));
+                    if (Widgets.ButtonImage(addRect, TexButton.Add))
                     {
-                        FloatMenuUtility.MakeMenu(AvaliableDamageDefs(ammo),
+                        List<ThingDef> list = MP_Options.fragments.ToList();
+                        FloatMenuUtility.MakeMenu(list,
                             (x) => x.LabelCap,
                             (x) => delegate
                             {
                                 manager.GetAmmoPatch(ammo);
-                                compProps.explosiveDamageType = x;
+
+                                if (!compProps.fragments.Any(y => y.thingDef == x))
+                                {
+                                    compProps.fragments.Add(new ThingDefCountClass(x, 1));
+                                }
                             }
                         );
-                    }, (int)compProps.damageAmountBase, 100f,
-                    (newValue) =>
+                    }
+
+                    //fragments
+                    for (int i = 0; i < compProps.fragments.Count; i++)
                     {
-                        manager.GetAmmoPatch(ammo);
-                        compProps.damageAmountBase = newValue;
-                    }, indent: 20f);
-
-                listing.FieldLineReflexion("CE_DescExplosionRadius".Translate(), "explosiveRadius", compProps, newValue =>
-                {
-                    manager.GetAmmoPatch(ammo);
-                }, indent: 20f);
-
-                listing.ButtonX("MP_DescExplosionGas".Translate(), 100f, compProps.postExplosionGasType.GetLabel(), () =>
-                {
-                    List<GasType?> list = new List<GasType?>();
-                    list.Add(null);
-                    list.AddRange(Enum.GetValues(typeof(GasType)).Cast<GasType?>());
-                    FloatMenuUtility.MakeMenu<GasType?>(list,
-                        (gas) => gas.GetLabel(),
-                        (gas) => delegate
-                        {
-                            manager.GetAmmoPatch(ammo);
-                            compProps.postExplosionGasType = gas;
-                        }
-                    );
-                }, indent: 20f);
-            }
-
-            //recipe
-            RecipeDef recipe = DefDatabase<RecipeDef>.GetNamed("Make" + ammo.ammo?.defName, false);
-            if (recipe != null)
-            {
-
-                listing.FieldLineOnChange("MP_RecipeWorkAmount".Translate(), ref recipe.workAmount, (newValue) =>
-                {
-                    manager.GetAmmoPatch(ammo);
-                });
-
-                ThingDefCountClass productCount = recipe.products.FirstOrDefault(x => x.thingDef == ammo.ammo);
-                if (productCount != null)
-                {
-                    listing.FieldLineOnChange("MP_RecipeProductAmount".Translate(), ref productCount.count, (newValue) =>
-                    {
-                        manager.GetAmmoPatch(ammo);
-                    });
+                        DrawFragmentsRow(compProps, i);
+                    }
                 }
 
-                //ingredients
-                listing.ButtonImageLine("MP_RecipeIngredients".Translate(), TexButton.Add, () =>
-                {
-                    List<FloatMenuOption> options = new List<FloatMenuOption>();
-                    foreach (var item in MP_Options.ingredientsForAmmo)
-                    {
-                        FloatMenuOption option = new FloatMenuOption(item.LabelCap, () =>
-                        {
-                            manager.GetAmmoPatch(ammo);
-
-                            ThingFilter filter = new ThingFilter();
-                            filter.SetAllow(item, true);
-
-                            IngredientCount ingredientCount = new IngredientCount();
-                            ingredientCount.filter = filter;
-                            ingredientCount.SetBaseCount(1);
-
-                            recipe.ingredients.Add(ingredientCount);
-
-                            recipe.fixedIngredientFilter.SetAllow(item, true);
-                        }, null, item.uiIcon);
-
-                        if (option != null)
-                        {
-                            options.Add(option);
-                        }
-                    }
-                    if (options.Any())
-                    {
-                        Find.WindowStack.Add(new FloatMenu(options));
-                    }
-
-
-                });
-
-                foreach (var item in recipe.ingredients)
+                void DrawFragmentsRow(CompProperties_Fragments compProps, int index)
                 {
                     Rect rect = listing.GetRect(Text.LineHeight);
                     rect.x += 20f;
                     rect.width -= 20f;
 
-                    ThingDef ingredientDef = item.filter?.AllowedThingDefs?.FirstOrDefault();
-                    int count = (int)item.GetBaseCount();
+                    Rect deleteRect = rect.RightPartPixels(rect.height);
+                    Rect fieldRect = new Rect(deleteRect.x - 6f - 100f, rect.y, 100f, rect.height);
+                    Rect xRect = new Rect(fieldRect.x - rect.height, rect.y, rect.height, rect.height);
 
-                    //icon
-                    Rect rect4 = rect.LeftPartPixels(rect.height);
-                    Widgets.DrawTextureFitted(rect4, ingredientDef.uiIcon, 1f);
+                    ThingDefCountClass fragment = compProps.fragments[index];
 
-                    //label
-                    Rect rect5 = rect4.RightAdjoin(rect.width - rect.height);
-                    Widgets.Label(rect5, ingredientDef?.LabelCap ?? "MP_Null".Translate());
+                    Widgets.Label(rect, fragment.thingDef.LabelCap);
 
-                    //delete
-                    Rect rect1 = rect.RightPartPixels(rect.height);
-                    if (Widgets.ButtonImage(rect1, TexButton.Delete))
+                    Widgets.Label(xRect, "x");
+
+                    WidgetsUtility.TextFieldOnChange(fieldRect, ref fragment.count, newValue =>
                     {
                         manager.GetAmmoPatch(ammo);
-
-                        recipe.ingredients.Remove(item);
-                        recipe.fixedIngredientFilter.SetAllow(ingredientDef, false);
-                        break;
-                    }
-
-                    //count
-                    Rect rect2 = rect1.LeftAdjoin(100f);
-                    WidgetsUtility.TextFieldOnChange(rect2, ref count, (newValue) =>
-                    {
-                        manager.GetAmmoPatch(ammo);
-
-                        item.SetBaseCount(newValue);
                     });
 
-                    Rect rect3 = rect2.LeftAdjoin(Text.CalcSize("x").x);
-                    Widgets.Label(rect3, "x");
+                    if (Widgets.ButtonImage(deleteRect, TexButton.Delete))
+                    {
+                        manager.GetAmmoPatch(ammo);
+                        compProps.fragments.RemoveAt(index);
+                    }
+
+                    listing.Gap(listing.verticalSpacing);
                 }
-
-
             }
 
+            void DrawSecondaryExplosion()
+            {
+                if (ammo.projectile.HasComp<CompExplosiveCE>())
+                {
+
+                    CompProperties_ExplosiveCE compProps = ammo.projectile.GetCompProperties<CompProperties_ExplosiveCE>();
+
+                    Color fontColor = compProps.explosiveDamageType == null ? MP_Color.Grey : Color.white;
+
+                    listing.Label("CE_DescSecondaryExplosion".Translate().Colorize(fontColor));
+
+                    string damageLabel = compProps.explosiveDamageType?.LabelCap ?? "null";
+                    listing.DamageRow(damageLabel.Colorize(fontColor), damageButtonWidth,
+                        () =>
+                        {
+                            FloatMenuUtility.MakeMenu(AvaliableDamageDefs(ammo),
+                                (x) => x.LabelCap,
+                                (x) => delegate
+                                {
+                                    manager.GetAmmoPatch(ammo);
+                                    compProps.explosiveDamageType = x;
+                                }
+                            );
+                        }, (int)compProps.damageAmountBase, 100f,
+                        (newValue) =>
+                        {
+                            manager.GetAmmoPatch(ammo);
+                            compProps.damageAmountBase = newValue;
+                        }, indent: 20f);
+
+                    listing.FieldLineReflexion("CE_DescExplosionRadius".Translate().Colorize(fontColor), "explosiveRadius", compProps, newValue =>
+                    {
+                        manager.GetAmmoPatch(ammo);
+                    }, indent: 20f);
+
+                    listing.ButtonX("MP_DescExplosionGas".Translate().Colorize(fontColor), 100f, compProps.postExplosionGasType.GetLabel(), () =>
+                    {
+                        List<GasType?> list = new List<GasType?>();
+                        list.Add(null);
+                        list.AddRange(Enum.GetValues(typeof(GasType)).Cast<GasType?>());
+                        FloatMenuUtility.MakeMenu<GasType?>(list,
+                            (gas) => gas.GetLabel(),
+                            (gas) => delegate
+                            {
+                                manager.GetAmmoPatch(ammo);
+                                compProps.postExplosionGasType = gas;
+                            }
+                        );
+                    }, indent: 20f);
+                }
+            }
+
+            void DrawRecipe()
+            {
+                RecipeDef recipe = DefDatabase<RecipeDef>.GetNamed("Make" + ammo.ammo?.defName, false);
+                if (recipe != null)
+                {
+
+                    listing.FieldLineOnChange("MP_RecipeWorkAmount".Translate(), ref recipe.workAmount, (newValue) =>
+                    {
+                        manager.GetAmmoPatch(ammo);
+                    });
+
+                    ThingDefCountClass productCount = recipe.products.FirstOrDefault(x => x.thingDef == ammo.ammo);
+                    if (productCount != null)
+                    {
+                        listing.FieldLineOnChange("MP_RecipeProductAmount".Translate(), ref productCount.count, (newValue) =>
+                        {
+                            manager.GetAmmoPatch(ammo);
+                        });
+                    }
+
+                    //ingredients
+                    listing.ButtonImageLine("MP_RecipeIngredients".Translate(), TexButton.Add, () =>
+                    {
+                        List<FloatMenuOption> options = new List<FloatMenuOption>();
+                        foreach (var item in MP_Options.ingredientsForAmmo)
+                        {
+                            FloatMenuOption option = new FloatMenuOption(item.LabelCap, () =>
+                            {
+                                manager.GetAmmoPatch(ammo);
+
+                                ThingFilter filter = new ThingFilter();
+                                filter.SetAllow(item, true);
+
+                                IngredientCount ingredientCount = new IngredientCount();
+                                ingredientCount.filter = filter;
+                                ingredientCount.SetBaseCount(1);
+
+                                recipe.ingredients.Add(ingredientCount);
+
+                                recipe.fixedIngredientFilter.SetAllow(item, true);
+                            }, null, item.uiIcon);
+
+                            if (option != null)
+                            {
+                                options.Add(option);
+                            }
+                        }
+                        if (options.Any())
+                        {
+                            Find.WindowStack.Add(new FloatMenu(options));
+                        }
+
+
+                    });
+
+                    foreach (var item in recipe.ingredients)
+                    {
+                        Rect rect = listing.GetRect(Text.LineHeight);
+                        rect.x += 20f;
+                        rect.width -= 20f;
+
+                        ThingDef ingredientDef = item.filter?.AllowedThingDefs?.FirstOrDefault();
+                        int count = (int)item.GetBaseCount();
+
+                        //icon
+                        Rect rect4 = rect.LeftPartPixels(rect.height);
+                        Widgets.DrawTextureFitted(rect4, ingredientDef.uiIcon, 1f);
+
+                        //label
+                        Rect rect5 = rect4.RightAdjoin(rect.width - rect.height);
+                        Widgets.Label(rect5, ingredientDef?.LabelCap ?? "MP_Null".Translate());
+
+                        //delete
+                        Rect rect1 = rect.RightPartPixels(rect.height);
+                        if (Widgets.ButtonImage(rect1, TexButton.Delete))
+                        {
+                            manager.GetAmmoPatch(ammo);
+
+                            recipe.ingredients.Remove(item);
+                            recipe.fixedIngredientFilter.SetAllow(ingredientDef, false);
+                            break;
+                        }
+
+                        //count
+                        Rect rect2 = rect1.LeftAdjoin(100f);
+                        WidgetsUtility.TextFieldOnChange(rect2, ref count, (newValue) =>
+                        {
+                            manager.GetAmmoPatch(ammo);
+
+                            item.SetBaseCount(newValue);
+                        });
+
+                        Rect rect3 = rect2.LeftAdjoin(Text.CalcSize("x").x);
+                        Widgets.Label(rect3, "x");
+                    }
+                }
+            }
         }
 
         private void DrawAmmoHead(Listing_Standard listing, MP_Ammo ammo)
@@ -347,7 +401,7 @@ namespace CeManualPatcher
 
             if (manager.HasAmmoPatch(ammo))
             {
-                Widgets.DrawBoxSolid(signRect, new Color(85f / 256f, 177f / 256f, 85f / 256f));
+                Widgets.DrawBoxSolid(signRect, MP_Color.SignGreen);
             }
 
             Widgets.DrawTextureFitted(iconRect, ammo.Icon, 0.7f);
@@ -568,35 +622,7 @@ namespace CeManualPatcher
                     }, i == -1 ? null : onDelete, 20f);
             }
         }
-        private void DrawFragmentsRow(Listing_Standard listing, MP_Ammo ammo, CompProperties_Fragments compProps, int index)
-        {
-            Rect rect = listing.GetRect(Text.LineHeight);
-            rect.x += 20f;
-            rect.width -= 20f;
 
-            Rect deleteRect = rect.RightPartPixels(rect.height);
-            Rect fieldRect = new Rect(deleteRect.x - 6f - 100f, rect.y, 100f, rect.height);
-            Rect xRect = new Rect(fieldRect.x - rect.height, rect.y, rect.height, rect.height);
-
-            ThingDefCountClass fragment = compProps.fragments[index];
-
-            Widgets.Label(rect, fragment.thingDef.LabelCap);
-
-            Widgets.Label(xRect, "x");
-
-            WidgetsUtility.TextFieldOnChange(fieldRect, ref fragment.count, newValue =>
-            {
-                manager.GetAmmoPatch(ammo);
-            });
-
-            if (Widgets.ButtonImage(deleteRect, TexButton.Delete))
-            {
-                manager.GetAmmoPatch(ammo);
-                compProps.fragments.RemoveAt(index);
-            }
-
-            listing.Gap(listing.verticalSpacing);
-        }
         private List<DamageDef> AvaliableDamageDefs(MP_Ammo ammo)
         {
             if (ammo.isExplosive)
@@ -609,15 +635,24 @@ namespace CeManualPatcher
             }
         }
 
-        private void DrawNonCEProjectile(Listing_Standard listing, ThingDef projectileDef)
+        private void DrawNonCEProjectile(Listing_Standard listing, MP_Ammo ammo)
         {
-            if (projectileDef == null) return;
+            if (ammo == null || ammo.projectile == null) return;
+
+            ThingDef projectileDef = ammo.projectile;
 
             listing.GapLine(6f);
 
             //head
             Rect rect = listing.GetRect(Text.LineHeight);
             Widgets.LabelWithIcon(rect, projectileDef.LabelCap, projectileDef.uiIcon);
+
+            Rect patchRect = rect.RightPartPixels(rect.height);
+            if (Widgets.ButtonImage(patchRect, MP_Texture.CEPatch))
+            {
+                MakeCEPatch(ammo);
+            }
+
 
             ProjectileProperties props = projectileDef.projectile;
             if (props == null) return;
@@ -647,8 +682,27 @@ namespace CeManualPatcher
             //non-explosive
             else
             {
-
+                //nothing
             }
         }
+
+        private void MakeCEPatch(MP_Ammo ammo)
+        {
+            if (ammo == null || ammo.projectile == null || ammo.projectile.projectile == null)
+            {
+                return;
+            }
+
+            manager.Reset(ammo.projectile);
+
+            ProjectilePropertiesCE propCE = PropUtility.ConvertToChild<ProjectileProperties, ProjectilePropertiesCE>(ammo.projectile.projectile);
+
+            ammo.projectile.projectile = propCE;
+            ammo.projectile.comps.Add(new CompProperties_Fragments());
+            ammo.projectile.comps.Add(new CompProperties_ExplosiveCE());
+
+            manager.GetAmmoPatch(ammo);
+        }
+
     }
 }

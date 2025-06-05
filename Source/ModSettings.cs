@@ -98,6 +98,7 @@ namespace CeManualPatcher
             apparelManager?.ExportAll();
             customAmmoManager?.ExportAll();
             bodyDefManager?.ExportAll();
+            ammoManager?.ExportAll();
 
             string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "CE Patches");
             Messages.Message($"MP_CEPatchExportMsg".Translate(path), MessageTypeDefOf.NeutralEvent);

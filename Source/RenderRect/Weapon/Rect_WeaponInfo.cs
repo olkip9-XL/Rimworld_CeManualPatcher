@@ -213,7 +213,7 @@ namespace CeManualPatcher
             //label
             Rect rect2 = rect.RightPartPixels(rect.width - 30f);
             Text.Font = GameFont.Medium;
-            Widgets.Label(rect2, curWeaponDef.label);
+            Widgets.Label(rect2, curWeaponDef.label ?? "No Label");
             Text.Font = GameFont.Small;
 
             //reset button

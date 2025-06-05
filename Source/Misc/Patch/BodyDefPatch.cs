@@ -100,7 +100,7 @@ namespace CeManualPatcher.Misc.Patch
             string filePath = Path.Combine(folderPath, targetDef.defName + ".xml");
 
             XmlElement root = null;
-            XmlDocument xmlDocument = XmlUtility.CreateBasePatchDoc(ref root);
+            XmlDocument xmlDocument = XmlUtility.CreateBasePatchDoc(ref root, targetDef.modContentPack.Name);
 
             CreateGroupElement(targetDef.corePart, new List<string>());
             CreateArmorCoverage(targetDef.corePart, new List<int>());

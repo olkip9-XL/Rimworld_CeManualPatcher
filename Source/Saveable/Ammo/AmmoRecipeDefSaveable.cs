@@ -1,4 +1,5 @@
 ﻿using CeManualPatcher.Misc.CustomAmmoMisc;
+using RimWorld;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,6 +21,10 @@ namespace CeManualPatcher.Saveable.Ammo
         private int productCount;
         private int workAmount;
         private List<ThingDefCountClass> ingredients;
+
+        public int OriginalProductCount => this.productCount;
+        public int OriginalWorkAmount => this.workAmount;
+        public List<ThingDefCountClass> OriginalIngredients => this.ingredients;
 
 
         private RecipeDef recipe => base.def as RecipeDef;
@@ -49,10 +54,10 @@ namespace CeManualPatcher.Saveable.Ammo
             Scribe_Values.Look(ref productCount_save, "productCount");
             Scribe_Values.Look(ref workAmount_save, "workAmount");
             Scribe_Collections.Look(ref ingredients_save, "ingerents", LookMode.Deep);
-            
-            if(Scribe.mode == LoadSaveMode.LoadingVars)
+
+            if (Scribe.mode == LoadSaveMode.LoadingVars)
             {
-                if(ingredients_save == null)
+                if (ingredients_save == null)
                 {
                     ingredients_save = new List<MP_ThingDefCountClass_Save>();
                 }
@@ -62,7 +67,7 @@ namespace CeManualPatcher.Saveable.Ammo
 
         public override void Reset()
         {
-            if(recipe == null)
+            if (recipe == null)
                 return;
 
             recipe.workAmount = this.workAmount;
@@ -87,7 +92,7 @@ namespace CeManualPatcher.Saveable.Ammo
 
         protected override void Apply()
         {
-            if(recipe == null)
+            if (recipe == null)
                 return;
 
             recipe.workAmount = this.workAmount_save;
@@ -120,7 +125,7 @@ namespace CeManualPatcher.Saveable.Ammo
             this.workAmount = (int)recipe.workAmount;
 
             this.productCount = recipe.products.FirstOrDefault()?.count ?? 0;
-            
+
             this.ingredients = new List<ThingDefCountClass>();
             foreach (var item in recipe.ingredients)
             {
@@ -130,6 +135,66 @@ namespace CeManualPatcher.Saveable.Ammo
                 this.ingredients.Add(new ThingDefCountClass(thingDef, count));
             }
         }
-       
+
+        public bool CompareOriginalIngredients()
+        {
+            List<IngredientCount> ingredientsA = this.recipe?.ingredients ?? null;
+            List<ThingDefCountClass> ingredientsB = this.ingredients;
+
+            Dictionary<ThingDef, int> thingCountDicA = new Dictionary<ThingDef, int>();
+            Dictionary<ThingDef, int> thingCountDicB = new Dictionary<ThingDef, int>();
+
+            if (ingredientsA == null || ingredientsB == null)
+            {
+                return false;
+            }
+
+            //collect thing counts
+            foreach (var ingredient in ingredientsA)
+            {
+                foreach (var thingDef in ingredient.filter.AllowedThingDefs)
+                {
+                    if (!thingCountDicA.ContainsKey(thingDef))
+                    {
+                        thingCountDicA.Add(thingDef, (int)ingredient.GetBaseCount());
+                    }
+                }
+            }
+
+            foreach (var item in ingredientsB)
+            {
+                if (!thingCountDicB.ContainsKey(item.thingDef))
+                {
+                    thingCountDicB.Add(item.thingDef, item.count);
+                }
+            }
+
+            //compare
+            if (thingCountDicA.Count != thingCountDicB.Count)
+            {
+                return false;
+            }
+
+            foreach (var kvp in thingCountDicA)
+            {
+                if (!thingCountDicB.TryGetValue(kvp.Key, out int countB) || countB != kvp.Value)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+
+
+
+        }
+
+        public bool CompareOriginalFixedIngredientFilter()
+        {
+            IEnumerable<ThingDef> allowedDefsA = this.recipe?.fixedIngredientFilter?.AllowedThingDefs ?? Enumerable.Empty<ThingDef>();
+            IEnumerable<ThingDef> allowedDefsB = this.ingredients?.Select(x => x.thingDef) ?? Enumerable.Empty<ThingDef>();
+
+            return allowedDefsA.OrderBy(x => x.defName).SequenceEqual(allowedDefsB.OrderBy(x => x.defName));
+        }
     }
 }

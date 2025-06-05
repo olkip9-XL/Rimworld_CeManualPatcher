@@ -61,7 +61,7 @@ namespace CeManualPatcher
                 weaponManager.GetWeaponPatch(thingDef).AddVerb();
             }
 
-            if (ammoUser != null && ammoUser.ammoSet!=null)
+            if (ammoUser != null && ammoUser.ammoSet != null)
             {
                 weaponManager.GetWeaponPatch(thingDef).AddAmmoUser();
             }
@@ -105,7 +105,7 @@ namespace CeManualPatcher
             //comps
             if (thingDef.comps != null)
             {
-                if (!thingDef.HasComp<CompAmmoUser>() && ammoUser != null && ammoUser.ammoSet!=null)
+                if (!thingDef.HasComp<CompAmmoUser>() && ammoUser != null && ammoUser.ammoSet != null)
                 {
                     thingDef.comps.Add(ammoUser);
                 }
@@ -292,7 +292,7 @@ namespace CeManualPatcher
 
             // 创建XML文档
             XmlElement rootPatchElement = null;
-            XmlDocument xmlDoc = XmlUtility.CreateBasePatchDoc(ref rootPatchElement);
+            XmlDocument xmlDoc = XmlUtility.CreateBasePatchDoc(ref rootPatchElement, thingDef.modContentPack.Name);
 
             XmlUtility.Replace_Tools(xmlDoc, rootPatchElement, thingDef.defName, thingDef.tools);
             XmlUtility.MakeGunCECompatible(xmlDoc, rootPatchElement, thingDef);

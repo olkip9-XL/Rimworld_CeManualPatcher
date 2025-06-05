@@ -85,12 +85,29 @@ namespace CeManualPatcher.Misc
                 throw new ArgumentNullException(nameof(target), "Target object cannot be null");
             }
 
-            Type type = source.GetType();
-            if (type != target.GetType())
-            {
-                throw new ArgumentException($"Source ({type.ToString()}) and target ({target.GetType().ToString()}) must be of the same type");
+            //Type type = typeof(T);
+            //if (type != target.GetType())
+            //{
+            //    throw new ArgumentException($"Source ({type.ToString()}) and target ({target.GetType().ToString()}) must be of the same type");
+            //}
+
+            //Check type
+            Type type = typeof(T);
+            if (type.IsValueType) { 
+                throw new ArgumentException("Source and target must be reference types", nameof(type));
             }
 
+            if (!type.IsInstanceOfType(target))
+            {
+                throw new ArgumentException($"Target must be of type {type.ToString()}", nameof(target));
+            }
+
+            if(!type.IsInstanceOfType(source))
+            {
+                throw new ArgumentException($"Source must be of type {type.ToString()}", nameof(source));
+            }
+
+            // Copy properties
             foreach (FieldInfo field in type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
             {
                 object fieldValue = field.GetValue(source);

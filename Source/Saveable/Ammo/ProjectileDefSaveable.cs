@@ -65,6 +65,13 @@ namespace CeManualPatcher.Saveable
         private ProjectilePropertiesCE originalData;
         private string originalLabel;
 
+        public string OriginalLabel => originalLabel;
+        public ProjectilePropertiesCE OriginalData => originalData;
+
+        public bool SecondaryExplosionChanged => !(secondaryExplosion?.CompareOriginalData() ?? true);
+        public bool SecondaryDamageChanged => !(secondaryDamage?.CompareOriginalData() ?? true);
+        public bool FragmentsChanged => !(fragments?.CompareOriginalData() ?? true);
+
         public ProjectileDefSaveable() { }
         public ProjectileDefSaveable(ThingDef thingDef)
         {
@@ -165,9 +172,18 @@ namespace CeManualPatcher.Saveable
         public override void PostLoadInit(ThingDef thingDef)
         {
             this.def = thingDef;
-            if (projectile == null)
+            //if (projectile == null)
+            //{
+            //    return;
+            //}
+            if (def == null || def.projectile == null)
             {
                 return;
+            }
+
+            if (!(def.projectile is ProjectilePropertiesCE))
+            {
+                def.projectile = PropUtility.ConvertToChild<ProjectileProperties, ProjectilePropertiesCE>(def.projectile);
             }
 
             InitOriginalData();

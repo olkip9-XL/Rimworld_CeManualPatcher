@@ -12,6 +12,7 @@ namespace CeManualPatcher.Saveable.Ammo
 {
     internal class SecondaryExplosionSaveable : SaveableBase<ThingDef>
     {
+        //字段
         public static ReadOnlyCollection<string> propNames = new List<string>()
         {
             "explosiveRadius",
@@ -20,13 +21,13 @@ namespace CeManualPatcher.Saveable.Ammo
         private Dictionary<string, string> propDic = new Dictionary<string, string>();
 
         private string damageDefString;
-        public DamageDef damageDef
+        private DamageDef damageDef
         {
             get => DefDatabase<DamageDef>.GetNamed(damageDefString, false);
             set => damageDefString = value?.defName ?? "null";
         }
 
-        public GasType? postExplosionGasType;
+        private GasType? postExplosionGasType;
 
         //private
         private CompProperties_ExplosiveCE compProps
@@ -75,7 +76,7 @@ namespace CeManualPatcher.Saveable.Ammo
 
         public override void ExposeData()
         {
-            if (Scribe.mode == LoadSaveMode.Saving && compProps!= null)
+            if (Scribe.mode == LoadSaveMode.Saving && compProps != null)
             {
                 //保存
                 foreach (var item in propNames)
@@ -109,9 +110,19 @@ namespace CeManualPatcher.Saveable.Ammo
         public override void PostLoadInit(ThingDef thingDef)
         {
             this.def = thingDef;
-            if (compProps == null)
+            //if (compProps == null)
+            //{
+            //    return;
+            //}
+
+            if (def == null)
             {
                 return;
+            }
+
+            if (!def.HasComp<CompExplosiveCE>())
+            {
+                def.comps.Add(new CompProperties_ExplosiveCE());
             }
 
             InitOriginalData();
@@ -126,6 +137,34 @@ namespace CeManualPatcher.Saveable.Ammo
             }
             originalData = new CompProperties_ExplosiveCE();
             PropUtility.CopyPropValue(compProps, originalData);
+        }
+
+        public bool CompareOriginalData()
+        {
+            CompProperties_ExplosiveCE currentData = compProps;
+
+            foreach (var item in propNames)
+            {
+                object originalValue = PropUtility.GetPropValue(originalData, item);
+                object currentValue = PropUtility.GetPropValue(currentData, item);
+
+                if (!object.Equals(originalValue, currentValue))
+                {
+                    return false;
+                }
+            }
+
+            if (compProps.explosiveDamageType != originalData.explosiveDamageType)
+            {
+                return false;
+            }
+
+            if (compProps.postExplosionGasType != originalData.postExplosionGasType)
+            {
+                return false;
+            }
+
+            return true;
         }
     }
 }

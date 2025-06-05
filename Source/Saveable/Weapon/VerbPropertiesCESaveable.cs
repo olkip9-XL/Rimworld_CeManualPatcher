@@ -78,6 +78,9 @@ namespace CeManualPatcher.Saveable
         }
 
         private VerbProperties originalData;
+
+        public VerbProperties OriginalData => originalData;
+
         internal VerbPropertiesCESaveable() { }
         internal VerbPropertiesCESaveable(ThingDef thingDef, bool forceAdd = false)
         {
@@ -175,13 +178,23 @@ namespace CeManualPatcher.Saveable
         }
         protected override void InitOriginalData()
         {
-            this.originalData = new VerbProperties();
+            if(def == null || def.Verbs.NullOrEmpty())
+            {
+                return;
+            }
+
             if (verbPropertiesCE != null)
+            {
                 this.originalData = new VerbPropertiesCE();
 
-            PropUtility.CopyPropValue(def.Verbs[0], this.originalData);
+                PropUtility.CopyPropValue(def.Verbs[0], this.originalData);
+            }
+            else
+            {
+                this.originalData = new VerbProperties();
+                PropUtility.CopyPropValue<VerbProperties>(def.Verbs[0], this.originalData);
+            }
         }
-
 
     }
 }

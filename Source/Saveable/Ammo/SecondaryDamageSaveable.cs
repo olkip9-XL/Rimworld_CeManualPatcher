@@ -57,13 +57,13 @@ namespace CeManualPatcher.Saveable.Ammo
         }
         protected override void Apply()
         {
-            if(secondaryDamages == null)
+            if (secondaryDamages == null)
             {
                 return;
             }
 
             secondaryDamages.Clear();
-            foreach(var item in secondaryDamagesExpo)
+            foreach (var item in secondaryDamagesExpo)
             {
                 DamageDef damageDef = DefDatabase<DamageDef>.GetNamed(item.defName);
                 if (damageDef != null)
@@ -79,7 +79,7 @@ namespace CeManualPatcher.Saveable.Ammo
 
         public override void ExposeData()
         {
-            if (Scribe.mode == LoadSaveMode.Saving && secondaryDamages!=null)
+            if (Scribe.mode == LoadSaveMode.Saving && secondaryDamages != null)
             {
                 secondaryDamagesExpo.Clear();
                 foreach (var damage in secondaryDamages)
@@ -93,7 +93,7 @@ namespace CeManualPatcher.Saveable.Ammo
             }
 
             Scribe_Collections.Look(ref secondaryDamagesExpo, "secondaryDamagesExpo", LookMode.Deep);
-            if(Scribe.mode == LoadSaveMode.LoadingVars)
+            if (Scribe.mode == LoadSaveMode.LoadingVars)
             {
                 if (secondaryDamagesExpo == null)
                 {
@@ -104,7 +104,7 @@ namespace CeManualPatcher.Saveable.Ammo
 
         public override void Reset()
         {
-            if(secondaryDamages == null)
+            if (secondaryDamages == null)
             {
                 return;
             }
@@ -120,7 +120,7 @@ namespace CeManualPatcher.Saveable.Ammo
 
         public override void PostLoadInit(ThingDef thingDef)
         {
-           this.def = thingDef;
+            this.def = thingDef;
             if (secondaryDamages == null)
             {
                 return;
@@ -145,6 +145,35 @@ namespace CeManualPatcher.Saveable.Ammo
 
                 originalData.Add(temp);
             }
+        }
+
+        public bool CompareOriginalData()
+        {
+            List<SecondaryDamage> currentData = (this.def.projectile as ProjectilePropertiesCE)?.secondaryDamage;
+
+            if ((currentData?.Count ?? -1) != (originalData?.Count ?? -1))
+            {
+                return false;
+            }
+
+            if (currentData == null || originalData == null)
+            {
+                return true;
+            }
+
+            currentData.SortBy(x => x.def.defName);
+            originalData.SortBy(x => x.def.defName);
+
+            for (int i = 0; i < currentData.Count; i++)
+            {
+                if (currentData[i].def != originalData[i].def ||
+                    currentData[i].amount != originalData[i].amount)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }

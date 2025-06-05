@@ -14,6 +14,8 @@ namespace CeManualPatcher.Saveable.Ammo
 
         //original
         private string originalLabel;
+
+        public string OriginalLabel => originalLabel;
         public AmmoDefSaveable() { }
 
         public AmmoDefSaveable(ThingDef ammoDef)

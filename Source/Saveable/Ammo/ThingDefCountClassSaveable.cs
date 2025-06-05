@@ -109,10 +109,21 @@ namespace CeManualPatcher.Saveable.Ammo
         public override void PostLoadInit(ThingDef thingDef)
         {
             this.def = thingDef;
-            if (compProps == null)
+            //if (compProps == null)
+            //{
+            //    return;
+            //}
+
+            if (def == null)
             {
                 return;
             }
+
+            if (!def.HasComp<CompFragments>())
+            {
+                def.comps.Add(new CompProperties_Fragments());
+            }
+
             InitOriginalData();
             this.Apply();
         }
@@ -134,5 +145,34 @@ namespace CeManualPatcher.Saveable.Ammo
             }
         }
 
+        public bool CompareOriginalData()
+        {
+            List<ThingDefCountClass> currentData = this.compProps?.fragments ?? null;
+
+            if ((currentData?.Count ?? -1) != (originalData?.Count ?? -1))
+            {
+                return false;
+            }
+
+            if(currentData == null || originalData == null)
+            {
+                return true;
+            }
+
+            currentData.SortBy(x=>x.thingDef.defName);
+            originalData.SortBy(x => x.thingDef.defName);
+
+            for (int i = 0; i < currentData.Count; i++)
+            {
+                var currentFragment = currentData[i];
+                var originalFragment = originalData[i];
+                if (currentFragment.thingDef != originalFragment.thingDef || currentFragment.count != originalFragment.count)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
     }
 }

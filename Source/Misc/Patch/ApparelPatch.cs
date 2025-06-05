@@ -63,7 +63,7 @@ namespace CeManualPatcher.Patch
 
         public override void PostLoadInit()
         {
-            if(targetDef == null)
+            if (targetDef == null)
             {
                 return;
             }
@@ -97,8 +97,8 @@ namespace CeManualPatcher.Patch
             string filePath = Path.Combine(folderPath, targetDef.defName + ".xml");
 
             // 创建XML文档
-            XmlElement rootPatchElement = null;                                                                                                                                                                           
-            XmlDocument xmlDoc = XmlUtility.CreateBasePatchDoc(ref rootPatchElement);
+            XmlElement rootPatchElement = null;
+            XmlDocument xmlDoc = XmlUtility.CreateBasePatchDoc(ref rootPatchElement, targetDef.modContentPack.Name);
 
             XmlUtility.Replace_StatBase(xmlDoc, rootPatchElement, targetDef.defName, targetDef.statBases);
             XmlUtility.AddModExt_PartialArmor(xmlDoc, rootPatchElement, targetDef.defName, targetDef.GetModExtension<PartialArmorExt>());

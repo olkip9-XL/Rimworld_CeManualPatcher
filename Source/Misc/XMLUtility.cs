@@ -1,4 +1,5 @@
 ﻿using CeManualPatcher.Manager;
+using CeManualPatcher.Patch;
 using CeManualPatcher.Saveable;
 using CombatExtended;
 using CombatExtended.Compatibility;
@@ -78,15 +79,7 @@ namespace CeManualPatcher.Misc
             }
         }
 
-        public static void AddChildElement(XmlDocument doc, XmlElement parent, string name, string value)
-        {
-            XmlElement element = doc.CreateElement(name);
-            if (!value.NullOrEmpty())
-                element.InnerText = value;
-            parent.AppendChild(element);
-        }
-
-        public static XmlDocument CreateBasePatchDoc(ref XmlElement rootElement)
+        public static XmlDocument CreateBasePatchDoc(ref XmlElement rootElement, string modName = null)
         {
             // 创建XML文档
             XmlDocument xmlDoc = new XmlDocument();
@@ -100,14 +93,43 @@ namespace CeManualPatcher.Misc
             xmlDoc.AppendChild(patchElement);
 
             //Operations
-            XmlElement operationElement = xmlDoc.CreateElement("Operation");
-            operationElement.SetAttribute("Class", "PatchOperationSequence");
-            patchElement.AppendChild(operationElement);
+            if (modName != null && modName != "Core")
+            {
+                XmlElement operationElement = xmlDoc.CreateElement("Operation");
+                operationElement.SetAttribute("Class", "PatchOperationFindMod");
+                patchElement.AppendChild(operationElement);
 
-            rootElement = xmlDoc.CreateElement("operations");
-            operationElement.AppendChild(rootElement);
+                XmlElement modsElement = xmlDoc.CreateElement("mods");
+                AddChildElement(xmlDoc, modsElement, "li", modName);
+                operationElement.AppendChild(modsElement);
+
+                XmlElement matchElement = xmlDoc.CreateElement("match");
+                matchElement.SetAttribute("Class", "PatchOperationSequence");
+                operationElement.AppendChild(matchElement);
+
+                rootElement = xmlDoc.CreateElement("operations");
+                matchElement.AppendChild(rootElement);
+            }
+            else
+            {
+                XmlElement operationElement = xmlDoc.CreateElement("Operation");
+                operationElement.SetAttribute("Class", "PatchOperationSequence");
+                patchElement.AppendChild(operationElement);
+
+                rootElement = xmlDoc.CreateElement("operations");
+                operationElement.AppendChild(rootElement);
+            }
 
             return xmlDoc;
+        }
+
+
+        public static void AddChildElement(XmlDocument doc, XmlElement parent, string name, string value)
+        {
+            XmlElement element = doc.CreateElement(name);
+            if (!value.NullOrEmpty())
+                element.InnerText = value;
+            parent.AppendChild(element);
         }
 
         public static void Replace_StatBase(XmlDocument xmlDoc, XmlElement rootElement, string defName, List<StatModifier> stats)
@@ -115,6 +137,12 @@ namespace CeManualPatcher.Misc
             if (stats == null)
                 return;
 
+            //add a match element
+            XmlElement noMatchElement = XmlUtility.PatchAdd(xmlDoc, $"Defs/ThingDef[defName=\"{defName}\"]", xmlDoc.CreateElement("statBases"), "nomatch");
+
+            rootElement.AppendChild(XmlUtility.PatchConditional(xmlDoc, $"Defs/ThingDef[defName=\"{defName}\"]/statBases", null, noMatchElement));
+
+            //replace the statBases element
             XmlElement liElement = xmlDoc.CreateElement("li");
             liElement.SetAttribute("Class", "PatchOperationReplace");
             rootElement.AppendChild(liElement);
@@ -236,7 +264,7 @@ namespace CeManualPatcher.Misc
                     if (tool.extraMeleeDamages != null)
                     {
                         XmlElement extraDamageElement = xmlDoc.CreateElement("extraMeleeDamages");
-                        foreach (var damage in tool.surpriseAttack.extraMeleeDamages)
+                        foreach (var damage in tool.extraMeleeDamages)
                         {
                             XmlElement listElement = xmlDoc.CreateElement("li");
 
@@ -267,6 +295,19 @@ namespace CeManualPatcher.Misc
         {
             if (thingDef == null)
                 return;
+
+            //remove current verb
+            WeaponPatch patch = WeaponManager.instance.GetWeaponPatch(thingDef);
+            Type originalVerbClass = patch.verbProperties?.OriginalData.verbClass;
+
+            if (originalVerbClass != null &&
+                (originalVerbClass != typeof(Verb_Shoot) ||
+                originalVerbClass != typeof(Verb_ShootOneUse) ||
+                originalVerbClass != typeof(Verb_LaunchProjectile)))
+            {
+                rootElement.AppendChild(XmlUtility.PatchRemove(xmlDoc, $"Defs/ThingDef[defName=\"{thingDef.defName}\"]/verbs/li[verbClass=\"{originalVerbClass}\"]"));
+            }
+
 
             //frame
             XmlElement cePatchElement = xmlDoc.CreateElement("li");
@@ -369,7 +410,7 @@ namespace CeManualPatcher.Misc
             {
 
                 //fire mode
-                if (thingDef.HasComp<CompFireModes>())
+                if (thingDef.HasComp<CompFireModes>() && originalVerbClass.Namespace == "CombatExtended")
                 {
                     XmlElement fireModeElement = xmlDoc.CreateElement("FireModes");
                     cePatchElement.AppendChild(fireModeElement);
@@ -527,6 +568,26 @@ namespace CeManualPatcher.Misc
                 PatchAdd(doc, xpath, element2, "nomatch")
                 );
 
+        }
+
+        public static XmlElement PatchRemove(XmlDocument doc, string xpath, string opNodeName = "li")
+        {
+            XmlElement liElement = doc.CreateElement(opNodeName);
+            liElement.SetAttribute("Class", "PatchOperationRemove");
+
+            AddChildElement(doc, liElement, "xpath", xpath);
+
+            return liElement;
+        }
+
+        public static XmlElement PatchAddEmptyComp(XmlDocument doc, string defName, string compName, string opNodeName = "li")
+        {
+            XmlElement liElement = doc.CreateElement(opNodeName);
+            liElement.SetAttribute("Class", compName);
+
+            XmlElement addElement = PatchAdd(doc, $"Defs/ThingDef[defName=\"{defName}\"]/comps", liElement, "nomatch");
+
+            return PatchConditional(doc, $"Defs/ThingDef[defName=\"{defName}\"]/comps/li[@Class = \"{compName}\"]", null, addElement, opNodeName);
         }
 
     }
