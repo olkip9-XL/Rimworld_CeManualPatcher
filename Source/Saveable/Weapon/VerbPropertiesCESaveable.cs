@@ -15,7 +15,6 @@ namespace CeManualPatcher.Saveable
 {
     internal class VerbPropertiesCESaveable : SaveableBase<ThingDef>
     {
-
         public static ReadOnlyCollection<string> propNames = new List<string>()
         {
                 "ammoConsumedPerShotCount",
@@ -31,7 +30,7 @@ namespace CeManualPatcher.Saveable
                 "range",
                 "burstShotCount",
                 "ticksBetweenBurstShots",
-                "muzzleFlashScale"
+                "muzzleFlashScale",
         }.AsReadOnly();
         private Dictionary<string, string> propDic = new Dictionary<string, string>();
 

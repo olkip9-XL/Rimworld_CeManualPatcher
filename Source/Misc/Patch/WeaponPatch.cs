@@ -1,6 +1,7 @@
 ﻿using CeManualPatcher.Misc;
 using CeManualPatcher.Misc.Patch;
 using CeManualPatcher.Saveable;
+using CeManualPatcher.Saveable.Comps;
 using CeManualPatcher.Saveable.Weapon;
 using CombatExtended;
 using RimWorld;
@@ -26,6 +27,8 @@ namespace CeManualPatcher.Patch
         internal CompAmmoUserSaveable ammoUser;
 
         internal CompFireModesSaveable fireMode;
+
+        internal CompChargeSaveable charges;
 
         internal WeaponTagsSaveable weaponTags;
 
@@ -71,6 +74,13 @@ namespace CeManualPatcher.Patch
                 {
                     fireMode = new CompFireModesSaveable(thingDef);
                 }
+
+                //comp charges
+                if (thingDef.HasComp<CompCharges>())
+                {
+                    charges = new CompChargeSaveable(thingDef);
+                }
+
             }
 
             //weapon tags
@@ -97,8 +107,12 @@ namespace CeManualPatcher.Patch
             Scribe_Deep.Look(ref statBase, "statBase");
             Scribe_Deep.Look(ref statOffsets, "statOffsets");
             Scribe_Deep.Look(ref verbProperties, "verbProperties");
+
+            //comps
             Scribe_Deep.Look(ref ammoUser, "ammoUser");
             Scribe_Deep.Look(ref fireMode, "fireMode");
+            Scribe_Deep.Look(ref charges, "charges");
+
             Scribe_Collections.Look(ref tools, "tools", LookMode.Deep);
             Scribe_Deep.Look(ref weaponTags, "weaponTags");
 
@@ -137,6 +151,7 @@ namespace CeManualPatcher.Patch
             //comps
             ammoUser?.Reset();
             fireMode?.Reset();
+            charges?.Reset();
 
             //weapontags
             weaponTags?.Reset();
@@ -161,6 +176,7 @@ namespace CeManualPatcher.Patch
              
                 this.ammoUser?.PostLoadInit(targetDef);
                 this.fireMode?.PostLoadInit(targetDef);
+                this.charges?.PostLoadInit(targetDef);
 
                 this.weaponTags?.PostLoadInit(targetDef);
 
@@ -214,6 +230,11 @@ namespace CeManualPatcher.Patch
         public void AddFireMode()
         {
             this.fireMode = new CompFireModesSaveable(targetDef, true);
+        }
+
+        public void AddCharges()
+        {
+            this.charges = new CompChargeSaveable(targetDef, true);
         }
 
         public override void ExportPatch(string dirPath)

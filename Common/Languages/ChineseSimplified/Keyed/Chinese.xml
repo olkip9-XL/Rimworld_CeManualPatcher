@@ -180,5 +180,9 @@
   <MP_DefaultAmmoRecipeLabel>制作{0} x{1}</MP_DefaultAmmoRecipeLabel>
   <MP_DefaultAmmoRecipeDescription>制作{0}枚{1}。</MP_DefaultAmmoRecipeDescription>
   <MP_DefaultAmmoRecipeJobString>正在制作{0}。</MP_DefaultAmmoRecipeJobString>
+  
+  <!--Weapon Comps-->
+  <MP_Charges>迫击炮药包</MP_Charges>
+  <MP_ChargeSpeed>药包设置</MP_ChargeSpeed>
 
 </LanguageData>

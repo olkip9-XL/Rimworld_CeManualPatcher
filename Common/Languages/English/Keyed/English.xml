@@ -180,4 +180,8 @@
   <MP_DefaultAmmoRecipeDescription>Craft {0} {1} cartridges.</MP_DefaultAmmoRecipeDescription>
   <MP_DefaultAmmoRecipeJobString>Making {0} cartridges.</MP_DefaultAmmoRecipeJobString>
 
+  <!--Weapon Comps-->
+  <MP_Charges>Mortar Charges</MP_Charges>
+  <MP_ChargeSpeed>Charge Speed</MP_ChargeSpeed>
+  
 </LanguageData>

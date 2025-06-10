@@ -33,6 +33,7 @@ namespace CeManualPatcher
         internal List<Tool> tools = new List<Tool>();
         internal CompProperties_AmmoUser ammoUser;
         internal CompProperties_FireModes fireMode;
+        internal CompProperties_Charges charges;
         internal List<string> weaponTags;
 
         public CEPatcher() { }
@@ -69,6 +70,11 @@ namespace CeManualPatcher
             if (fireMode != null)
             {
                 weaponManager.GetWeaponPatch(thingDef).AddFireMode();
+            }
+
+            if (charges != null && !charges.chargeSpeeds.NullOrEmpty())
+            {
+                weaponManager.GetWeaponPatch(thingDef).AddCharges();
             }
 
             ReplaceData();
@@ -112,6 +118,10 @@ namespace CeManualPatcher
                 if (!thingDef.HasComp<CompFireModes>() && fireMode != null)
                 {
                     thingDef.comps.Add(fireMode);
+                }
+                if (!thingDef.HasComp<CompCharges>() && charges != null && !charges.chargeSpeeds.NullOrEmpty())
+                {
+                    thingDef.comps.Add(charges);
                 }
             }
         }
@@ -273,6 +283,12 @@ namespace CeManualPatcher
                 {
                     fireMode.aimedBurstShotCount = 3;
                 }
+
+                this.charges = new CompProperties_Charges();
+                if (thingDef.HasComp<CompCharges>())
+                {
+                    this.charges.chargeSpeeds = new List<int>(thingDef.GetCompProperties<CompProperties_Charges>().chargeSpeeds);
+                }
             }
         }
 
@@ -297,8 +313,32 @@ namespace CeManualPatcher
             XmlUtility.Replace_Tools(xmlDoc, rootPatchElement, thingDef.defName, thingDef.tools);
             XmlUtility.MakeGunCECompatible(xmlDoc, rootPatchElement, thingDef);
             XmlUtility.Replace_StatOffsets(xmlDoc, rootPatchElement, thingDef.defName, thingDef.equippedStatOffsets);
+            AddCompCharges();
 
             xmlDoc.Save(filePath);
+
+            void AddCompCharges()
+            {
+                CompProperties_Charges compProps = thingDef.GetCompProperties<CompProperties_Charges>();
+                if (compProps == null)
+                    return;
+
+                //add empty comp root node if not exists
+                rootPatchElement.AppendChild(XmlUtility.PatchAddCompRoot(xmlDoc, thingDef.defName));
+
+                //add empty compCharge if not exists
+                rootPatchElement.AppendChild(XmlUtility.PatchAddEmptyComp(xmlDoc, thingDef.defName, typeof(CompProperties_Charges).ToString()));
+
+                //add replace comp
+                XmlElement valueElement = xmlDoc.CreateElement("li");
+                valueElement.SetAttribute("Class", typeof(CompProperties_Charges).ToString());
+
+                XmlUtility.AddChildElementList(xmlDoc, valueElement, "chargeSpeeds", compProps.chargeSpeeds.Select(x => x.ToString()));
+
+                rootPatchElement.AppendChild(XmlUtility.PatchReplace(xmlDoc, $"Defs/ThingDef[defName=\"{thingDef.defName}\"]/comps/li[@Class = \"{typeof(CompProperties_Charges).ToString()}\"]", valueElement));
+            }
         }
     }
+
+
 }

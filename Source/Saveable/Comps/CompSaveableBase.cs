@@ -10,6 +10,13 @@ namespace CeManualPatcher.Saveable.Comps
 {
     internal abstract class CompSaveableBase<TComp> : SaveableBase<ThingDef> where TComp : CompProperties
     {
-        private TComp originalComp;
+        protected abstract TComp compProps { get; }
+
+        public CompSaveableBase() { }
+
+        public CompSaveableBase(ThingDef thingDef) : base(thingDef)
+        {
+        }
+
     }
 }

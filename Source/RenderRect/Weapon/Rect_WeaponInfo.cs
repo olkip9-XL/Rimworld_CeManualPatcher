@@ -26,6 +26,9 @@ namespace CeManualPatcher
         private float innerHeight = 0f;
         private Vector2 scrollPosition = Vector2.zero;
 
+        //collpse
+        private bool collapse_charges = false;
+
         //copy
         private ThingDef copiedThing = null;
 
@@ -78,6 +81,8 @@ namespace CeManualPatcher
                     ammoUser,
                     curWeaponDef.Verbs.FirstOrDefault(),
                     preChange);
+
+                DrawChargeSpeed(innerListing, curWeaponDef.GetCompProperties<CompProperties_Charges>(), preChange);
             });
 
             //control pannel
@@ -698,55 +703,100 @@ namespace CeManualPatcher
             //CompFireModes
             if (fireModes != null)
             {
-                listing.GapLine(6f);
-                listing.Label("<b>" + "MP_FireModes".Translate() + "</b>");
-
-                listing.ButtonX("MP_AiAimMode".Translate(), 100f, fireModes.aiAimMode.ToString(), () =>
+                listing.DrawComp("MP_FireModes".Translate(), (innerListing) =>
                 {
-                    List<AimMode> list = Enum.GetValues(typeof(AimMode)).Cast<AimMode>().ToList();
-                    FloatMenuUtility.MakeMenu(list,
-                        (AimMode x) => x.ToString(),
-                        (AimMode x) => delegate ()
+                    innerListing.ButtonX("MP_AiAimMode".Translate(), 100f, fireModes.aiAimMode.ToString(), () =>
+                    {
+                        List<AimMode> list = Enum.GetValues(typeof(AimMode)).Cast<AimMode>().ToList();
+                        FloatMenuUtility.MakeMenu(list,
+                            (AimMode x) => x.ToString(),
+                            (AimMode x) => delegate ()
+                            {
+                                preChange?.Invoke();
+                                fireModes.aiAimMode = x;
+                            });
+                    });
+
+                    foreach (var item in CompFireModesSaveable.propNames)
+                    {
+                        innerListing.FieldLineReflexion($"MP_FireModes.{item}".Translate(), item, fireModes, newValue =>
                         {
                             preChange?.Invoke();
-                            fireModes.aiAimMode = x;
                         });
-                }, indent: 20f);
-
-                foreach (var item in CompFireModesSaveable.propNames)
-                {
-                    listing.FieldLineReflexion($"MP_FireModes.{item}".Translate(), item, fireModes, newValue =>
-                    {
-                        preChange?.Invoke();
-                    }, indent: 20f);
-                }
+                    }
+                }, fireModes.GetHashCode());
             }
 
             //CompAmmoUser
             if (ammoUser != null)
             {
-                listing.GapLine(6f);
+                Color fontColor = ammoUser.ammoSet == null ? MP_Color.Grey : Color.white;
 
-                Color fontColor = Color.white;
-                if (ammoUser.ammoSet == null)
-                    fontColor = MP_Color.Grey;
-
-                listing.Label($"<b>{"MP_AmmoUser".Translate()}</b>".Colorize(fontColor));
-
-                listing.ButtonTextLine("MP_AmmoSet".Translate().Colorize(fontColor), ammoUser.ammoSet?.LabelCap ?? "null", () =>
+                listing.DrawComp("MP_AmmoUser".Translate(), (innerListing) =>
                 {
-                    preChange?.Invoke();
-                    Find.WindowStack.Add(new Dialog_SetDefaultProjectile(verb as VerbPropertiesCE, ammoUser));
-                }, indent: 20f);
-
-                foreach (var item in CompAmmoUserSaveable.propNames)
-                {
-                    listing.FieldLineReflexion($"MP_AmmoUser.{item}".Translate().Colorize(fontColor), item, ammoUser, newValue =>
+                    innerListing.ButtonTextLine("MP_AmmoSet".Translate().Colorize(fontColor), ammoUser.ammoSet?.LabelCap ?? "null", () =>
                     {
                         preChange?.Invoke();
-                    }, indent: 20f);
-                }
+                        Find.WindowStack.Add(new Dialog_SetDefaultProjectile(verb as VerbPropertiesCE, ammoUser));
+                    });
+
+                    foreach (var item in CompAmmoUserSaveable.propNames)
+                    {
+                        innerListing.FieldLineReflexion($"MP_AmmoUser.{item}".Translate().Colorize(fontColor), item, ammoUser, newValue =>
+                        {
+                            preChange?.Invoke();
+                        });
+                    }
+                }, ammoUser.GetHashCode());
             }
         }
+
+        public static void DrawChargeSpeed(Listing_Standard listing, CompProperties_Charges charges, Action preChange)
+        {
+            if (charges == null)
+            {
+                return;
+            }
+
+            listing.DrawComp("MP_Charges".Translate(), (innerListing) =>
+            {
+                List<int> chargeSpeeds = charges.chargeSpeeds;
+
+                Color fontColor = chargeSpeeds.NullOrEmpty() ? MP_Color.Grey : Color.white;
+
+                //add
+                innerListing.ButtonImageLine("MP_ChargeSpeed".Translate().Colorize(fontColor), TexButton.Add, () =>
+                {
+                    preChange?.Invoke();
+                    charges.chargeSpeeds.Add(1);
+                });
+
+                for (int i = 0; i < chargeSpeeds.Count; i++)
+                {
+                    Rect rect = innerListing.GetRect(Text.LineHeight);
+
+                    //number
+                    Rect rect1 = rect.LeftPartPixels(100f);
+                    int tempItem = chargeSpeeds[i];
+                    WidgetsUtility.TextFieldOnChange<int>(rect1, ref tempItem, newValue =>
+                    {
+                        preChange?.Invoke();
+                        chargeSpeeds[i] = newValue;
+                    });
+
+                    //delete
+                    Rect rect2 = rect.RightPartPixels(rect.height);
+
+                    if (Widgets.ButtonImage(rect2, TexButton.Delete))
+                    {
+                        preChange?.Invoke();
+                        charges.chargeSpeeds.RemoveAt(i);
+                        break;
+                    }
+
+                }
+            }, charges.GetHashCode());
+        }
+
     }
 }

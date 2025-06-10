@@ -47,6 +47,7 @@ namespace CeManualPatcher.Misc
                 writer.WriteLine("        <li>/</li>");
                 writer.WriteLine("        <li IfModActive=\"CETeam.CombatExtended\">CE</li>");
                 writer.WriteLine("        <li IfModActive=\"CETeam.CombatExtended_copy\">CE</li>");
+                writer.WriteLine("        <li IfModActive=\"CETeam.CombatExtended_Steam\">CE</li>");
                 writer.WriteLine("    </v1.5>");
                 writer.WriteLine("</loadFolders>");
             }
@@ -301,10 +302,22 @@ namespace CeManualPatcher.Misc
             Type originalVerbClass = patch.verbProperties?.OriginalData.verbClass;
 
             if (originalVerbClass != null &&
-                (originalVerbClass != typeof(Verb_Shoot) ||
-                originalVerbClass != typeof(Verb_ShootOneUse) ||
+                (originalVerbClass != typeof(Verb_Shoot) &&
+                originalVerbClass != typeof(Verb_ShootOneUse) &&
                 originalVerbClass != typeof(Verb_LaunchProjectile)))
             {
+                string originalVerbClassName = originalVerbClass.ToString();
+
+                if (originalVerbClassName.StartsWith("RimWorld."))
+                {
+                    originalVerbClassName = originalVerbClassName.Substring("RimWorld.".Length);
+                }
+
+                if (originalVerbClassName.StartsWith("Verse."))
+                {
+                    originalVerbClassName = originalVerbClassName.Substring("Verse.".Length);
+                }
+
                 rootElement.AppendChild(XmlUtility.PatchRemove(xmlDoc, $"Defs/ThingDef[defName=\"{thingDef.defName}\"]/verbs/li[verbClass=\"{originalVerbClass}\"]"));
             }
 
@@ -351,7 +364,6 @@ namespace CeManualPatcher.Misc
                     XmlElement verbPropertiesElement = xmlDoc.CreateElement("Properties");
                     cePatchElement.AppendChild(verbPropertiesElement);
 
-
                     VerbPropertiesCE defaultVerb = new VerbPropertiesCE();
                     VerbPropertiesCE currentVerb = thingDef.Verbs[0] as VerbPropertiesCE;
 
@@ -374,6 +386,17 @@ namespace CeManualPatcher.Misc
                     {
                         AddChildElement(xmlDoc, verbPropertiesElement, "defaultProjectile", currentVerb.defaultProjectile.defName);
                     }
+
+                    if(currentVerb.soundCast != defaultVerb.soundCast)
+                    {
+                        AddChildElement(xmlDoc, verbPropertiesElement, "soundCast", currentVerb.soundCast.defName);
+                    }
+
+                    if (currentVerb.soundCastTail != defaultVerb.soundCastTail)
+                    {
+                        AddChildElement(xmlDoc, verbPropertiesElement, "soundCastTail", currentVerb.soundCastTail.defName);
+                    }
+
                 }
             }
 
@@ -410,7 +433,7 @@ namespace CeManualPatcher.Misc
             {
 
                 //fire mode
-                if (thingDef.HasComp<CompFireModes>() && originalVerbClass.Namespace == "CombatExtended")
+                if (thingDef.HasComp<CompFireModes>())
                 {
                     XmlElement fireModeElement = xmlDoc.CreateElement("FireModes");
                     cePatchElement.AppendChild(fireModeElement);
@@ -502,6 +525,11 @@ namespace CeManualPatcher.Misc
                 AddChildElement(doc, liElement, "li", item);
             }
         }
+        public static void AddChildElementList(XmlDocument doc, XmlElement root, string listName, IEnumerable<string> list)
+        {
+            AddChildElementList(doc, root, listName, list.ToList());
+        }
+
 
 
         public static XmlElement PatchReplace(XmlDocument doc, string xpath, XmlElement valueContentElement, string opNodeName = "li")
@@ -588,6 +616,13 @@ namespace CeManualPatcher.Misc
             XmlElement addElement = PatchAdd(doc, $"Defs/ThingDef[defName=\"{defName}\"]/comps", liElement, "nomatch");
 
             return PatchConditional(doc, $"Defs/ThingDef[defName=\"{defName}\"]/comps/li[@Class = \"{compName}\"]", null, addElement, opNodeName);
+        }
+
+        public static XmlElement PatchAddCompRoot(XmlDocument doc, string defName, string opNodeName = "li")
+        {
+            XmlElement nomatchElement = PatchAdd(doc, $"Defs/ThingDef[defName=\"{defName}\"]", doc.CreateElement("comps"), "nomatch");
+
+            return PatchConditional(doc, $"Defs/ThingDef[defName=\"{defName}\"]/comps", null, nomatchElement, opNodeName);
         }
 
     }

@@ -82,6 +82,8 @@ namespace CeManualPatcher.Dialogs
                 Rect_WeaponInfo.DrawVebs(innerListing, patcher.verbProperties, patcher.ammoUser, null);
                 Rect_WeaponInfo.DrawTools(innerListing, patcher.tools, null);
                 Rect_WeaponInfo.DrawComps(innerListing, patcher.fireMode, patcher.ammoUser, patcher.verbProperties, null);
+                Rect_WeaponInfo.DrawChargeSpeed(innerListing, patcher.charges, null);
+
             });
 
             Rect buttonRect = new Rect(0, 0, 100f, 30f).CenterIn(listing.GetRect(30f));

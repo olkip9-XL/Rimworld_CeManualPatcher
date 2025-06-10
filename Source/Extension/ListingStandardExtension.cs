@@ -276,8 +276,66 @@ namespace CeManualPatcher.Extension
             }
             listing.Gap(listing.verticalSpacing);
         }
-        
 
-    
+        private static Dictionary<int, bool> compCollapsedDic = new Dictionary<int, bool>();
+        public static void DrawComp(this Listing_Standard listing, string compName, Action<Listing_Standard> drawComp, int id)
+        {
+            listing.GapLine(6f);
+            //head
+            Rect rect = listing.GetRect(Text.LineHeight);
+
+            if (!compCollapsedDic.ContainsKey(id))
+            {
+                compCollapsedDic[id] = false;
+            }
+
+            Rect rect1 = rect.LeftPartPixels(rect.height);
+            if (compCollapsedDic[id])
+            {
+                if (Widgets.ButtonImage(rect1, TexButton.Reveal))
+                {
+                    compCollapsedDic[id] = false;
+                }
+            }
+            else
+            {
+                if (Widgets.ButtonImage(rect1, TexButton.Collapse))
+                {
+                    compCollapsedDic[id] = true;
+                }
+            }
+
+            Rect rect2 = rect1.RightAdjoin(Text.CalcSize(compName).x);
+            Widgets.Label(rect2, "<b>" + compName + "</b>");
+
+            //menu
+            //Rect rect3 = rect.RightPartPixels(rect.height);
+            //if (Widgets.ButtonImage(rect3, TexButton.Suspend))
+            //{
+            //    //todo comp options: copy, paste, delete
+            //    List<FloatMenuOption> options = new List<FloatMenuOption>();
+
+            //    options.Add(new FloatMenuOption("Copy", () => { /*todo copy comp*/ }));
+            //    options.Add(new FloatMenuOption("Paste", () => { /*todo paste comp*/ }));
+            //    options.Add(new FloatMenuOption("Delete", () => { /*todo delete comp*/ }));
+
+            //    Find.WindowStack.Add(new FloatMenu(options));
+            //}
+
+            //draw
+            if (!compCollapsedDic[id])
+            {
+                listing.Indent(20f);
+                listing.ColumnWidth -= 20f;
+
+                drawComp?.Invoke(listing);
+
+                listing.Outdent(20f);
+                listing.ColumnWidth += 20f;
+            }
+
+            listing.Gap(listing.verticalSpacing);
+        }
+
     }
 }

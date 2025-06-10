@@ -17,6 +17,12 @@ namespace CeManualPatcher
         {
             //init
             Mod_CEManualPatcher.settings.PostLoad();
+
+            //log All mod id
+            //foreach(var item in LoadedModManager.RunningMods)
+            //{
+            //    Log.Warning($"Mod ID: {item.PackageId} - Name: {item.Name}");
+            //}
         }
     }
 }
