@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using Verse;
 
-namespace CeManualPatcher.RenderRect.Ammo
+namespace CeManualPatcher.RenderRect
 {
     internal class Rect_AmmoList : RenderRectBase
     {

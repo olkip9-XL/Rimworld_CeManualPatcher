@@ -1,4 +1,4 @@
-﻿using CeManualPatcher.Misc.CustomAmmoMisc;
+﻿using CeManualPatcher.Misc;
 using CeManualPatcher.RenderRect;
 using CombatExtended;
 using RimWorld;
@@ -12,7 +12,7 @@ using UnityEngine;
 using Verse;
 
 
-namespace CeManualPatcher.Misc.Manager
+namespace CeManualPatcher.Manager
 {
     internal class CustomAmmoManager : IExposable
     {

@@ -1,6 +1,7 @@
 ﻿using CeManualPatcher.Misc;
 using CombatExtended;
 using RimWorld;
+using RuntimeAudioClipLoader;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -199,7 +200,7 @@ namespace CeManualPatcher.Extension
 
                 listing.FieldLineOnChange(label, ref intValue, (x) =>
                 {
-                    onChange(x);
+                    onChange?.Invoke(x);
                     fieldInfo.SetValue(instance, x);
                 }, fieldWidth, tooltip, indent, min, max);
             }
@@ -280,6 +281,11 @@ namespace CeManualPatcher.Extension
         private static Dictionary<int, bool> compCollapsedDic = new Dictionary<int, bool>();
         public static void DrawComp(this Listing_Standard listing, string compName, Action<Listing_Standard> drawComp, int id)
         {
+            if (drawComp == null)
+            {
+                return;
+            }
+
             listing.GapLine(6f);
             //head
             Rect rect = listing.GetRect(Text.LineHeight);
@@ -337,5 +343,43 @@ namespace CeManualPatcher.Extension
             listing.Gap(listing.verticalSpacing);
         }
 
+        public static void ThingDefCountClassLine(this Listing_Standard listing, ThingDefCountClass thingDefCount, Action onDelete, Action preChange, float fieldWidth = 100f, string tooltip = null, float indent = 0f)
+        {
+            Rect rect = listing.GetRect(Text.LineHeight);
+            rect.x += indent;
+            rect.width -= indent;
+
+            ThingDef thingDef = thingDefCount.thingDef;
+            int count = thingDefCount.count;
+
+            //icon
+            Rect rect4 = rect.LeftPartPixels(rect.height);
+            Widgets.DrawTextureFitted(rect4, thingDef.uiIcon, 1f);
+
+            //label
+            Rect rect5 = rect4.RightAdjoin(rect.width - rect.height);
+            Widgets.Label(rect5, thingDef?.LabelCap ?? "MP_Null".Translate());
+
+            //delete
+            Rect rect1 = rect.RightPartPixels(rect.height);
+            if (Widgets.ButtonImage(rect1, TexButton.Delete))
+            {
+                preChange?.Invoke();
+                onDelete?.Invoke();
+            }
+
+            //count
+            Rect rect2 = rect1.LeftAdjoin(100f);
+            WidgetsUtility.TextFieldOnChange(rect2, ref count, (newValue) =>
+            {
+                preChange?.Invoke();
+                thingDefCount.count = newValue;
+            });
+
+            Rect rect3 = rect2.LeftAdjoin(Text.CalcSize("x").x);
+            Widgets.Label(rect3, "x");
+
+            listing.Gap(listing.verticalSpacing);
+        }
     }
 }

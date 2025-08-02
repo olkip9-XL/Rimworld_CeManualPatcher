@@ -1,13 +1,10 @@
 ﻿using CeManualPatcher.Misc;
-using CeManualPatcher.Misc.Patch;
 using CeManualPatcher.Saveable;
-using CeManualPatcher.Saveable.Comps;
-using CeManualPatcher.Saveable.Weapon;
 using CombatExtended;
 using RimWorld;
 using System;
 using System.Collections.Generic;
-
+using System.Xml;
 using Verse;
 using Verse.AI;
 
@@ -34,6 +31,8 @@ namespace CeManualPatcher.Patch
 
         //private
         List<Tool> originalTools = new List<Tool>();
+
+        public override string PatchName => throw new NotImplementedException();
 
         public WeaponPatch() { }
         public WeaponPatch(ThingDef thingDef)
@@ -234,10 +233,15 @@ namespace CeManualPatcher.Patch
 
         public void AddCharges()
         {
-            this.charges = new CompChargeSaveable(targetDef, true);
+            this.charges = new CompChargeSaveable(targetDef);
         }
 
         public override void ExportPatch(string dirPath)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override void MakePatch(XmlDocument xmlDoc, XmlElement root)
         {
             throw new NotImplementedException();
         }

@@ -1,6 +1,4 @@
-﻿using CeManualPatcher.Misc.Patch;
-using CeManualPatcher.Patch;
-using CeManualPatcher.RenderRect.Body;
+﻿using CeManualPatcher.Misc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,8 +6,11 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using Verse;
+using CeManualPatcher.RenderRect;
+using CeManualPatcher.Patch;
+using CeManualPatcher.Misc.Patch;
 
-namespace CeManualPatcher.Misc.Manager
+namespace CeManualPatcher.Manager
 {
     internal class BodyDefManager : MP_DefManagerBase<BodyDef>
     {
@@ -93,10 +94,10 @@ namespace CeManualPatcher.Misc.Manager
 
             foreach (var item in DefDatabase<BodyDef>.AllDefs)
             {
-                ThingDef thingDef = DefDatabase<ThingDef>.AllDefs.FirstOrDefault(x => x.race?.body == item);
+                ThingDef firstDef = DefDatabase<ThingDef>.AllDefs.FirstOrDefault(x => x.race?.body == item && !x.IsCorpse);
 
-                Texture2D texture = thingDef?.uiIcon;
-                string desc = thingDef?.description;
+                Texture2D texture = firstDef?.uiIcon;
+                string desc = firstDef?.description;
 
                 if (texture == null)
                     texture = BaseContent.BadTex;

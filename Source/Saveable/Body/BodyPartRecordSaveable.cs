@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Verse;
 
-namespace CeManualPatcher.Saveable.Body
+namespace CeManualPatcher.Saveable
 {
     internal class BodyPartRecordSaveable : SaveableBase<BodyDef>
     {

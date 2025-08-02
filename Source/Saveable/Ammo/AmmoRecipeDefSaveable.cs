@@ -1,4 +1,4 @@
-﻿using CeManualPatcher.Misc.CustomAmmoMisc;
+﻿using CeManualPatcher.Misc;
 using RimWorld;
 using System;
 using System.Collections.Generic;
@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Verse;
 
-namespace CeManualPatcher.Saveable.Ammo
+namespace CeManualPatcher.Saveable
 {
     internal class AmmoRecipeDefSaveable : SaveableBase<RecipeDef>
     {

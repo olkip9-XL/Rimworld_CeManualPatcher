@@ -1,4 +1,5 @@
 ﻿using CeManualPatcher.Misc;
+using CombatExtended;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,17 +7,78 @@ using System.Text;
 using System.Threading.Tasks;
 using Verse;
 
-namespace CeManualPatcher.Saveable.Comps
+namespace CeManualPatcher.Saveable
 {
     internal abstract class CompSaveableBase<TComp> : SaveableBase<ThingDef> where TComp : CompProperties
     {
+
+        protected TComp originalData;
+
         protected abstract TComp compProps { get; }
 
+        public abstract bool CompChanged { get; }
         public CompSaveableBase() { }
 
         public CompSaveableBase(ThingDef thingDef) : base(thingDef)
         {
+            if (thingDef == null)
+            {
+                return;
+            }
+            InitOriginalData();
         }
 
+        public override void ExposeData()
+        {
+            if (def != null && Scribe.mode == LoadSaveMode.Saving)
+            {
+                SaveData();
+            }
+        }
+        public override void Reset()
+        {
+            if (def == null)
+            {
+                return;
+            }
+
+            def.comps.RemoveAll(x => x is TComp);
+            if (originalData != null)
+            {
+                def.comps.Add(originalData);
+            }
+        }
+
+        protected override void Apply()
+        {
+            if (def == null)
+            {
+                return;
+            }
+
+            def.comps.RemoveAll(x => x is TComp);
+            def.comps.Add(ReadData());
+        }
+
+        protected override void InitOriginalData()
+        {
+            if (def == null)
+            {
+                return;
+            }
+
+            if (compProps == null)
+            {
+                originalData = null;
+            }
+            else
+            {
+                originalData = MakeCopy(compProps);
+            }
+        }
+
+        protected abstract void SaveData();
+        protected abstract TComp ReadData();
+        protected abstract TComp MakeCopy(TComp original);
     }
 }

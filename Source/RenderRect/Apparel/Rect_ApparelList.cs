@@ -1,6 +1,6 @@
 ﻿using CeManualPatcher.Extension;
+using CeManualPatcher.Manager;
 using CeManualPatcher.Misc;
-using CeManualPatcher.Misc.Manager;
 using RimWorld;
 using System;
 using System.Collections.Generic;
@@ -73,12 +73,17 @@ namespace CeManualPatcher.RenderRect
 
             listing.ButtonTextLine("MP_Source".Translate(), curMod?.Name ?? "MP_All".Translate(), delegate
             {
-                FloatMenuUtility.MakeMenu<ModContentPack>(ActiveMods,
+                List<ModContentPack> options = new List<ModContentPack>();
+                options.Add(null);
+                options.AddRange(ActiveMods);
+
+                FloatMenuUtility.MakeMenu<ModContentPack>(options,
                     (mod) => mod?.Name ?? "MP_All".Translate(),
                     (mod) => delegate
                     {
                         curMod = mod;
                     });
+
             }, fieldWidth:150f);
 
             listing.SearchBar(ref keyWords);

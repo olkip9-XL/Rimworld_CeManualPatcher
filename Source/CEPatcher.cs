@@ -297,7 +297,7 @@ namespace CeManualPatcher
             if (this.thingDef == null)
                 return;
 
-            string folderPath = Path.Combine(dirPath, thingDef.modContentPack.Name);
+            string folderPath = Path.Combine(dirPath, thingDef.modContentPack.PackageId);
             folderPath = Path.Combine(folderPath, "Weapon");
             if (!Directory.Exists(folderPath))
             {

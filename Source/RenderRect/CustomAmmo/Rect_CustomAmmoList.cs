@@ -1,7 +1,6 @@
 ﻿using CeManualPatcher.Extension;
+using CeManualPatcher.Manager;
 using CeManualPatcher.Misc;
-using CeManualPatcher.Misc.CustomAmmoMisc;
-using CeManualPatcher.Misc.Manager;
 using RimWorld;
 using System;
 using System.Collections.Generic;

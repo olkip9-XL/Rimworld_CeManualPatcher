@@ -1,10 +1,6 @@
 ﻿using CeManualPatcher.Manager;
 using CeManualPatcher.Misc;
-using CeManualPatcher.Misc.Manager;
-using CeManualPatcher.Misc.Patch;
 using CeManualPatcher.Saveable;
-using CeManualPatcher.Saveable.Apparel;
-using CeManualPatcher.Saveable.Weapon;
 using CombatExtended;
 using RimWorld;
 using System;
@@ -25,7 +21,8 @@ namespace CeManualPatcher.Patch
         private StatOffsetSaveable statOffsets;
         private PartialArmorExtSaveable partialArmorExtSaveable;
 
-        private ApparelManager manager => ApparelManager.instance;
+        public override string PatchName => "Apparel";
+
 
         public ApparelPatch() { }
         public ApparelPatch(ThingDef apparelDef)
@@ -87,7 +84,7 @@ namespace CeManualPatcher.Patch
 
         public override void ExportPatch(string dirPath)
         {
-            string folderPath = Path.Combine(dirPath, targetDef.modContentPack.Name);
+            string folderPath = Path.Combine(dirPath, targetDef.modContentPack.PackageId);
             folderPath = Path.Combine(folderPath, "Apparel");
             if (!Directory.Exists(folderPath))
             {
@@ -105,6 +102,11 @@ namespace CeManualPatcher.Patch
             XmlUtility.Replace_StatOffsets(xmlDoc, rootPatchElement, targetDef.defName, targetDef.equippedStatOffsets);
 
             xmlDoc.Save(filePath);
+        }
+
+        protected override void MakePatch(XmlDocument xmlDoc, XmlElement root)
+        {
+            throw new NotImplementedException();
         }
     }
 }

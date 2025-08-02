@@ -652,12 +652,11 @@ namespace CeManualPatcher
         }
 
         private static ReadOnlyCollection<string> parentAmmoRecipeClassInt = null;
-
         public static ReadOnlyCollection<string> parentAmmoRecipeClass
         {
             get
             {
-                if(parentAmmoRecipeClassInt == null)
+                if (parentAmmoRecipeClassInt == null)
                 {
                     parentAmmoRecipeClassInt = new List<string>()
                     {
@@ -673,6 +672,71 @@ namespace CeManualPatcher
                 }
 
                 return parentAmmoRecipeClassInt;
+            }
+        }
+
+
+        private static ReadOnlyCollection<StatDef> statDefs_RaceInt = null;
+        public static ReadOnlyCollection<StatDef> statDefs_Race
+        {
+            get
+            {
+                if (statDefs_RaceInt == null)
+                {
+                    List<StatCategoryDef> categoryDefs = new List<StatCategoryDef>();
+                    foreach (var item in DefDatabase<ThingDef>.AllDefs.Where(x => x.race != null))
+                    {
+                        if (item.statBases != null)
+                        {
+                            foreach (var stat in item.statBases)
+                            {
+                                categoryDefs.AddDistinct(stat.stat.category);
+                            }
+                        }
+                    }
+
+                    List<StatDef> list = new List<StatDef>();
+                    foreach (var item in DefDatabase<StatDef>.AllDefsListForReading)
+                    {
+                        if (categoryDefs.Contains(item.category))
+                        {
+                            list.Add(item);
+                        }
+                    }
+                    statDefs_RaceInt = list.AsReadOnly();
+                }
+                return statDefs_RaceInt;
+            }
+        }
+
+        public static ReadOnlyCollection<ThingDef> ingredientsForRepairArmorInt = null;
+
+        public static ReadOnlyCollection<ThingDef> ingredientsForRepairArmor
+        {
+            get
+            {
+                if (ingredientsForRepairArmorInt == null)
+                {
+                    List<ThingDef> list = new List<ThingDef>();
+
+                    foreach(var def in DefDatabase<ThingDef>.AllDefs.Where(x => x.HasComp(typeof(CompArmorDurability))))
+                    {
+                        CompProperties_ArmorDurability comp = def.GetCompProperties<CompProperties_ArmorDurability>();
+                        if (comp != null && comp.RepairIngredients != null)
+                        {
+                            foreach (var ingredient in comp.RepairIngredients)
+                            {
+                                if (!list.Contains(ingredient.thingDef))
+                                {
+                                    list.Add(ingredient.thingDef);
+                                }
+                            }
+                        }
+                    }
+
+                    ingredientsForRepairArmorInt = list.AsReadOnly();
+                }
+                return ingredientsForRepairArmorInt;
             }
         }
 

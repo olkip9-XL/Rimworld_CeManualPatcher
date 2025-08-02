@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using System.Xml;
 using Verse;
 
-namespace CeManualPatcher.Misc.CustomAmmoMisc
+namespace CeManualPatcher.Misc
 {
     internal class CustomProjectile : IExposable
     {
@@ -348,7 +348,6 @@ namespace CeManualPatcher.Misc.CustomAmmoMisc
 
     internal class MP_SecondaryDamage_Save : IExposable
     {
-        private DamageDef damageDefInt;
         private string damageDefString;
         public DamageDef damageDef
         {

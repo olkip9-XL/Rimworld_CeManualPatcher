@@ -2,7 +2,6 @@
 using CeManualPatcher.Extension;
 using CeManualPatcher.Manager;
 using CeManualPatcher.Misc;
-using CeManualPatcher.Misc.Manager;
 using CombatExtended;
 using RimWorld;
 using System;
@@ -13,7 +12,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using Verse;
 
-namespace CeManualPatcher.RenderRect.Apparel
+namespace CeManualPatcher.RenderRect
 {
     internal class Rect_ApparelInfo : RenderRectBase
     {

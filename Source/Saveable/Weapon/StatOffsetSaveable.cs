@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Verse;
 
-namespace CeManualPatcher.Saveable.Weapon
+namespace CeManualPatcher.Saveable
 {
     internal class StatOffsetSaveable : SaveableBase<ThingDef>
     {

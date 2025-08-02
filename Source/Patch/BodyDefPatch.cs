@@ -1,4 +1,5 @@
-﻿using CeManualPatcher.Saveable.Body;
+﻿using CeManualPatcher.Saveable;
+using CeManualPatcher.Patch;
 using CombatExtended.Compatibility;
 using RimWorld;
 using System;
@@ -9,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using Verse;
+using CeManualPatcher.Misc;
 
 namespace CeManualPatcher.Misc.Patch
 {
@@ -17,6 +19,8 @@ namespace CeManualPatcher.Misc.Patch
 
         //字段
         List<BodyPartRecordSaveable> records = new List<BodyPartRecordSaveable>();
+
+        public override string PatchName => "Body";
 
         public BodyDefPatch() { }
         public BodyDefPatch(BodyDef bodyDef)
@@ -90,7 +94,7 @@ namespace CeManualPatcher.Misc.Patch
 
         public override void ExportPatch(string dirPath)
         {
-            string folderPath = Path.Combine(dirPath, targetDef.modContentPack.Name);
+            string folderPath = Path.Combine(dirPath, targetDef.modContentPack.PackageId);
             folderPath = Path.Combine(folderPath, "Body");
             if (!Directory.Exists(folderPath))
             {
@@ -236,6 +240,9 @@ namespace CeManualPatcher.Misc.Patch
             return records.FirstOrDefault(x => x.path.SequenceEqual(path));
         }
 
-
+        protected override void MakePatch(XmlDocument xmlDoc, XmlElement root)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

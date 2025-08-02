@@ -12,20 +12,8 @@ using Verse;
 
 namespace CeManualPatcher.RenderRect
 {
-    internal class Rect_WeaponList : RenderRectBase
+    internal class Rect_RaceList : RenderRectBase
     {
-        public ThingDef curWeaponDef
-        {
-            get
-            {
-                return WeaponManager.curWeaponDef;
-            }
-            set
-            {
-                WeaponManager.curWeaponDef = value;
-            }
-        }
-
         private List<ModContentPack> activeModsInt = null;
         private List<ModContentPack> ActiveMods
         {
@@ -33,7 +21,7 @@ namespace CeManualPatcher.RenderRect
             {
                 if (activeModsInt == null)
                 {
-                    activeModsInt = DefDatabase<ThingDef>.AllDefsListForReading.Where(x => x.IsWeapon).Select(x => x.modContentPack).Distinct().ToList();
+                    activeModsInt = DefDatabase<ThingDef>.AllDefsListForReading.Where(x => x.race != null).Select(x => x.modContentPack).Distinct().ToList();
                 }
                 return activeModsInt;
             }
@@ -42,14 +30,15 @@ namespace CeManualPatcher.RenderRect
         private string keyWords;
         private ModContentPack curSourceMod = null;
 
-        private Vector2 scrollPosition;
-        private float innerHeight = 0;
+        //scroll
+        private Vector2 scrollPosition = Vector2.zero;
+        private float scrollHeight = 0f;
 
-        private List<ThingDef> WeaponDefs
+        private List<ThingDef> FilteredDefs
         {
             get
             {
-                List<ThingDef> list = DefDatabase<ThingDef>.AllDefsListForReading.Where(x => x.IsWeapon).ToList();
+                List<ThingDef> list = DefDatabase<ThingDef>.AllDefs.Where(x => x.race != null && !x.IsCorpse).ToList();
 
                 if (!keyWords.NullOrEmpty())
                 {
@@ -65,14 +54,13 @@ namespace CeManualPatcher.RenderRect
             }
         }
 
-
         public override void DoWindowContents(Rect rect)
         {
             Listing_Standard listingStandard = new Listing_Standard();
             listingStandard.Begin(rect);
 
             //来源mod
-            listingStandard.ButtonX("MP_Source".Translate(), 150f, curSourceMod?.Name ?? "MP_All".Translate(), delegate
+            listingStandard.ButtonTextLine("MP_Source".Translate(), curSourceMod?.Name ?? "MP_All".Translate(), delegate
             {
                 List<ModContentPack> options = new List<ModContentPack>();
                 options.Add(null);
@@ -88,21 +76,18 @@ namespace CeManualPatcher.RenderRect
 
             listingStandard.SearchBar(ref keyWords);
 
-            List<ThingDef> allWeaponDefs = WeaponDefs;
-
             Rect listRect = listingStandard.GetRect(rect.height - listingStandard.CurHeight - 0.1f);
 
-            WidgetsUtility.ScrollView(listRect, ref scrollPosition, ref innerHeight, (listing) =>
+            WidgetsUtility.ScrollView(listRect, ref scrollPosition, ref scrollHeight, (listing) =>
             {
-                foreach (var item in allWeaponDefs)
+                foreach (var item in FilteredDefs)
                 {
                     try
                     {
-                        RenderRectUtility.DrawItemRow(listing, item, ref WeaponManager.curWeaponDef);
+                        RenderRectUtility.DrawItemRow(listing, item, ref RaceManager.curDef);
                     }
                     catch (Exception e)
                     {
-                        //Log.ErrorOnce($"[CeManualPatcher] Error while drawing Weapon tab {item?.defName ?? "null"} from {item?.modContentPack.Name ?? "null"} : {e}", e.GetHashCode());
                         MP_Log.Error("Error while drawing Weapon tab", e, item);
                     }
 

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LanguageData>
+
+  <!--Verbs-->
+  <MP_Verb>远程参数</MP_Verb>
+
+  <MP_VerbClass>Verb Class</MP_VerbClass>
+
+  <MP_RecoilPattern>后坐力模式</MP_RecoilPattern>
+
+  <MP_DefaultProjectile>默认弹药</MP_DefaultProjectile>
+
+  <MP_SoundCast>发射音效</MP_SoundCast>
+
+  <MP_SoundCastTail>发射音效2</MP_SoundCastTail>
+
+  <MP_Bipod>脚架</MP_Bipod>
+
+  <MP_Verbproperties.ammoConsumedPerShotCount>每次射击消耗弹药</MP_Verbproperties.ammoConsumedPerShotCount>
+  <MP_Verbproperties.recoilAmount>后坐力</MP_Verbproperties.recoilAmount>
+  <MP_Verbproperties.indirectFirePenalty>间接射击惩罚</MP_Verbproperties.indirectFirePenalty>
+  <MP_Verbproperties.circularError>circularError</MP_Verbproperties.circularError>
+  <MP_Verbproperties.ticksToTruePosition>ticksToTruePosition</MP_Verbproperties.ticksToTruePosition>
+  <MP_Verbproperties.ejectsCasings>抛壳</MP_Verbproperties.ejectsCasings>
+  <MP_Verbproperties.ignorePartialLoSBlocker>ignorePartialLoSBlocker</MP_Verbproperties.ignorePartialLoSBlocker>
+  <MP_Verbproperties.interruptibleBurst>interruptibleBurst</MP_Verbproperties.interruptibleBurst>
+  <MP_Verbproperties.hasStandardCommand>有标准指令</MP_Verbproperties.hasStandardCommand>
+  <MP_Verbproperties.warmupTime>瞄准时间</MP_Verbproperties.warmupTime>
+  <MP_Verbproperties.range>射程</MP_Verbproperties.range>
+  <MP_Verbproperties.burstShotCount>爆发性射击计数</MP_Verbproperties.burstShotCount>
+  <MP_Verbproperties.ticksBetweenBurstShots>战斗射速</MP_Verbproperties.ticksBetweenBurstShots>
+  <MP_Verbproperties.muzzleFlashScale>膛口焰</MP_Verbproperties.muzzleFlashScale>
+
+  <!--tools-->
+  <MP_Tools>近战参数</MP_Tools>
+
+  <MP_LinkedBodyPartsGroup>武器部位</MP_LinkedBodyPartsGroup>
+
+  <MP_Capacities>伤害类型</MP_Capacities>
+
+  <MP_SurpriseAttackDamage>暴击伤害</MP_SurpriseAttackDamage>
+
+  <MP_ExtraMeleeDamage>额外伤害</MP_ExtraMeleeDamage>
+
+  <MP_DamageChance>几率</MP_DamageChance>
+  <MP_DamageAmount>伤害量</MP_DamageAmount>
+
+  <MP_Tools.armorPenetrationBlunt>钝器穿透</MP_Tools.armorPenetrationBlunt>
+  <MP_Tools.armorPenetrationSharp>利器穿透</MP_Tools.armorPenetrationSharp>
+  <MP_Tools.power>力量</MP_Tools.power>
+  <MP_Tools.cooldownTime>冷却时间</MP_Tools.cooldownTime>
+  <MP_Tools.alwaysTreatAsWeapon>总是作为武器</MP_Tools.alwaysTreatAsWeapon>
+  <MP_Tools.chanceFactor>使用几率系数</MP_Tools.chanceFactor>
+  <MP_Tools.ensureLinkedBodyPartsGroupAlwaysUsable>保证武器部位总是可用</MP_Tools.ensureLinkedBodyPartsGroupAlwaysUsable>
+
+
+  <!--Fire Modes-->
+
+  <MP_FireModes>开火模式</MP_FireModes>
+
+  <MP_AiAimMode>AI瞄准模式</MP_AiAimMode>
+
+  <MP_FireModes.aimedBurstShotCount>瞄准时连发射击数量</MP_FireModes.aimedBurstShotCount>
+  <MP_FireModes.aiUseBurstMode>AI使用连发模式</MP_FireModes.aiUseBurstMode>
+  <MP_FireModes.noSingleShot>无单发射击</MP_FireModes.noSingleShot>
+  <MP_FireModes.noSnapshot>无快速射击</MP_FireModes.noSnapshot>
+
+  <!--Ammo User-->
+  <MP_AmmoUser>弹药使用</MP_AmmoUser>
+
+  <MP_AmmoSet>弹药口径</MP_AmmoSet>
+
+  <MP_AmmoUser.magazineSize>弹匣容量</MP_AmmoUser.magazineSize>
+  <MP_AmmoUser.AmmoGenPerMagOverride>弹药生成</MP_AmmoUser.AmmoGenPerMagOverride>
+  <MP_AmmoUser.reloadTime>装填时间</MP_AmmoUser.reloadTime>
+  <MP_AmmoUser.reloadOneAtATime>一次装填一发</MP_AmmoUser.reloadOneAtATime>
+  <MP_AmmoUser.throwMote>生成碎屑</MP_AmmoUser.throwMote>
+  <MP_AmmoUser.loadedAmmoBulkFactor>已装弹药体积系数</MP_AmmoUser.loadedAmmoBulkFactor>
+
+  <!--Weapon tags-->
+  <MP_WeaponTags>武器标签</MP_WeaponTags>
+
+  <MP_CombatRole>CE战斗角色标签</MP_CombatRole>
+
+  <!--Comp Charges-->
+  <MP_Charges>迫击炮药包</MP_Charges>
+  <MP_ChargeSpeed>药包设置</MP_ChargeSpeed>
+  
+</LanguageData>

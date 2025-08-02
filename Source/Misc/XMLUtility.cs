@@ -68,7 +68,7 @@ namespace CeManualPatcher.Misc
                 writer.WriteLine("	<author>LotusLand</author>");
                 writer.WriteLine("	<packageId>LotusLand.CustomCEPatch</packageId>");
                 writer.WriteLine("	<supportedVersions>");
-                writer.WriteLine("		<li>1.5</li>");
+                writer.WriteLine("		<li>1.6</li>");
                 writer.WriteLine("	</supportedVersions>");
                 writer.WriteLine("	<description>");
                 writer.WriteLine("	Custom CE Patch");
@@ -623,6 +623,13 @@ namespace CeManualPatcher.Misc
             XmlElement nomatchElement = PatchAdd(doc, $"Defs/ThingDef[defName=\"{defName}\"]", doc.CreateElement("comps"), "nomatch");
 
             return PatchConditional(doc, $"Defs/ThingDef[defName=\"{defName}\"]/comps", null, nomatchElement, opNodeName);
+        }
+
+        public static void PatchComp(XmlDocument doc, XmlElement root, XmlElement compValueElement, string defName, string compName)
+        {
+            XmlElement matchElement = PatchRemove(doc, $"Defs/ThingDef[defName=\"{defName}\"]/comps/li[@Class=\"{compName}\"]", "match");
+            root.AppendChild(PatchConditional(doc, $"Defs/ThingDef[defName=\"{defName}\"]/comps/li[@Class=\"{compName}\"]", matchElement, null, "li"));
+            root.AppendChild(PatchAdd(doc, $"Defs/ThingDef[defName=\"{defName}\"]/comps", compValueElement));
         }
 
     }

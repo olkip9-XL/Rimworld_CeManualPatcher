@@ -7,110 +7,38 @@
   <MP_Bionic>Bionics</MP_Bionic>
   <MP_CustomAmmo>Custom Ammo</MP_CustomAmmo>
   <MP_Body>Body</MP_Body>
+  <MP_Race>Race</MP_Race>
 
   <!--UI 武器-->
   <MP_Source>Source: </MP_Source>
+  
   <MP_All>All</MP_All>
 
   <MP_StatBase>Base Stats</MP_StatBase>
 
   <MP_StatOffset>Equipped Stat Offsets</MP_StatOffset>
 
-  <!--Verbs-->
-  <MP_Verb>Ranged Parameters</MP_Verb>
-
-  <MP_VerbClass>Verb Class</MP_VerbClass>
-
-  <MP_RecoilPattern>Recoil Pattern</MP_RecoilPattern>
-
-  <MP_DefaultProjectile>Default Ammo</MP_DefaultProjectile>
-
-  <MP_SoundCast>Firing Sound</MP_SoundCast>
-
-  <MP_SoundCastTail>Firing Sound 2</MP_SoundCastTail>
-
-  <MP_Bipod>Bipod</MP_Bipod>
-
-  <MP_Null>None</MP_Null>
-
-  <MP_Verbproperties.ammoConsumedPerShotCount>ammo consumed per shot</MP_Verbproperties.ammoConsumedPerShotCount>
-  <MP_Verbproperties.recoilAmount>Recoil amount</MP_Verbproperties.recoilAmount>
-  <MP_Verbproperties.indirectFirePenalty>Indirect Fire Penalty</MP_Verbproperties.indirectFirePenalty>
-  <MP_Verbproperties.circularError>Circular Error</MP_Verbproperties.circularError>
-  <MP_Verbproperties.ticksToTruePosition>Ticks To True Position</MP_Verbproperties.ticksToTruePosition>
-  <MP_Verbproperties.ejectsCasings>Ejects Casings</MP_Verbproperties.ejectsCasings>
-  <MP_Verbproperties.ignorePartialLoSBlocker>Ignore Partial LoS Blocker</MP_Verbproperties.ignorePartialLoSBlocker>
-  <MP_Verbproperties.interruptibleBurst>Interruptible Burst</MP_Verbproperties.interruptibleBurst>
-  <MP_Verbproperties.hasStandardCommand>Has Standard Command</MP_Verbproperties.hasStandardCommand>
-  <MP_Verbproperties.warmupTime>Warmup Time</MP_Verbproperties.warmupTime>
-  <MP_Verbproperties.range>Range</MP_Verbproperties.range>
-  <MP_Verbproperties.burstShotCount>Burst shot count</MP_Verbproperties.burstShotCount>
-  <MP_Verbproperties.ticksBetweenBurstShots>Fire rate</MP_Verbproperties.ticksBetweenBurstShots>
-  <MP_Verbproperties.muzzleFlashScale>muzzle flash</MP_Verbproperties.muzzleFlashScale>
-
-  <!--tools-->
-  <MP_Tools>Melee Parameters</MP_Tools>
-
-  <MP_LinkedBodyPartsGroup>Weapon Body Parts</MP_LinkedBodyPartsGroup>
-
-  <MP_Capacities>Damage Types</MP_Capacities>
-
-  <MP_SurpriseAttackDamage>Surprise Attack</MP_SurpriseAttackDamage>
-
-  <MP_ExtraMeleeDamage>Extra Melee Damage</MP_ExtraMeleeDamage>
-
-  <MP_DamageChance>chance</MP_DamageChance>
-  <MP_DamageAmount>amount</MP_DamageAmount>
-
-  <MP_Tools.armorPenetrationBlunt>Blunt Armor Penetration</MP_Tools.armorPenetrationBlunt>
-  <MP_Tools.armorPenetrationSharp>Sharp Armor Penetration</MP_Tools.armorPenetrationSharp>
-  <MP_Tools.power>Power</MP_Tools.power>
-  <MP_Tools.cooldownTime>Cooldown Time</MP_Tools.cooldownTime>
-  <MP_Tools.alwaysTreatAsWeapon>Always Treat As Weapon</MP_Tools.alwaysTreatAsWeapon>
-  <MP_Tools.chanceFactor>Usage Chance Factor</MP_Tools.chanceFactor>
-  <MP_Tools.ensureLinkedBodyPartsGroupAlwaysUsable> Ensure Weapon Body Parts Always Usabel</MP_Tools.ensureLinkedBodyPartsGroupAlwaysUsable>
-
-  <!--Fire Modes-->
-  <MP_FireModes>Fire Modes</MP_FireModes>
-
-  <MP_AiAimMode>AI Aim Mode</MP_AiAimMode>
-
-  <MP_FireModes.aimedBurstShotCount>Aimed Burst Shot Count</MP_FireModes.aimedBurstShotCount>
-  <MP_FireModes.aiUseBurstMode>AI Use Burst Mode</MP_FireModes.aiUseBurstMode>
-  <MP_FireModes.noSingleShot>No Single Shot</MP_FireModes.noSingleShot>
-  <MP_FireModes.noSnapshot>No Snapshot</MP_FireModes.noSnapshot>
-
-  <!--Ammo User-->
-  <MP_AmmoUser>Ammo User</MP_AmmoUser>
-
-  <MP_AmmoSet>Ammo Caliber</MP_AmmoSet>
-
-  <MP_AmmoUser.magazineSize>Magazine capacity</MP_AmmoUser.magazineSize>
-  <MP_AmmoUser.AmmoGenPerMagOverride>Ammo generation per magazine override</MP_AmmoUser.AmmoGenPerMagOverride>
-  <MP_AmmoUser.reloadTime>Reload speed</MP_AmmoUser.reloadTime>
-  <MP_AmmoUser.reloadOneAtATime>Reload One At A Time</MP_AmmoUser.reloadOneAtATime>
-  <MP_AmmoUser.throwMote>Throw Mote</MP_AmmoUser.throwMote>
-  <MP_AmmoUser.loadedAmmoBulkFactor>Loaded Ammo Bulk Factor</MP_AmmoUser.loadedAmmoBulkFactor>
-
   <MP_ResetAll>Reset All</MP_ResetAll>
+  
   <MP_Export>Export CE Patch</MP_Export>
 
-  <!--Ammo-->
   <MP_Category>Category</MP_Category>
+  
   <MP_ModifiedOnly>Modified Only</MP_ModifiedOnly>
 
-  <MP_Grenades>Hand Grenades</MP_Grenades>
   <MP_Uncategorized>Uncategorized</MP_Uncategorized>
 
-  <MP_DescSuppressionFactor>Suppression Factor</MP_DescSuppressionFactor>
-  <MP_DescExplosionGas>Explosion Gas</MP_DescExplosionGas>
-  <MP_DescStoppingPower>Stopping Power</MP_DescStoppingPower>
+  <MP_CEPatchExportMsg>CE Patch Exported To {0}</MP_CEPatchExportMsg>
 
-  <!--Weapon tags-->
+  <MP_Accept>Accept</MP_Accept>
 
-  <MP_WeaponTags>Weapon Tags</MP_WeaponTags>
+  <MP_SaveSuccess>Saved to local mod directory, restart to take effect.</MP_SaveSuccess>
 
-  <MP_CombatRole>CE Combat Role Tag</MP_CombatRole>
+  <MP_Add>Add</MP_Add>
+
+  <MP_Save>Save</MP_Save>
+
+  <MP_Null>None</MP_Null>
 
   <!--Apparel-->
 
@@ -122,15 +50,7 @@
   <MP_MultValue>Multiplier</MP_MultValue>
   <MP_BodyPart>Body Parts</MP_BodyPart>
 
-  <!--Misc-->
-  <MP_CEPatchExportMsg>CE Patch Exported To {0}</MP_CEPatchExportMsg>
-
-  <MP_Accept>Accept</MP_Accept>
-
-  <MP_SaveSuccess>Saved to local mod directory, restart to take effect.</MP_SaveSuccess>
-
   <!--Custom Ammo-->
-  
    <MP_AddCustomAmmo>Add Custom Ammo</MP_AddCustomAmmo>
   
    <MP_ConfirmDelete>Are you sure you want to delete {0}?</MP_ConfirmDelete>
@@ -158,30 +78,12 @@
    <MP_GraphicTexture>Texture</MP_GraphicTexture>
    <MP_GraphicClass>Graphic Class</MP_GraphicClass>
 
-  <MP_Save>Save</MP_Save>
-
   <!--Body-->
   <MP_Height>Height</MP_Height>
   <MP_Depth>Depth</MP_Depth>
   <MP_Coverage>Coverage</MP_Coverage>
   <MP_CoverdByArmor>Coverd By Armor</MP_CoverdByArmor>
-  
-  <!--Ammo Recipe-->
-  <MP_Recipe>Recipe</MP_Recipe>
-  <MP_RecipeParentClass>Recipe Parent</MP_RecipeParentClass>
-  <MP_RecipeLabel>Recipe Label</MP_RecipeLabel>
-  <MP_RecipeDescription>Recipe Description </MP_RecipeDescription>
-  <MP_RecipeJobString>Recipe JobString</MP_RecipeJobString>
-  <MP_RecipeWorkAmount>Recipe Work Amount</MP_RecipeWorkAmount>
-  <MP_RecipeProductAmount>Recipe Product Amount</MP_RecipeProductAmount>
-  <MP_RecipeIngredients>Ingredients</MP_RecipeIngredients>
 
-  <MP_DefaultAmmoRecipeLabel>make {0} cartridge x{1}</MP_DefaultAmmoRecipeLabel>
-  <MP_DefaultAmmoRecipeDescription>Craft {0} {1} cartridges.</MP_DefaultAmmoRecipeDescription>
-  <MP_DefaultAmmoRecipeJobString>Making {0} cartridges.</MP_DefaultAmmoRecipeJobString>
-
-  <!--Weapon Comps-->
-  <MP_Charges>Mortar Charges</MP_Charges>
-  <MP_ChargeSpeed>Charge Speed</MP_ChargeSpeed>
+  <MP_BodyUser>Races that use this body</MP_BodyUser>
   
 </LanguageData>

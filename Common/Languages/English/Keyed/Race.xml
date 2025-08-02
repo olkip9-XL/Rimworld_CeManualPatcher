@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LanguageData>
+
+  <!--Comp ArmorDurability-->
+  <MP_ArmorDurability>Armor Durability</MP_ArmorDurability>
+
+  <MP_ArmorDurability.Durability>Durability</MP_ArmorDurability.Durability>
+  <MP_ArmorDurability.Regenerates>Regenerates</MP_ArmorDurability.Regenerates>
+  <MP_ArmorDurability.RegenInterval>Regenerate Interval</MP_ArmorDurability.RegenInterval>
+  <MP_ArmorDurability.RegenValue>Regenerate Value</MP_ArmorDurability.RegenValue>
+  <MP_ArmorDurability.Repairable>Repairable</MP_ArmorDurability.Repairable>
+  <MP_ArmorDurability.RepairTime>Repair Time</MP_ArmorDurability.RepairTime>
+  <MP_ArmorDurability.RepairValue>Repair Value</MP_ArmorDurability.RepairValue>
+  <MP_ArmorDurability.MinArmorValueSharp>Min Armor Value (Sharp)</MP_ArmorDurability.MinArmorValueSharp>
+  <MP_ArmorDurability.MinArmorValueBlunt>Min Armor Value (Blunt)</MP_ArmorDurability.MinArmorValueBlunt>
+  <MP_ArmorDurability.MinArmorValueHeat>Min Armor Value (Heat)</MP_ArmorDurability.MinArmorValueHeat>
+  <MP_ArmorDurability.MinArmorValueElectric>Min Armor Value (Electric)</MP_ArmorDurability.MinArmorValueElectric>
+  <MP_ArmorDurability.MinArmorPct>Min Armor Pct</MP_ArmorDurability.MinArmorPct>
+  <MP_RepairIngredients>Repair Ingredients</MP_RepairIngredients>
+
+</LanguageData>

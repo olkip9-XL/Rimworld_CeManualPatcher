@@ -2,7 +2,6 @@
 using CeManualPatcher.Extension;
 using CeManualPatcher.Manager;
 using CeManualPatcher.Misc;
-using CeManualPatcher.Misc.CustomAmmoMisc;
 using CombatExtended;
 using RimWorld;
 using System;
@@ -14,7 +13,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using Verse;
 
-namespace CeManualPatcher
+namespace CeManualPatcher.RenderRect
 {
     internal class Rect_AmmoInfo : RenderRectBase
     {

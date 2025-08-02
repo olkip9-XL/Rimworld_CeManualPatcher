@@ -6,15 +6,35 @@ using System.Text;
 using System.Threading.Tasks;
 using Verse;
 
-namespace CeManualPatcher.Saveable.Comps
+namespace CeManualPatcher.Saveable
 {
     internal class CompChargeSaveable : CompSaveableBase<CompProperties_Charges>
     {
         //save
         private List<int> charges_save;
+        public override bool CompChanged
+        {
+            get
+            {
+                if (originalData == null || compProps == null)
+                {
+                    return false;
+                }
 
-        //original
-        private List<int> charges_original;
+                if (!originalData.chargeSpeeds.NullOrEmpty() && !compProps.chargeSpeeds.NullOrEmpty() && originalData.chargeSpeeds.Count == compProps.chargeSpeeds.Count)
+                {
+                    for (int i = 0; i < originalData.chargeSpeeds.Count; i++)
+                    {
+                        if (originalData.chargeSpeeds[i] != compProps.chargeSpeeds[i])
+                        {
+                            return true;
+                        }
+                    }
+                }
+
+                return false;
+            }
+        }
 
         protected override CompProperties_Charges compProps
         {
@@ -31,74 +51,86 @@ namespace CeManualPatcher.Saveable.Comps
 
         public CompChargeSaveable() { }
 
-        public CompChargeSaveable(ThingDef thingDef, bool forceAdd = false)
+        public CompChargeSaveable(ThingDef thingDef) : base(thingDef)
         {
-            this.def = thingDef;
-            if (compProps == null && !forceAdd)
-            {
-                return;
-            }
-
-            InitOriginalData();
         }
 
         public override void ExposeData()
         {
-            if (Scribe.mode == LoadSaveMode.Saving)
-            {
-                this.charges_save = new List<int>(compProps.chargeSpeeds);
-            }
+            base.ExposeData();
 
             Scribe_Collections.Look(ref this.charges_save, "chargeSpeeds", LookMode.Value);
         }
 
-        public override void Reset()
+        //public override void Reset()
+        //{
+        //    if (compProps == null)
+        //    {
+        //        return;
+        //    }
+
+        //    if(this.charges_original == null)
+        //    {
+        //        def.comps.RemoveWhere(x => x is CompProperties_Charges);
+        //        return;
+        //    }
+
+        //    compProps.chargeSpeeds = new List<int>(this.charges_original);
+        //}
+
+        //protected override void Apply()
+        //{
+        //    if (compProps == null)
+        //    {
+        //        return;
+        //    }
+
+        //    compProps.chargeSpeeds = new List<int>(this.charges_save);
+        //}
+
+        //protected override void InitOriginalData()
+        //{
+        //    if (compProps == null)
+        //    {
+        //        return;
+        //    }
+
+        //    this.charges_original = new List<int>(compProps.chargeSpeeds);
+        //}
+
+        //public override void PostLoadInit(ThingDef thingDef)
+        //{
+        //    this.def = thingDef;
+        //    InitOriginalData();
+
+        //    if (!thingDef.HasComp<CompCharges>())
+        //    {
+        //        thingDef.comps.Add(new CompProperties_Charges());
+        //    }
+        //    this.Apply();
+        //}
+
+        protected override void SaveData()
         {
-            if (compProps == null)
-            {
-                return;
-            }
-
-            if(this.charges_original == null)
-            {
-                def.comps.RemoveWhere(x => x is CompProperties_Charges);
-                return;
-            }
-
-            compProps.chargeSpeeds = new List<int>(this.charges_original);
+            charges_save = new List<int>(compProps.chargeSpeeds);
         }
 
-        protected override void Apply()
+        protected override CompProperties_Charges ReadData()
         {
-            if (compProps == null)
-            {
-                return;
-            }
+            CompProperties_Charges newComp = new CompProperties_Charges();
 
-            compProps.chargeSpeeds = new List<int>(this.charges_save);
+            newComp.chargeSpeeds = new List<int>(this.charges_save);
+
+            return newComp;
         }
 
-        protected override void InitOriginalData()
+        protected override CompProperties_Charges MakeCopy(CompProperties_Charges original)
         {
-            if (compProps == null)
-            {
-                return;
-            }
+            CompProperties_Charges newComp = new CompProperties_Charges();
 
-            this.charges_original = new List<int>(compProps.chargeSpeeds);
+            newComp.chargeSpeeds = new List<int>(compProps.chargeSpeeds);
+
+            return newComp;
         }
-
-        public override void PostLoadInit(ThingDef thingDef)
-        {
-            this.def = thingDef;
-            InitOriginalData();
-
-            if (!thingDef.HasComp<CompCharges>())
-            {
-                thingDef.comps.Add(new CompProperties_Charges());
-            }
-            this.Apply();
-        }
-
     }
 }

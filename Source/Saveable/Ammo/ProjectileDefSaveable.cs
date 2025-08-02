@@ -8,7 +8,6 @@ using Verse;
 
 using System.Reflection;
 
-using CeManualPatcher.Saveable.Ammo;
 using System.Collections.ObjectModel;
 using CeManualPatcher.Misc;
 

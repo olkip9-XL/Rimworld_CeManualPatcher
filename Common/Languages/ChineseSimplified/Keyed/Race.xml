@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LanguageData>
+
+  <!--Comp ArmorDurability-->
+  <MP_ArmorDurability>护甲疲劳</MP_ArmorDurability>
+
+  <MP_ArmorDurability.Durability>护甲疲劳值</MP_ArmorDurability.Durability>
+  <MP_ArmorDurability.Regenerates>护甲可再生</MP_ArmorDurability.Regenerates>
+  <MP_ArmorDurability.RegenInterval>再生间隔</MP_ArmorDurability.RegenInterval>
+  <MP_ArmorDurability.RegenValue>再生值</MP_ArmorDurability.RegenValue>
+  <MP_ArmorDurability.Repairable>可修复</MP_ArmorDurability.Repairable>
+  <MP_ArmorDurability.RepairTime>修复时间</MP_ArmorDurability.RepairTime>
+  <MP_ArmorDurability.RepairValue>修复值</MP_ArmorDurability.RepairValue>
+  <MP_ArmorDurability.MinArmorValueSharp>最小护甲值（利器）</MP_ArmorDurability.MinArmorValueSharp>
+  <MP_ArmorDurability.MinArmorValueBlunt>最小护甲值（钝器）</MP_ArmorDurability.MinArmorValueBlunt>
+  <MP_ArmorDurability.MinArmorValueHeat>最小护甲值（热能）</MP_ArmorDurability.MinArmorValueHeat>
+  <MP_ArmorDurability.MinArmorValueElectric>最小护甲值（电能）</MP_ArmorDurability.MinArmorValueElectric>
+  <MP_ArmorDurability.MinArmorPct>最小护甲百分比</MP_ArmorDurability.MinArmorPct>
+  <MP_RepairIngredients>修复所需材料</MP_RepairIngredients>
+
+</LanguageData>

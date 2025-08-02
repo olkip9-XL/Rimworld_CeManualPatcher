@@ -1,9 +1,9 @@
 ﻿using CeManualPatcher.Extension;
 using CeManualPatcher.Manager;
 using CeManualPatcher.Misc;
-using CeManualPatcher.Misc.Manager;
 using CeManualPatcher.Misc.Patch;
-using CeManualPatcher.Saveable.Body;
+using CeManualPatcher.Patch;
+using CeManualPatcher.Saveable;
 using RimWorld;
 using System;
 using System.Collections.Generic;
@@ -13,10 +13,11 @@ using System.Threading.Tasks;
 using UnityEngine;
 using Verse;
 
-namespace CeManualPatcher.RenderRect.Body
+namespace CeManualPatcher.RenderRect
 {
     internal class Rect_BodyInfo : RenderRectBase
     {
+        private Dictionary<BodyDef, List<ThingDef>> bodyRaceDic = new Dictionary<BodyDef, List<ThingDef>>();
 
         //scroll
         private Vector2 scrollPosition = Vector2.zero;
@@ -40,6 +41,7 @@ namespace CeManualPatcher.RenderRect.Body
 
             WidgetsUtility.ScrollView(listing.GetRect(rect.height - listing.CurHeight - 30f - 0.1f), ref scrollPosition, ref scrollHeight, (innerListing) =>
             {
+                DrawBodyUsers(innerListing);
                 DrawBodyPart(innerListing, body.corePart, new List<int>());
             });
 
@@ -76,7 +78,7 @@ namespace CeManualPatcher.RenderRect.Body
 
             //icon
             Rect rect1 = signRect.RightAdjoin(rect.height);
-            Widgets.DrawTextureFitted(rect1, manager.iconDic[body], 1f);
+            Widgets.DrawTextureFitted(rect1, manager.iconDic[body], 0.7f);
 
             //label
             Rect rect2 = rect.RightPartPixels(rect.width - rect1.width - signRect.width - 0.1f);
@@ -90,6 +92,53 @@ namespace CeManualPatcher.RenderRect.Body
             {
                 //TODO : reset
                 manager.Reset(body);
+            }
+
+        }
+       
+        private void DrawBodyUsers(Listing_Standard listing)
+        {
+            listing.GapLine();
+
+            listing.LabelLine("MP_BodyUser".Translate());
+
+            List<ThingDef> thingDefs = null;
+
+            if (!this.bodyRaceDic.ContainsKey(body))
+            {
+                thingDefs = DefDatabase<ThingDef>.AllDefs.Where(x=>x.race?.body == body && !x.IsCorpse).ToList();
+
+                this.bodyRaceDic.Add(body, thingDefs);
+            }
+            else
+            {
+                bodyRaceDic.TryGetValue(body, out thingDefs);
+            }
+
+            if (thingDefs.NullOrEmpty())
+            {
+                return;
+            }
+
+
+            foreach (var def in thingDefs)
+            {
+                Rect rect = listing.GetRect(Text.LineHeight);
+                rect.x += 20f; //indent
+                rect.width -= 20f; //indent
+
+                Rect iconRect = rect.LeftPartPixels(rect.height);
+                Widgets.DrawTextureFitted(iconRect, def.uiIcon ?? BaseContent.BadTex, 0.7f);
+
+                Rect labelRect = iconRect.RightAdjoin(rect.width);
+
+                if (Widgets.ButtonText(labelRect, def.LabelCap, drawBackground: false, doMouseoverSound: false, textColor: Widgets.NormalOptionColor))
+                {
+                    Mod_CEManualPatcher.instance.SetCurTab(MP_SettingTab.Race);
+                    RaceManager.curDef = def;
+                }
+
+                listing.Gap(listing.verticalSpacing);
             }
 
         }

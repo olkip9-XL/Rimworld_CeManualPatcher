@@ -1,8 +1,6 @@
 ﻿using CeManualPatcher.Misc;
-using CeManualPatcher.Misc.Manager;
-using CeManualPatcher.Misc.Patch;
 using CeManualPatcher.Patch;
-using CeManualPatcher.RenderRect.Ammo;
+using CeManualPatcher.RenderRect;
 using RimWorld;
 using System;
 using System.Collections.Generic;

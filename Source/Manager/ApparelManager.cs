@@ -1,8 +1,6 @@
-﻿using CeManualPatcher.Manager;
-using CeManualPatcher.Misc.Patch;
+﻿using CeManualPatcher.Misc;
 using CeManualPatcher.Patch;
 using CeManualPatcher.RenderRect;
-using CeManualPatcher.RenderRect.Apparel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +10,7 @@ using UnityEngine;
 using Verse;
 
 
-namespace CeManualPatcher.Misc.Manager
+namespace CeManualPatcher.Manager
 {
     internal class ApparelManager : MP_DefManagerBase<ThingDef>
     {
@@ -40,7 +38,6 @@ namespace CeManualPatcher.Misc.Manager
             }
             catch (Exception e)
             {
-                //Log.ErrorOnce($"[CeManualPatcher] ApparelManager apparel list error: {e}", e.GetHashCode());
                 MP_Log.Error("ApparelManager apparel list error", e);
             }
 

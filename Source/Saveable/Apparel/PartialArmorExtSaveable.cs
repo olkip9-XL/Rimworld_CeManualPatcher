@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Verse;
 using Verse.AI;
 
-namespace CeManualPatcher.Saveable.Apparel
+namespace CeManualPatcher.Saveable
 {
     internal class PartialArmorExtSaveable : SaveableBase<ThingDef>
     {

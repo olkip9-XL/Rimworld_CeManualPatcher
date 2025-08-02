@@ -1,6 +1,6 @@
 ﻿using CeManualPatcher.Manager;
 using CeManualPatcher.Misc;
-using CeManualPatcher.RenderRect.Ammo;
+using CeManualPatcher.RenderRect;
 using CombatExtended;
 using System;
 using System.Collections.Generic;

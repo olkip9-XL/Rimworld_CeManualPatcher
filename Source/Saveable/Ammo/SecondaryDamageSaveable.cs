@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Verse;
 
-namespace CeManualPatcher.Saveable.Ammo
+namespace CeManualPatcher.Saveable
 {
     class SecondaryDamageExpo : IExposable
     {

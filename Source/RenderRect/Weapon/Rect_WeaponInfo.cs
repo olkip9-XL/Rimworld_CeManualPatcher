@@ -3,11 +3,8 @@ using CeManualPatcher.Extension;
 using CeManualPatcher.Manager;
 using CeManualPatcher.Misc;
 using CeManualPatcher.Patch;
-using CeManualPatcher.RenderRect;
 using CeManualPatcher.Saveable;
-using CeManualPatcher.Saveable.Weapon;
 using CombatExtended;
-using CombatExtended.Compatibility;
 using RimWorld;
 using System;
 using System.Collections.Generic;
@@ -18,7 +15,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using Verse;
 
-namespace CeManualPatcher
+namespace CeManualPatcher.RenderRect
 {
     internal class Rect_WeaponInfo : RenderRectBase
     {
@@ -26,12 +23,8 @@ namespace CeManualPatcher
         private float innerHeight = 0f;
         private Vector2 scrollPosition = Vector2.zero;
 
-        //collpse
-        private bool collapse_charges = false;
-
         //copy
         private ThingDef copiedThing = null;
-
 
         private static WeaponManager manager => WeaponManager.instance;
         private static CEPatchManager patchManager => CEPatchManager.instance;

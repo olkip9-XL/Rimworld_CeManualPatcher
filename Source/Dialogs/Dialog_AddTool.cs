@@ -1,6 +1,7 @@
 ﻿using CeManualPatcher.Extension;
 using CeManualPatcher.Manager;
 using CeManualPatcher.Misc;
+using CeManualPatcher.RenderRect;
 using CeManualPatcher.Saveable;
 using CombatExtended;
 using RimWorld;

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Xml;
 using Verse;
 
-namespace CeManualPatcher.Misc.CustomAmmoMisc
+namespace CeManualPatcher.Misc
 {
     internal class CustomAmmoRecipe : IExposable
     {

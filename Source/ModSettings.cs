@@ -1,7 +1,6 @@
 ﻿using CeManualPatcher.Extension;
 using CeManualPatcher.Manager;
 using CeManualPatcher.Misc;
-using CeManualPatcher.Misc.Manager;
 using CeManualPatcher.RenderRect;
 using RimWorld;
 using System;
@@ -23,6 +22,7 @@ namespace CeManualPatcher
         Bionic,
         Apparel,
         Body,
+        Race
     }
 
     public class ModSetting_CEManualPatcher : ModSettings
@@ -33,6 +33,7 @@ namespace CeManualPatcher
         internal WeaponManager weaponManager = new WeaponManager();
         internal ApparelManager apparelManager = new ApparelManager();
         internal BodyDefManager bodyDefManager = new BodyDefManager();
+        internal RaceManager raceManager = new RaceManager();
 
         internal CustomAmmoManager customAmmoManager = new CustomAmmoManager();
 
@@ -48,6 +49,7 @@ namespace CeManualPatcher
             Scribe_Deep.Look(ref apparelManager, "apparelManager");
             Scribe_Deep.Look(ref customAmmoManager, "customAmmoManager");
             Scribe_Deep.Look(ref bodyDefManager, "bodyDefManager");
+            Scribe_Deep.Look(ref raceManager, "raceManager");
 
             if (Scribe.mode == LoadSaveMode.LoadingVars)
             {
@@ -75,6 +77,10 @@ namespace CeManualPatcher
                 {
                     bodyDefManager = new BodyDefManager();
                 }
+                if (raceManager == null)
+                {
+                    raceManager = new RaceManager();
+                }
             }
         }
 
@@ -88,6 +94,7 @@ namespace CeManualPatcher
             weaponManager?.PostLoadInit();
             apparelManager?.PostLoadInit();
             bodyDefManager?.PostLoadInit();
+            raceManager?.PostLoadInit();
         }
 
         public void ExportPatch()
@@ -99,6 +106,7 @@ namespace CeManualPatcher
             customAmmoManager?.ExportAll();
             bodyDefManager?.ExportAll();
             ammoManager?.ExportAll();
+            raceManager?.ExportAll();
 
             string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "CE Patches");
             Messages.Message($"MP_CEPatchExportMsg".Translate(path), MessageTypeDefOf.NeutralEvent);
@@ -108,13 +116,16 @@ namespace CeManualPatcher
 
     public class Mod_CEManualPatcher : Mod
     {
-        public static ModSetting_CEManualPatcher settings;
+        public static ModSetting_CEManualPatcher settings { get; private set; }
+
+        public static Mod_CEManualPatcher instance { get; private set; }
 
         private MP_SettingTab curTab = MP_SettingTab.Weapon;
 
         public Mod_CEManualPatcher(ModContentPack content) : base(content)
         {
             settings = GetSettings<ModSetting_CEManualPatcher>();
+            instance = this;
         }
         public override string SettingsCategory()
         {
@@ -165,13 +176,19 @@ namespace CeManualPatcher
                 case MP_SettingTab.Body:
                     settings.bodyDefManager.DoWindowContents(inRect);
                     break;
+                case MP_SettingTab.Race:
+                    settings.raceManager.DoWindowContents(inRect);
+                    break;
             }
 
             WidgetsUtility.UtilityTick();
         }
 
+        public void SetCurTab(MP_SettingTab tab)
+        {
+            curTab = tab;
+        }
         //test
-
         private void DebugLogAllButtonImage(Rect rect)
         {
             float width = 30f;

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 
 
-namespace CeManualPatcher
+namespace CeManualPatcher.RenderRect
 {
     internal abstract class RenderRectBase
     {

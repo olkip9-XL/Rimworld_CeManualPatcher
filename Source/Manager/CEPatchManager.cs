@@ -1,5 +1,4 @@
 ﻿using CeManualPatcher.Misc;
-using CeManualPatcher.Misc.Manager;
 using RimWorld;
 using System;
 using System.Collections.Generic;

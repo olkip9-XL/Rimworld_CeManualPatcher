@@ -1,7 +1,6 @@
 ﻿using CeManualPatcher.Extension;
 using CeManualPatcher.Manager;
 using CeManualPatcher.Misc;
-using CeManualPatcher.Misc.Manager;
 using RimWorld;
 using System;
 using System.Collections.Generic;
@@ -11,7 +10,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using Verse;
 
-namespace CeManualPatcher.RenderRect.Body
+namespace CeManualPatcher.RenderRect
 {
     internal class Rect_BodyList : RenderRectBase
     {

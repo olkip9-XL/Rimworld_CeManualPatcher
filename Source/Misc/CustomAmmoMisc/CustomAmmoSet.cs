@@ -9,7 +9,7 @@ using System.Xml;
 using UnityEngine;
 using Verse;
 
-namespace CeManualPatcher.Misc.CustomAmmoMisc
+namespace CeManualPatcher.Misc
 {
     internal class CustomAmmoSet : IExposable
     {

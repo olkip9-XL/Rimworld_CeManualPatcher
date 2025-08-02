@@ -1,138 +1,58 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <LanguageData>
 
-  <!--分类-->
+  <!-- Tab -->
   <MP_Weapon>武器</MP_Weapon>
   <MP_Ammo>弹药</MP_Ammo>
   <MP_Bionic>植入物</MP_Bionic>
   <MP_CustomAmmo>自定义弹药</MP_CustomAmmo>
   <MP_Body>身体</MP_Body>
+  <MP_Race>物种</MP_Race>
 
-  <!--UI 武器-->
+  <!--UI-->
   <MP_Source>来源：</MP_Source>
+  
   <MP_All>全部</MP_All>
 
   <MP_StatBase>基本状态</MP_StatBase>
 
   <MP_StatOffset>装备时状态偏移</MP_StatOffset>
 
-  <!--Verbs-->
-  <MP_Verb>远程参数</MP_Verb>
-
-  <MP_VerbClass>Verb Class</MP_VerbClass>
-
-  <MP_RecoilPattern>后坐力模式</MP_RecoilPattern>
-
-  <MP_DefaultProjectile>默认弹药</MP_DefaultProjectile>
-
-  <MP_SoundCast>发射音效</MP_SoundCast>
-
-  <MP_SoundCastTail>发射音效2</MP_SoundCastTail>
-
-  <MP_Bipod>脚架</MP_Bipod>
-  <MP_Null>无</MP_Null>
-
-  <MP_Verbproperties.ammoConsumedPerShotCount>每次射击消耗弹药</MP_Verbproperties.ammoConsumedPerShotCount>
-  <MP_Verbproperties.recoilAmount>后坐力</MP_Verbproperties.recoilAmount>
-  <MP_Verbproperties.indirectFirePenalty>间接射击惩罚</MP_Verbproperties.indirectFirePenalty>
-  <MP_Verbproperties.circularError>circularError</MP_Verbproperties.circularError>
-  <MP_Verbproperties.ticksToTruePosition>ticksToTruePosition</MP_Verbproperties.ticksToTruePosition>
-  <MP_Verbproperties.ejectsCasings>抛壳</MP_Verbproperties.ejectsCasings>
-  <MP_Verbproperties.ignorePartialLoSBlocker>ignorePartialLoSBlocker</MP_Verbproperties.ignorePartialLoSBlocker>
-  <MP_Verbproperties.interruptibleBurst>interruptibleBurst</MP_Verbproperties.interruptibleBurst>
-  <MP_Verbproperties.hasStandardCommand>有标准指令</MP_Verbproperties.hasStandardCommand>
-  <MP_Verbproperties.warmupTime>瞄准时间</MP_Verbproperties.warmupTime>
-  <MP_Verbproperties.range>射程</MP_Verbproperties.range>
-  <MP_Verbproperties.burstShotCount>爆发性射击计数</MP_Verbproperties.burstShotCount>
-  <MP_Verbproperties.ticksBetweenBurstShots>战斗射速</MP_Verbproperties.ticksBetweenBurstShots>
-  <MP_Verbproperties.muzzleFlashScale>膛口焰</MP_Verbproperties.muzzleFlashScale>
-
-  <!--tools-->
-  <MP_Tools>近战参数</MP_Tools>
-
-  <MP_LinkedBodyPartsGroup>武器部位</MP_LinkedBodyPartsGroup>
-
-  <MP_Capacities>伤害类型</MP_Capacities>
-
-  <MP_SurpriseAttackDamage>暴击伤害</MP_SurpriseAttackDamage>
-
-  <MP_ExtraMeleeDamage>额外伤害</MP_ExtraMeleeDamage>
-
-  <MP_DamageChance>几率</MP_DamageChance>
-  <MP_DamageAmount>伤害量</MP_DamageAmount>
-
-  <MP_Tools.armorPenetrationBlunt>钝器穿透</MP_Tools.armorPenetrationBlunt>
-  <MP_Tools.armorPenetrationSharp>利器穿透</MP_Tools.armorPenetrationSharp>
-  <MP_Tools.power>力量</MP_Tools.power>
-  <MP_Tools.cooldownTime>冷却时间</MP_Tools.cooldownTime>
-  <MP_Tools.alwaysTreatAsWeapon>总是作为武器</MP_Tools.alwaysTreatAsWeapon>
-  <MP_Tools.chanceFactor>使用几率系数</MP_Tools.chanceFactor>
-  <MP_Tools.ensureLinkedBodyPartsGroupAlwaysUsable>保证武器部位总是可用</MP_Tools.ensureLinkedBodyPartsGroupAlwaysUsable>
-
-
-  <!--Fire Modes-->
-
-  <MP_FireModes>开火模式</MP_FireModes>
-
-  <MP_AiAimMode>AI瞄准模式</MP_AiAimMode>
-
-  <MP_FireModes.aimedBurstShotCount>瞄准时连发射击数量</MP_FireModes.aimedBurstShotCount>
-  <MP_FireModes.aiUseBurstMode>AI使用连发模式</MP_FireModes.aiUseBurstMode>
-  <MP_FireModes.noSingleShot>无单发射击</MP_FireModes.noSingleShot>
-  <MP_FireModes.noSnapshot>无快速射击</MP_FireModes.noSnapshot>
-
-  <!--Ammo User-->
-  <MP_AmmoUser>弹药使用</MP_AmmoUser>
-
-  <MP_AmmoSet>弹药口径</MP_AmmoSet>
-
-  <MP_AmmoUser.magazineSize>弹匣容量</MP_AmmoUser.magazineSize>
-  <MP_AmmoUser.AmmoGenPerMagOverride>弹药生成</MP_AmmoUser.AmmoGenPerMagOverride>
-  <MP_AmmoUser.reloadTime>装填时间</MP_AmmoUser.reloadTime>
-  <MP_AmmoUser.reloadOneAtATime>一次装填一发</MP_AmmoUser.reloadOneAtATime>
-  <MP_AmmoUser.throwMote>生成碎屑</MP_AmmoUser.throwMote>
-  <MP_AmmoUser.loadedAmmoBulkFactor>已装弹药体积系数</MP_AmmoUser.loadedAmmoBulkFactor>
-
   <MP_ResetAll>重置所有</MP_ResetAll>
+  
   <MP_Export>导出CE补丁</MP_Export>
 
-  <!--Ammo-->
   <MP_Category>分类</MP_Category>
+
   <MP_ModifiedOnly>仅已修改</MP_ModifiedOnly>
 
-  <MP_Grenades>手榴弹</MP_Grenades>
   <MP_Uncategorized>未分类</MP_Uncategorized>
 
-  <MP_DescSuppressionFactor>压制系数</MP_DescSuppressionFactor>
-  <MP_DescExplosionGas>爆炸气体</MP_DescExplosionGas>
-  <MP_DescStoppingPower>停止力</MP_DescStoppingPower>
-  
-<!--Weapon tags-->
+  <MP_CEPatchExportMsg>CE补丁已导出至{0}</MP_CEPatchExportMsg>
 
-  <MP_WeaponTags>武器标签</MP_WeaponTags>
+  <MP_Accept>确定</MP_Accept>
 
-  <MP_CombatRole>CE战斗角色标签</MP_CombatRole>
-  
+  <MP_SaveSuccess>已保存至本地mod目录, 重启生效</MP_SaveSuccess>
+
+  <MP_Add>添加</MP_Add>
+
+  <MP_Save>保存</MP_Save>
+
+  <MP_Null>无</MP_Null>
+
   <!--Apparel-->
-  
+
   <MP_Apparel>服装和护甲</MP_Apparel>
-  
+
   <MP_PartialArmorExt>部位护甲</MP_PartialArmorExt>
   <MP_UseStaticValue>使用固定值</MP_UseStaticValue>
   <MP_StaticValue>固定值</MP_StaticValue>
   <MP_MultValue>倍数</MP_MultValue>
   <MP_BodyPart>身体部位</MP_BodyPart>
 
-  <!--Misc-->
-  <MP_CEPatchExportMsg>CE补丁已导出至{0}</MP_CEPatchExportMsg>
-
-  <MP_Accept>确定</MP_Accept>
-
-  <MP_SaveSuccess>已保存至本地mod目录, 重启生效</MP_SaveSuccess>
-  
   <!--Custom Ammo-->
   <MP_AddCustomAmmo>添加自定义弹药</MP_AddCustomAmmo>
-  
+
   <MP_ConfirmDelete>你确定要删除{0}吗？</MP_ConfirmDelete>
   <MP_C_BaseInfo>基础属性</MP_C_BaseInfo>
   <MP_DefNameBase>defName基础</MP_DefNameBase>
@@ -150,7 +70,6 @@
   <MP_AmmoClass>弹药类</MP_AmmoClass>
 
   <MP_Projectile>投射物</MP_Projectile>
-
   <MP_DamageAmountBase>基础伤害</MP_DamageAmountBase>
   <MP_DamageDef>伤害类型</MP_DamageDef>
 
@@ -159,30 +78,14 @@
   <MP_GraphicTexture>纹理</MP_GraphicTexture>
   <MP_GraphicClass>图像类</MP_GraphicClass>
 
-  <MP_Save>保存</MP_Save>
-  
+
   <!--Body-->
   <MP_Height>高度</MP_Height>
   <MP_Depth>深度</MP_Depth>
   <MP_Coverage>覆盖率</MP_Coverage>
   <MP_CoverdByArmor>有护甲覆盖</MP_CoverdByArmor>
-  
-  <!--Ammo Recipe-->
-  <MP_Recipe>制作清单</MP_Recipe>
-  <MP_RecipeParentClass>清单父类</MP_RecipeParentClass>
-  <MP_RecipeLabel>清单标签</MP_RecipeLabel>
-  <MP_RecipeDescription>清单描述</MP_RecipeDescription>
-  <MP_RecipeJobString>工作中描述</MP_RecipeJobString>
-  <MP_RecipeWorkAmount>工作量</MP_RecipeWorkAmount>
-  <MP_RecipeProductAmount>产物数量</MP_RecipeProductAmount>
-  <MP_RecipeIngredients>材料需求</MP_RecipeIngredients>
 
-  <MP_DefaultAmmoRecipeLabel>制作{0} x{1}</MP_DefaultAmmoRecipeLabel>
-  <MP_DefaultAmmoRecipeDescription>制作{0}枚{1}。</MP_DefaultAmmoRecipeDescription>
-  <MP_DefaultAmmoRecipeJobString>正在制作{0}。</MP_DefaultAmmoRecipeJobString>
-  
-  <!--Weapon Comps-->
-  <MP_Charges>迫击炮药包</MP_Charges>
-  <MP_ChargeSpeed>药包设置</MP_ChargeSpeed>
+  <MP_BodyUser>使用该身体的物种</MP_BodyUser>
 
+  
 </LanguageData>

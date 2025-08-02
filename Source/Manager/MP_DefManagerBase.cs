@@ -1,5 +1,4 @@
 ﻿using CeManualPatcher.Misc;
-using CeManualPatcher.Misc.Patch;
 using CeManualPatcher.Patch;
 using System;
 using System.Collections.Generic;
@@ -10,7 +9,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using Verse;
 
-namespace CeManualPatcher.Misc.Manager
+namespace CeManualPatcher.Manager
 {
     internal abstract class MP_DefManagerBase<T> : IExposable where T : Def
     {

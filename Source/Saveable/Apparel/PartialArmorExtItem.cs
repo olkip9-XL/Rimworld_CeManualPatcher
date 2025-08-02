@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Verse;
 
-namespace CeManualPatcher.Saveable.Apparel
+namespace CeManualPatcher.Saveable
 {
     internal class PartialArmorExtItem : SaveableBase<ThingDef>
     {

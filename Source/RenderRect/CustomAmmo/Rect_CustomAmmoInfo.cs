@@ -2,8 +2,6 @@
 using CeManualPatcher.Extension;
 using CeManualPatcher.Manager;
 using CeManualPatcher.Misc;
-using CeManualPatcher.Misc.CustomAmmoMisc;
-using CeManualPatcher.Misc.Manager;
 using CombatExtended;
 using RimWorld;
 using System;
