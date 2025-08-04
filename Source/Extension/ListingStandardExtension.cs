@@ -279,7 +279,7 @@ namespace CeManualPatcher.Extension
         }
 
         private static Dictionary<int, bool> compCollapsedDic = new Dictionary<int, bool>();
-        public static void DrawComp(this Listing_Standard listing, string compName, Action<Listing_Standard> drawComp, int id)
+        public static void DrawComp(this Listing_Standard listing, string compName, Action<Listing_Standard> drawComp, int id, Action addNewComp = null)
         {
             if (drawComp == null)
             {
@@ -296,7 +296,7 @@ namespace CeManualPatcher.Extension
             }
 
             Rect rect1 = rect.LeftPartPixels(rect.height);
-            if (compCollapsedDic[id])
+            if (compCollapsedDic[id] || id == 0)
             {
                 if (Widgets.ButtonImage(rect1, TexButton.Reveal))
                 {
@@ -311,22 +311,21 @@ namespace CeManualPatcher.Extension
                 }
             }
 
+            //title
             Rect rect2 = rect1.RightAdjoin(Text.CalcSize(compName).x);
             Widgets.Label(rect2, "<b>" + compName + "</b>");
 
-            //menu
-            //Rect rect3 = rect.RightPartPixels(rect.height);
-            //if (Widgets.ButtonImage(rect3, TexButton.Suspend))
-            //{
-            //    //todo comp options: copy, paste, delete
-            //    List<FloatMenuOption> options = new List<FloatMenuOption>();
+            //comp is null
+            if (id == 0)
+            {
+                Rect rect3 = rect.RightPartPixels(100f);
+                if (Widgets.ButtonText(rect3, "MP_Add".Translate()))
+                {
+                    addNewComp?.Invoke();
+                }
 
-            //    options.Add(new FloatMenuOption("Copy", () => { /*todo copy comp*/ }));
-            //    options.Add(new FloatMenuOption("Paste", () => { /*todo paste comp*/ }));
-            //    options.Add(new FloatMenuOption("Delete", () => { /*todo delete comp*/ }));
-
-            //    Find.WindowStack.Add(new FloatMenu(options));
-            //}
+                return;
+            }
 
             //draw
             if (!compCollapsedDic[id])

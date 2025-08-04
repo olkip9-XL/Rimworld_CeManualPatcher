@@ -16,6 +16,7 @@ namespace CeManualPatcher.Saveable
 
     internal class ProjectileDefSaveable : SaveableBase<ThingDef>
     {
+
         //字段
         public static ReadOnlyCollection<string> propNames = new List<string>()
         {
@@ -23,7 +24,29 @@ namespace CeManualPatcher.Saveable
                 "armorPenetrationBlunt",
                 "explosionRadius",
                 "suppressionFactor",
-                "stoppingPower"
+                "stoppingPower",
+
+                "speedGain",
+                "fuelTicks",
+                "pelletCount",
+                "spreadMult",
+                "damageAdjacentTiles",
+                "dropsCasings",
+                "gravityFactor",
+                "isInstant",
+                "damageFalloff",
+                "castShadow",
+                "airborneSuppressionFactor",
+                "dangerFactor",
+                "detonateEffectsScaleOverride",
+                "fuze_delay",
+                "HP_penetration",
+                "HP_penetration_ratio",
+                "armingDelay",
+                "aimHeightOffset",
+                "empShieldBreakChance",
+                "collideDistance",
+                "impactChance",
         }.AsReadOnly();
         private Dictionary<string, string> propDic = new Dictionary<string, string>();
 

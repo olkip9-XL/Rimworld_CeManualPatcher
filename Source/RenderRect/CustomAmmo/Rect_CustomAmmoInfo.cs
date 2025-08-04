@@ -438,6 +438,9 @@ namespace CeManualPatcher.RenderRect
             listing.FieldLine($"CE_DescBluntPenetration".Translate().Colorize(isExpo ? ColorGrey : Color.white), ref projectile.armorPenetrationBlunt, indent: 20f);
             listing.FieldLine($"CE_DescSharpPenetration".Translate().Colorize(isExpo ? ColorGrey : Color.white), ref projectile.armorPenetrationSharp, indent: 20f);
 
+            listing.FieldLine("MP_ProjectilePropertiesCE.pelletCount".Translate(), ref projectile.pelletCount, indent: 20f);
+            listing.FieldLine("MP_ProjectilePropertiesCE.isInstant".Translate(), ref projectile.isInstant, indent:20f);
+
             DrawSecondaryDamages(listing, projectile.secondaryDamages, isExpo);
 
             listing.ButtonTextLine($"MP_DescExplosionGas".Translate().Colorize(isExpo ? Color.white : ColorGrey), projectile.gas.GetLabel(), () =>

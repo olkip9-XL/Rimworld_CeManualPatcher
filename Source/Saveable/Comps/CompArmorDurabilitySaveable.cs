@@ -24,26 +24,27 @@ namespace CeManualPatcher.Saveable
             }
         }
 
-        public override bool CompChanged{
+        public override bool CompChanged
+        {
             get
             {
-                if(originalData == null || compProps == null)
+                if (originalData == null || compProps == null)
                 {
                     return false;
                 }
 
-                foreach(var fieldName in propNames)
+                foreach (var fieldName in propNames)
                 {
                     string originalValue = PropUtility.GetPropValue(originalData, fieldName).ToString();
                     string currentValue = PropUtility.GetPropValue(compProps, fieldName).ToString();
 
-                    if(originalValue != currentValue)
+                    if (originalValue != currentValue)
                     {
                         return true;
                     }
                 }
 
-                if(!originalData.RepairIngredients.NullOrEmpty() && !compProps.RepairIngredients.NullOrEmpty() && originalData.RepairIngredients.Count == compProps.RepairIngredients.Count)
+                if (!originalData.RepairIngredients.NullOrEmpty() && !compProps.RepairIngredients.NullOrEmpty() && originalData.RepairIngredients.Count == compProps.RepairIngredients.Count)
                 {
                     List<ThingDefCountClass> originalList = originalData.RepairIngredients;
                     List<ThingDefCountClass> currentList = compProps.RepairIngredients;
@@ -51,7 +52,7 @@ namespace CeManualPatcher.Saveable
                     originalList.SortBy(x => x.thingDef.defName);
                     currentList.SortBy(x => x.thingDef.defName);
 
-                    for(int i=0;i<originalList.Count;i++)
+                    for (int i = 0; i < originalList.Count; i++)
                     {
                         if (originalList[i].thingDef != currentList[i].thingDef ||
                             originalList[i].count != currentList[i].count)
@@ -83,7 +84,7 @@ namespace CeManualPatcher.Saveable
         private List<ThingDefCountClassExpo> repairIngredients = new List<ThingDefCountClassExpo>();
 
         public CompArmorDurabilitySaveable() { }
-        public CompArmorDurabilitySaveable(ThingDef thingDef):base(thingDef)
+        public CompArmorDurabilitySaveable(ThingDef thingDef) : base(thingDef)
         {
         }
 
@@ -91,14 +92,26 @@ namespace CeManualPatcher.Saveable
         {
             base.ExposeData();
 
-            Scribe_Collections.Look(ref propDic, "compArmorDurability", LookMode.Value, LookMode.Value);
-            Scribe_Collections.Look(ref repairIngredients, "repairIngredients", LookMode.Deep);
-
-            if (Scribe.mode == LoadSaveMode.LoadingVars)
+            if(Scribe.mode == LoadSaveMode.LoadingVars && base.compIsNull)
             {
-                if (propDic == null)
+                Scribe_Collections.Look(ref propDic, "compArmorDurability", LookMode.Value, LookMode.Value);
+                if (!propDic.NullOrEmpty())
                 {
-                    propDic = new Dictionary<string, string>();
+                    base.compIsNull = false;
+                }
+            }
+
+            if (!base.compIsNull)
+            {
+                Scribe_Collections.Look(ref propDic, "compArmorDurability", LookMode.Value, LookMode.Value);
+                Scribe_Collections.Look(ref repairIngredients, "repairIngredients", LookMode.Deep);
+
+                if (Scribe.mode == LoadSaveMode.LoadingVars)
+                {
+                    if (propDic == null)
+                    {
+                        propDic = new Dictionary<string, string>();
+                    }
                 }
             }
         }
@@ -158,10 +171,7 @@ namespace CeManualPatcher.Saveable
         {
             foreach (var item in propNames)
             {
-                if (!propDic.ContainsKey(item))
-                {
-                    propDic[item] = PropUtility.GetPropValue(compProps, item).ToString();
-                }
+                propDic[item] = PropUtility.GetPropValue(compProps, item).ToString();
             }
 
             repairIngredients = new List<ThingDefCountClassExpo>();

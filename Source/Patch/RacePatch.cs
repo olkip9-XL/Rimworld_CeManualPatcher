@@ -66,71 +66,6 @@ namespace CeManualPatcher.Patch
             statBase?.PostLoadInit(targetDef);
             armorDurability?.PostLoadInit(targetDef);
         }
-
-        //public override void ExportPatch(string dirPath)
-        //{
-
-        //    string folderPath = Path.Combine(dirPath, targetDef.modContentPack.Name);
-        //    folderPath = Path.Combine(folderPath, "Race");
-        //    if (!Directory.Exists(folderPath))
-        //    {
-        //        Directory.CreateDirectory(folderPath);
-        //    }
-
-        //    string filePath = Path.Combine(folderPath, targetDef.defName + ".xml");
-
-        //    XmlElement root = null;
-        //    XmlDocument xmlDoc = XmlUtility.CreateBasePatchDoc(ref root, targetDef.modContentPack.Name);
-
-        //    //stats
-        //    XmlUtility.Replace_StatBase(xmlDoc, root, targetDef.defName, targetDef.statBases);
-
-        //    //comps
-        //    MakeCompPatch_ArmorDurability();
-
-        //    xmlDoc.Save(filePath);
-
-        //    void MakeCompPatch_ArmorDurability()
-        //    {
-        //        XmlElement valueElement = xmlDoc.CreateElement("li");
-        //        valueElement.SetAttribute("Class", typeof(CompProperties_ArmorDurability).ToString());
-
-        //        CompProperties_ArmorDurability defaultData = new CompProperties_ArmorDurability();
-        //        CompProperties_ArmorDurability currentData = targetDef.GetCompProperties<CompProperties_ArmorDurability>();
-
-        //        if (defaultData != null && currentData != null)
-        //        {
-        //            foreach (var fieldName in CompArmorDurabilitySaveable.propNames)
-        //            {
-        //                string defaultValue = PropUtility.GetPropValue(defaultData, fieldName).ToString();
-        //                string currentValue = PropUtility.GetPropValue(currentData, fieldName).ToString();
-
-        //                if (defaultValue != currentValue)
-        //                {
-        //                    XmlUtility.AddChildElement(xmlDoc, valueElement, fieldName, currentValue);
-        //                }
-        //            }
-
-        //            if (!currentData.RepairIngredients.NullOrEmpty() && !currentData.RepairIngredients.NullOrEmpty())
-        //            {
-        //                XmlElement repairIngredientsElement = xmlDoc.CreateElement("RepairIngredients");
-        //                foreach (var ingredient in currentData.RepairIngredients)
-        //                {
-        //                    XmlUtility.AddChildElement(xmlDoc, repairIngredientsElement, ingredient.thingDef.defName, ingredient.count.ToString());
-        //                }
-        //                valueElement.AppendChild(repairIngredientsElement);
-        //            }
-        //        }
-
-        //        if (this.armorDurability.CompChanged)
-        //        {
-        //            root.AppendChild(XmlUtility.PatchAddCompRoot(xmlDoc, targetDef.defName));
-        //            XmlUtility.PatchComp(xmlDoc, root, valueElement, targetDef.defName, typeof(CompProperties_ArmorDurability).ToString());
-        //        }
-
-        //    }
-        //}
-
         protected override void MakePatch(XmlDocument xmlDoc, XmlElement root)
         {
             XmlUtility.Replace_StatBase(xmlDoc, root, targetDef.defName, targetDef.statBases);
@@ -140,6 +75,9 @@ namespace CeManualPatcher.Patch
 
             void MakeCompPatch_ArmorDurability()
             {
+                if (!this.armorDurability.CompChanged)
+                    return;
+
                 XmlElement valueElement = xmlDoc.CreateElement("li");
                 valueElement.SetAttribute("Class", typeof(CompProperties_ArmorDurability).ToString());
 
@@ -170,11 +108,8 @@ namespace CeManualPatcher.Patch
                     }
                 }
 
-                if (this.armorDurability.CompChanged)
-                {
-                    root.AppendChild(XmlUtility.PatchAddCompRoot(xmlDoc, targetDef.defName));
-                    XmlUtility.PatchComp(xmlDoc, root, valueElement, targetDef.defName, typeof(CompProperties_ArmorDurability).ToString());
-                }
+                root.AppendChild(XmlUtility.PatchAddCompRoot(xmlDoc, targetDef.defName));
+                XmlUtility.PatchComp(xmlDoc, root, valueElement, targetDef.defName, typeof(CompProperties_ArmorDurability).ToString());
 
             }
         }

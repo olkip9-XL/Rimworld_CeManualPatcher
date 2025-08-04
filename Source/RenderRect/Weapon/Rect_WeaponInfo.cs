@@ -5,15 +5,19 @@ using CeManualPatcher.Misc;
 using CeManualPatcher.Patch;
 using CeManualPatcher.Saveable;
 using CombatExtended;
+using CombatExtended.Compatibility;
 using RimWorld;
+using RimWorld.Planet;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using Verse;
+using Verse.Noise;
 
 namespace CeManualPatcher.RenderRect
 {
@@ -27,8 +31,18 @@ namespace CeManualPatcher.RenderRect
         private ThingDef copiedThing = null;
 
         private static WeaponManager manager => WeaponManager.instance;
-        private static CEPatchManager patchManager => CEPatchManager.instance;
+        //private static CEPatchManager patchManager => CEPatchManager.instance;
         private static ThingDef curWeaponDef => WeaponManager.curWeaponDef;
+
+        private Action preChange = null;
+
+        public Rect_WeaponInfo()
+        {
+            preChange = delegate
+            {
+               manager.GetPatch(curWeaponDef);
+            };
+        }
 
         public override void DoWindowContents(Rect rect)
         {
@@ -42,40 +56,29 @@ namespace CeManualPatcher.RenderRect
 
             DrawHead(listing);
 
-            Action preChange = delegate
-            {
-                manager.GetPatch(curWeaponDef);
-            };
-
             WidgetsUtility.ScrollView(listing.GetRect(rect.height - listing.CurHeight - 30f - 0.1f), ref scrollPosition, ref innerHeight, (innerListing) =>
             {
                 RenderRectUtility.DrawStats(innerListing, ref curWeaponDef.statBases, MP_Options.statDefs_Weapon, preChange);
 
-                RenderRectUtility.DrawStats(innerListing, ref curWeaponDef.equippedStatOffsets, MP_Options.statDefs_WeaponOffset, delegate
-                {
-                    manager.GetPatch(curWeaponDef);
-                }, headLabel: "MP_StatOffset".Translate());
+                RenderRectUtility.DrawStats(innerListing, ref curWeaponDef.equippedStatOffsets, MP_Options.statDefs_WeaponOffset, preChange, headLabel: "MP_StatOffset".Translate());
 
                 DrawWeaponTags(innerListing, curWeaponDef.weaponTags, preChange);
 
                 DrawVebs(innerListing, curWeaponDef.Verbs.FirstOrDefault(), curWeaponDef.GetCompProperties<CompProperties_AmmoUser>(), preChange);
                 DrawTools(innerListing, curWeaponDef.tools, preChange);
 
-                CompProperties_AmmoUser ammoUser = curWeaponDef.GetCompProperties<CompProperties_AmmoUser>();
-                if (manager.HasWeaponPatch(curWeaponDef) && ammoUser == null)
-                {
-                    WeaponPatch patch = manager.GetWeaponPatch(curWeaponDef);
-                    ammoUser = patch.ammoUser?.reservedData;
-                }
+                //CompProperties_AmmoUser ammoUser = curWeaponDef.GetCompProperties<CompProperties_AmmoUser>();
+                //if (manager.HasWeaponPatch(curWeaponDef) && ammoUser == null)
+                //{
+                //    WeaponPatch patch = manager.GetWeaponPatch(curWeaponDef);
+                //    ammoUser = patch.ammoUser?.reservedData;
+                //}
 
-                DrawComps(innerListing,
-                    curWeaponDef.GetCompProperties<CompProperties_FireModes>(),
-                    //curWeaponDef.GetCompProperties<CompProperties_AmmoUser>(),
-                    ammoUser,
-                    curWeaponDef.Verbs.FirstOrDefault(),
-                    preChange);
+                DrawComp_Firemodes(innerListing);
 
-                DrawChargeSpeed(innerListing, curWeaponDef.GetCompProperties<CompProperties_Charges>(), preChange);
+                DrawComp_Ammouser(innerListing);
+
+                DrawComp_ChargeSpeed(innerListing);
             });
 
             //control pannel
@@ -137,7 +140,7 @@ namespace CeManualPatcher.RenderRect
             }, indent: 20f);
 
             //All weaponTags
-            listing.ButtonImageLine("<color=#6b717a>" + "MP_WeaponTags".Translate() + "</color>", TexButton.Add, () =>
+            listing.ButtonImageLine("MP_WeaponTags".Translate().Colorize(MP_Color.Grey), TexButton.Add, () =>
             {
                 List<string> tags = new List<string>(MP_Options.weaponTags);
                 tags = tags.Except(weaponTags).ToList();
@@ -154,7 +157,7 @@ namespace CeManualPatcher.RenderRect
             foreach (var item in weaponTags)
             {
                 bool needBreak = false;
-                listing.ButtonImageLine("<color=#6b717a>" + item + "</color>", TexButton.Delete, () =>
+                listing.ButtonImageLine(item.Colorize(MP_Color.Grey), TexButton.Delete, () =>
                 {
                     preChange?.Invoke();
                     weaponTags.Remove(item);
@@ -176,7 +179,7 @@ namespace CeManualPatcher.RenderRect
             if (Widgets.ButtonText(resetAllRect, "MP_ResetAll".Translate()))
             {
                 manager.ResetAll();
-                patchManager.ResetAll();
+                //patchManager.ResetAll();
             }
 
             Rect exportCEPatchRect = rect.RightPartPixels(120f);
@@ -193,15 +196,19 @@ namespace CeManualPatcher.RenderRect
 
             //sign
             Rect rect0 = rect.LeftPartPixels(3f);
+            if (manager.HasWeaponPatch(curWeaponDef))
+            {
+                Widgets.DrawBoxSolid(rect0, MP_Color.SignGreen);
+            }
 
-            if (CEPatchManager.instance.HasPatcher(curWeaponDef))
-            {
-                Widgets.DrawBoxSolid(rect0, Color.blue);
-            }
-            else if (manager.HasWeaponPatch(curWeaponDef))
-            {
-                Widgets.DrawBoxSolid(rect0, new Color(85f / 256f, 177f / 256f, 85f / 256f));
-            }
+
+            //if (CEPatchManager.instance.HasPatcher(curWeaponDef))
+            //{
+            //    Widgets.DrawBoxSolid(rect0, Color.blue);
+            //}
+            //else if (manager.HasWeaponPatch(curWeaponDef))
+            //{
+            //}
 
             //icon
             Rect rect1 = rect0.RightAdjoin(30f, 0);
@@ -219,7 +226,7 @@ namespace CeManualPatcher.RenderRect
             if (Widgets.ButtonImage(rect3, MP_Texture.Reset))
             {
                 manager.Reset(curWeaponDef);
-                patchManager.Reset(curWeaponDef);
+                //patchManager.Reset(curWeaponDef);
             }
 
             //CE patch button
@@ -229,7 +236,12 @@ namespace CeManualPatcher.RenderRect
             {
                 if (Widgets.ButtonImage(rect4, MP_Texture.CEPatch))
                 {
-                    Find.WindowStack.Add(new Dialog_MakeCEPatch(curWeaponDef));
+                    //Find.WindowStack.Add(new Dialog_MakeCEPatch(curWeaponDef));
+                    
+                    //Patch fuction
+                    preChange?.Invoke();
+
+                    PatchWeapon();
                 }
             }
 
@@ -340,6 +352,111 @@ namespace CeManualPatcher.RenderRect
             }
 
             return true;
+        }
+
+        private void PatchWeapon()
+        {
+            ThingDef thingDef = curWeaponDef;
+
+            //statBases
+            if (thingDef.statBases != null)
+            {
+                List<StatModifier> stats = new List<StatModifier>();
+                foreach (var stat in thingDef.statBases)
+                {
+                    if (MP_Options.exceptStatDefs.Contains(stat.stat))
+                    {
+                        continue;
+                    }
+
+                    StatModifier statModifier = new StatModifier();
+                    PropUtility.CopyPropValue(stat, statModifier);
+                    stats.Add(statModifier);
+                }
+
+                // Add CE stats, default AR
+                stats.Add(new StatModifier() { stat = CE_StatDefOf.Bulk, value = 10.03f });
+
+                if (!thingDef.Verbs.NullOrEmpty())
+                {
+                    stats.Add(new StatModifier() { stat = CE_StatDefOf.TicksBetweenBurstShots, value = 4 });
+                    stats.Add(new StatModifier() { stat = CE_StatDefOf.BurstShotCount, value = 6 });
+                    stats.Add(new StatModifier() { stat = CE_StatDefOf.SightsEfficiency, value = 1 });
+                    stats.Add(new StatModifier() { stat = CE_StatDefOf.SwayFactor, value = 1.33f });
+                    stats.Add(new StatModifier() { stat = CE_StatDefOf.ShotSpread, value = 0.07f });
+                    stats.Add(new StatModifier() { stat = CE_StatDefOf.Recoil, value = 1.5f });
+
+                    stats.Add(new StatModifier() { stat = CE_StatDefOf.MagazineCapacity, value = 30f });
+                    stats.Add(new StatModifier() { stat = CE_StatDefOf.ReloadSpeed, value = 4f });
+                    stats.Add(new StatModifier() { stat = CE_StatDefOf.AmmoGenPerMagOverride });
+                }
+
+                thingDef.statBases = stats;
+            }
+
+            //statOffsets stay the same
+
+            //weaponTags stay the same
+
+            //verbs
+            if (!thingDef.Verbs.NullOrEmpty())
+            {
+                VerbPropertiesCE verb = PropUtility.ConvertToChild<VerbProperties, VerbPropertiesCE>(thingDef.Verbs[0]);
+
+                if (verb.verbClass == typeof(Verb_Shoot))
+                    verb.verbClass = typeof(Verb_ShootCE);
+
+                if (verb.verbClass == typeof(Verb_ShootOneUse))
+                    verb.verbClass = typeof(Verb_ShootCEOneUse);
+
+                if (verb.verbClass == typeof(Verb_LaunchProjectile))
+                    verb.verbClass = typeof(Verb_LaunchProjectileCE);
+
+                verb.defaultProjectile = MP_ProjectileDefOf.Bullet_556x45mmNATO_FMJ;
+
+                thingDef.Verbs.Clear();
+                thingDef.Verbs.Add(verb);
+            }
+
+            //tools
+            if (thingDef.tools != null)
+            {
+                List<Tool> tools= new List<Tool>();
+                foreach (var tool in thingDef.tools)
+                {
+                    ToolCE toolCopy = PropUtility.ConvertToChild<Tool, ToolCE>(tool);
+
+                    List<ToolCapacityDef> capacities = new List<ToolCapacityDef>();
+                    capacities.AddRange(tool.capacities);
+                    toolCopy.capacities = capacities;
+
+                    tools.Add(toolCopy);
+                }
+
+                thingDef.tools = tools;
+            }
+
+            //comps
+            if (thingDef.comps != null && !thingDef.Verbs.NullOrEmpty())
+            {
+                //AmmoUser
+                if (!thingDef.HasComp<CompAmmoUser>())
+                {
+                    CompProperties_AmmoUser ammoUser = new CompProperties_AmmoUser();
+                    ammoUser.ammoSet = MP_AmmoSetDefOf.AmmoSet_556x45mmNATO;
+                    thingDef.comps.Add(ammoUser);
+                }
+
+                //fireModes
+                if (!thingDef.HasComp<CompFireModes>())
+                {
+                    CompProperties_FireModes fireModes = new CompProperties_FireModes();
+                    fireModes.aimedBurstShotCount = 3;
+                    thingDef.comps.Add(fireModes);
+                }
+
+                //charges stay the same
+            }
         }
 
         public static void DrawVebs(Listing_Standard listing, VerbProperties verb, CompProperties_AmmoUser ammoUser, Action preChange)
@@ -744,16 +861,13 @@ namespace CeManualPatcher.RenderRect
             }
         }
 
-        public static void DrawChargeSpeed(Listing_Standard listing, CompProperties_Charges charges, Action preChange)
+        public void DrawComp_ChargeSpeed(Listing_Standard listing)
         {
-            if (charges == null)
-            {
-                return;
-            }
+            CompProperties_Charges compProps = curWeaponDef.GetCompProperties<CompProperties_Charges>();
 
             listing.DrawComp("MP_Charges".Translate(), (innerListing) =>
             {
-                List<int> chargeSpeeds = charges.chargeSpeeds;
+                List<int> chargeSpeeds = compProps.chargeSpeeds;
 
                 Color fontColor = chargeSpeeds.NullOrEmpty() ? MP_Color.Grey : Color.white;
 
@@ -761,7 +875,7 @@ namespace CeManualPatcher.RenderRect
                 innerListing.ButtonImageLine("MP_ChargeSpeed".Translate().Colorize(fontColor), TexButton.Add, () =>
                 {
                     preChange?.Invoke();
-                    charges.chargeSpeeds.Add(1);
+                    compProps.chargeSpeeds.Add(1);
                 });
 
                 for (int i = 0; i < chargeSpeeds.Count; i++)
@@ -783,13 +897,82 @@ namespace CeManualPatcher.RenderRect
                     if (Widgets.ButtonImage(rect2, TexButton.Delete))
                     {
                         preChange?.Invoke();
-                        charges.chargeSpeeds.RemoveAt(i);
+                        compProps.chargeSpeeds.RemoveAt(i);
                         break;
                     }
 
                 }
-            }, charges.GetHashCode());
+            }, compProps?.GetHashCode() ?? 0, () =>
+            {
+                preChange?.Invoke();
+                curWeaponDef.comps.Add(new CompProperties_Charges()
+                {
+                    chargeSpeeds = new List<int>()
+                });
+            });
+        }
+        //1.6 improve
+        private void DrawComp_Firemodes(Listing_Standard listing)
+        {
+            CompProperties_FireModes compProps = curWeaponDef.GetCompProperties<CompProperties_FireModes>();
+
+            listing.DrawComp("MP_FireModes".Translate(), (innerListing) =>
+            {
+                innerListing.ButtonX("MP_AiAimMode".Translate(), 100f, compProps.aiAimMode.ToString(), () =>
+                {
+                    List<AimMode> list = Enum.GetValues(typeof(AimMode)).Cast<AimMode>().ToList();
+                    FloatMenuUtility.MakeMenu(list,
+                        (AimMode x) => x.ToString(),
+                        (AimMode x) => delegate ()
+                        {
+                            preChange?.Invoke();
+                            compProps.aiAimMode = x;
+                        });
+                });
+
+                foreach (var item in CompFireModesSaveable.propNames)
+                {
+                    innerListing.FieldLineReflexion($"MP_FireModes.{item}".Translate(), item, compProps, newValue =>
+                    {
+                        preChange?.Invoke();
+                    });
+                }
+
+            }, compProps?.GetHashCode() ?? 0, () =>
+            {
+                preChange?.Invoke();
+
+                curWeaponDef.comps.Add(new CompProperties_FireModes());
+            });
         }
 
+        private void DrawComp_Ammouser(Listing_Standard listing)
+        {
+            CompProperties_AmmoUser compProps = curWeaponDef.GetCompProperties<CompProperties_AmmoUser>();
+
+            VerbPropertiesCE verb = curWeaponDef.Verbs.FirstOrDefault() as VerbPropertiesCE;
+
+            listing.DrawComp("MP_AmmoUser".Translate(), (innerListing) =>
+            {
+                Color fontColor = compProps.ammoSet == null ? MP_Color.Grey : Color.white;
+                innerListing.ButtonTextLine("MP_AmmoSet".Translate().Colorize(fontColor), compProps.ammoSet?.LabelCap ?? "null", () =>
+                {
+                    preChange?.Invoke();
+                    Find.WindowStack.Add(new Dialog_SetDefaultProjectile(verb, compProps));
+                });
+
+                foreach (var item in CompAmmoUserSaveable.propNames)
+                {
+                    innerListing.FieldLineReflexion($"MP_AmmoUser.{item}".Translate().Colorize(fontColor), item, compProps, newValue =>
+                    {
+                        preChange?.Invoke();
+                    });
+                }
+            }, compProps?.GetHashCode() ?? 0, () =>
+            {
+                preChange?.Invoke();
+                curWeaponDef.comps.Add(new CompProperties_AmmoUser());
+            });
+        }
     }
 }

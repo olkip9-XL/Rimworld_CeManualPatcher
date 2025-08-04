@@ -10,7 +10,7 @@ using Verse;
 
 namespace CeManualPatcher.Saveable
 {
-    internal class CompAmmoUserSaveable : SaveableBase<ThingDef>
+    internal class CompAmmoUserSaveable : CompSaveableBase<CompProperties_AmmoUser>
     {
         public static ReadOnlyCollection<string> propNames = new List<string>()
         {
@@ -25,14 +25,8 @@ namespace CeManualPatcher.Saveable
         private Dictionary<string, string> propDic = new Dictionary<string, string>();
 
         private string ammoSetString;
-        public AmmoSetDef ammoSet
-        {
-            get => DefDatabase<AmmoSetDef>.GetNamed(ammoSetString, false);
-            set => ammoSetString = value?.defName ?? "null";
-        }
 
-        //private
-        private CompProperties_AmmoUser compProps
+        protected override CompProperties_AmmoUser compProps
         {
             get
             {
@@ -44,125 +38,117 @@ namespace CeManualPatcher.Saveable
             }
         }
 
-        private CompProperties_AmmoUser originalData;
+        public override bool CompChanged
+        {
+            get
+            {
+                if (originalData == null || compProps == null)
+                {
+                    return false;
+                }
 
-        public CompProperties_AmmoUser reservedData;
+                foreach (var fieldName in propNames)
+                {
+                    string originalValue = PropUtility.GetPropValue(originalData, fieldName).ToString();
+                    string currentValue = PropUtility.GetPropValue(compProps, fieldName).ToString();
+                    if (originalValue != currentValue)
+                    {
+                        return true;
+                    }
+                }
+
+                if (originalData.ammoSet != compProps.ammoSet)
+                {
+                    return true;
+                }
+
+                return false;
+            }
+        }
 
         public CompAmmoUserSaveable() { }
 
-        public CompAmmoUserSaveable(ThingDef thingDef, bool forceAdd = false)
+        public CompAmmoUserSaveable(ThingDef thingDef) : base(thingDef)
         {
-            this.def = thingDef;
-            if (compProps == null && !forceAdd)
-            {
-                return;
-            }
-
-            InitOriginalData();
         }
 
-        protected override void Apply()
-        {
-            if (compProps == null)
-            {
-                return;
-            }
-
-            foreach (var item in propNames)
-            {
-                PropUtility.SetPropValueString(compProps, item, this.propDic[item]);
-            }
-
-            compProps.ammoSet = ammoSet;
-
-            if (ammoSet == null)
-            {
-                def.comps.RemoveWhere(x => x is CompProperties_AmmoUser);
-            }
-
-        }
         public override void ExposeData()
         {
-            if (Scribe.mode == LoadSaveMode.Saving && (compProps != null || reservedData != null))
+            base.ExposeData();
+
+            //old save
+            if(Scribe.mode == LoadSaveMode.LoadingVars && base.compIsNull)
             {
-                if (reservedData == null)
-                    reservedData = compProps;
-
-                foreach (var item in propNames)
+                Scribe_Collections.Look(ref propDic, "propDic", LookMode.Value, LookMode.Value);
+                if (!propDic.NullOrEmpty())
                 {
-                    propDic[item] = PropUtility.GetPropValue(reservedData, item).ToString();
+                    base.compIsNull = false;
                 }
-
-                //this.ammoSet = compProps.ammoSet;
-                if (compProps != null && reservedData.ammoSet == null)
-                {
-                    def.comps.RemoveWhere(x => x is CompProperties_AmmoUser);
-                }
-                else if (compProps == null && reservedData.ammoSet != null)
-                {
-                    def.comps.Add(reservedData);
-                }
-
-                this.ammoSet = reservedData.ammoSet;
             }
 
-            Scribe_Collections.Look(ref propDic, "propDic", LookMode.Value, LookMode.Value);
-            Scribe_Values.Look(ref ammoSetString, "ammoSet", null);
-
-            if (Scribe.mode == LoadSaveMode.LoadingVars)
+            if (!base.compIsNull)
             {
-                if (propDic == null)
+                Scribe_Collections.Look(ref propDic, "propDic", LookMode.Value, LookMode.Value);
+                Scribe_Values.Look(ref ammoSetString, "ammoSet", null);
+
+                if (Scribe.mode == LoadSaveMode.LoadingVars)
                 {
-                    propDic = new Dictionary<string, string>();
+                    if (propDic == null)
+                    {
+                        propDic = new Dictionary<string, string>();
+                    }
                 }
             }
         }
-
-        public override void Reset()
+        protected override void SaveData()
         {
-            if (compProps == null && reservedData != null)
+            foreach (var item in propNames)
             {
-                def.comps.Add(reservedData);
+                propDic[item] = PropUtility.GetPropValue(compProps, item).ToString();
             }
 
-            if (compProps == null)
+            ammoSetString = compProps.ammoSet?.defName ?? "null";
+        }
+
+        protected override CompProperties_AmmoUser ReadData()
+        {
+            CompProperties_AmmoUser newComp = new CompProperties_AmmoUser();
+            foreach (var item in propNames)
             {
-                return;
+                if (propDic.ContainsKey(item))
+                {
+                    PropUtility.SetPropValueString(newComp, item, propDic[item]);
+                }
             }
 
-            if (originalData == null)
+            if (!ammoSetString.NullOrEmpty())
             {
-                def.comps.RemoveWhere(x => x is CompProperties_AmmoUser);
+                newComp.ammoSet = DefDatabase<AmmoSetDef>.GetNamed(ammoSetString, false);
+            }
+
+            if(newComp.ammoSet == null)
+            {
+                return null;
             }
             else
             {
-                PropUtility.CopyPropValue(originalData, compProps);
+                return newComp;
             }
         }
 
-        public override void PostLoadInit(ThingDef thingDef)
+        protected override CompProperties_AmmoUser MakeCopy(CompProperties_AmmoUser original)
         {
-            this.def = thingDef;
-            InitOriginalData();
-
-            if (!thingDef.HasComp<CompAmmoUser>())
+            if(original == null)
             {
-                thingDef.comps.Add(new CompProperties_AmmoUser());
+                return null;
             }
-            this.Apply();
+
+            CompProperties_AmmoUser copy = new CompProperties_AmmoUser();
+            PropUtility.CopyPropValue(original, copy);
+
+            copy.ammoSet = original.ammoSet;
+
+            return copy;
         }
-
-        protected override void InitOriginalData()
-        {
-            if (compProps == null)
-            {
-                return;
-            }
-            originalData = new CompProperties_AmmoUser();
-            PropUtility.CopyPropValue(compProps, originalData);
-
-            reservedData = compProps;
-        }
-
     }
 }

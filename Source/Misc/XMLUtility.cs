@@ -359,7 +359,7 @@ namespace CeManualPatcher.Misc
             void MakeVerb()
             {
                 //verb
-                if (!thingDef.Verbs.NullOrEmpty())
+                if (!thingDef.Verbs.NullOrEmpty() && thingDef.Verbs[0] is VerbPropertiesCE)
                 {
                     XmlElement verbPropertiesElement = xmlDoc.CreateElement("Properties");
                     cePatchElement.AppendChild(verbPropertiesElement);
@@ -387,7 +387,7 @@ namespace CeManualPatcher.Misc
                         AddChildElement(xmlDoc, verbPropertiesElement, "defaultProjectile", currentVerb.defaultProjectile.defName);
                     }
 
-                    if(currentVerb.soundCast != defaultVerb.soundCast)
+                    if (currentVerb.soundCast != defaultVerb.soundCast)
                     {
                         AddChildElement(xmlDoc, verbPropertiesElement, "soundCast", currentVerb.soundCast.defName);
                     }
@@ -458,6 +458,8 @@ namespace CeManualPatcher.Misc
 
             void MakeWeaponTags()
             {
+                List<string> originalTags = weaponManager.GetWeaponPatch(thingDef).weaponTags.OriginalTags;
+
                 //weapontags
                 if (thingDef.weaponTags != null)
                 {
@@ -465,7 +467,8 @@ namespace CeManualPatcher.Misc
                     cePatchElement.AppendChild(weaponTagsElement);
                     foreach (var tag in thingDef.weaponTags)
                     {
-                        AddChildElement(xmlDoc, weaponTagsElement, "li", tag);
+                        if (!originalTags.Contains(tag))
+                            AddChildElement(xmlDoc, weaponTagsElement, "li", tag);
                     }
                 }
             }

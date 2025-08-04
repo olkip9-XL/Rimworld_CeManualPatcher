@@ -2,6 +2,7 @@
 using CeManualPatcher.Extension;
 using CeManualPatcher.Manager;
 using CeManualPatcher.Misc;
+using CeManualPatcher.Saveable;
 using CombatExtended;
 using RimWorld;
 using System;
@@ -154,20 +155,26 @@ namespace CeManualPatcher.RenderRect
             }
 
             //common
-            listing.FieldLineReflexion("MP_DescSuppressionFactor".Translate(), "suppressionFactor", props, newValue =>
+            foreach (var fieldName in ProjectileDefSaveable.propNames)
             {
-                manager.GetAmmoPatch(ammo);
-            });
+                if(fieldName == "armorPenetrationSharp" || 
+                    fieldName == "armorPenetrationBlunt" ||
+                    fieldName == "explosionRadius")
+                {
+                    continue; // Handled above
+                }
 
-            listing.FieldLineReflexion("MP_DescStoppingPower".Translate(), "stoppingPower", props, newValue =>
-            {
-                manager.GetAmmoPatch(ammo);
-            });
+                listing.FieldLineReflexion($"MP_ProjectilePropertiesCE.{fieldName}".Translate(), fieldName, props, newValue =>
+                {
+                    manager.GetAmmoPatch(ammo);
+                });
+            }
 
             //comps
-
             DrawFragments();
             DrawSecondaryExplosion();
+
+            //recipe
             DrawRecipe();
 
             void DrawFragments()

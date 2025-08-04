@@ -152,20 +152,6 @@ namespace CeManualPatcher.RenderRect
 
             listing.DrawComp("MP_ArmorDurability".Translate(), (innerListing) =>
             {
-                if (comp == null)
-                {
-
-                    listing.ButtonTextLine("Comp ArmorDurability not found", "MP_Add".Translate(), () =>
-                    {
-                        preChange?.Invoke();
-
-                        CompProperties_ArmorDurability newComp = new CompProperties_ArmorDurability();
-                        curDef.comps.Add(newComp);
-                    });
-
-                    return;
-                }
-
                 foreach (var name in CompArmorDurabilitySaveable.propNames)
                 {
                     innerListing.FieldLineReflexion($"MP_ArmorDurability.{name}".Translate(), name, comp, (newValue) =>
@@ -218,8 +204,11 @@ namespace CeManualPatcher.RenderRect
                         break;
                     }
                 }
-
-            }, comp?.GetHashCode() ?? 0);
+            }, comp?.GetHashCode() ?? 0, () =>
+            {
+                preChange?.Invoke();
+                curDef.comps.Add(new CompProperties_ArmorDurability());
+            });
 
         }
     }

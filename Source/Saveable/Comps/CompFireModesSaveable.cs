@@ -10,8 +10,9 @@ using Verse;
 
 namespace CeManualPatcher.Saveable
 {
-    internal class CompFireModesSaveable : SaveableBase<ThingDef>
+    internal class CompFireModesSaveable : CompSaveableBase<CompProperties_FireModes>
     {
+
         //字段
         public static ReadOnlyCollection<string> propNames = new List<string>()
         {
@@ -25,8 +26,7 @@ namespace CeManualPatcher.Saveable
         public AimMode aiAimMode = AimMode.AimedShot;
 
 
-        //private
-        private CompProperties_FireModes compProps
+        protected override CompProperties_FireModes compProps
         {
             get
             {
@@ -38,97 +38,108 @@ namespace CeManualPatcher.Saveable
             }
         }
 
-        private CompProperties_FireModes originalData;
-        public CompFireModesSaveable() { }
-
-        public CompFireModesSaveable(ThingDef thingDef, bool forceAdd = false)
+        public override bool CompChanged
         {
-            this.def = thingDef;
-            if (compProps == null && !forceAdd)
+            get
             {
-                return;
-            }
+                if (originalData == null || compProps == null)
+                {
+                    return false;
+                }
 
-            InitOriginalData();
+                foreach (var fieldName in propNames)
+                {
+                    string originalValue = PropUtility.GetPropValue(originalData, fieldName).ToString();
+                    string currentValue = PropUtility.GetPropValue(compProps, fieldName).ToString();
+
+                    if (originalValue != currentValue)
+                    {
+                        return true;
+                    }
+                }
+
+                if (originalData.aiAimMode != compProps.aiAimMode)
+                {
+                    return true;
+                }
+                return false;
+            }
         }
 
-        protected override void Apply()
+        public CompFireModesSaveable() { }
+
+        public CompFireModesSaveable(ThingDef thingDef) : base(thingDef)
         {
-            if (compProps == null)
-            {
-                return;
-            }
-
-            foreach (var item in propNames)
-            {
-                PropUtility.SetPropValueString(compProps, item, this.propDic[item]);
-            }
-
-            compProps.aiAimMode = aiAimMode;
         }
 
         public override void ExposeData()
         {
-            if (Scribe.mode == LoadSaveMode.Saving && compProps!=null)
-            {
-                foreach (var item in propNames)
-                {
-                    propDic[item] = PropUtility.GetPropValue(compProps, item).ToString();
-                }
-                this.aiAimMode = compProps.aiAimMode;
-            }
-            Scribe_Collections.Look(ref propDic, "compFireModes", LookMode.Value, LookMode.Value);
-            Scribe_Values.Look(ref aiAimMode, "aiAimMode", AimMode.AimedShot);
+            base.ExposeData();
 
-            if (Scribe.mode == LoadSaveMode.LoadingVars)
+            if(Scribe.mode == LoadSaveMode.LoadingVars && base.compIsNull)
             {
-                if (propDic == null)
+                Scribe_Collections.Look(ref propDic, "compFireModes", LookMode.Value, LookMode.Value);
+                if (!propDic.NullOrEmpty())
                 {
-                    propDic = new Dictionary<string, string>();
+                    base.compIsNull = false;
                 }
             }
 
-        }
 
-        public override void Reset()
-        {
-            if (compProps == null)
+            if (!base.compIsNull)
             {
-                return;
-            }
+                Scribe_Collections.Look(ref propDic, "compFireModes", LookMode.Value, LookMode.Value);
+                Scribe_Values.Look(ref aiAimMode, "aiAimMode", AimMode.AimedShot);
 
-            if(originalData == null)
-            {
-                def.comps.RemoveWhere(x => x is CompProperties_FireModes);
-            }
-            else
-            {
-                PropUtility.CopyPropValue(originalData, compProps);
+                if (Scribe.mode == LoadSaveMode.LoadingVars)
+                {
+                    if (propDic == null)
+                    {
+                        propDic = new Dictionary<string, string>();
+                    }
+                }
             }
         }
 
-        public override void PostLoadInit(ThingDef thingDef)
+        protected override void SaveData()
         {
-            this.def = thingDef;
-
-            InitOriginalData();
-
-            if(!thingDef.HasComp<CompFireModes>())
+            foreach (var item in propNames)
             {
-                thingDef.comps.Add(new CompProperties_FireModes());
+                propDic[item] = PropUtility.GetPropValue(compProps, item).ToString();
             }
-
-            this.Apply();
+            this.aiAimMode = compProps.aiAimMode;
         }
 
-        protected override void InitOriginalData()
+        protected override CompProperties_FireModes ReadData()
         {
-            if (compProps == null)
+            CompProperties_FireModes newComp = new CompProperties_FireModes();
+
+            foreach (var item in propNames)
             {
-                return;
+                if (propDic.ContainsKey(item))
+                {
+                    PropUtility.SetPropValueString(newComp, item, this.propDic[item]);
+                }
             }
-            originalData = new CompProperties_FireModes();
-            PropUtility.CopyPropValue(compProps, originalData);
+
+            newComp.aiAimMode = this.aiAimMode;
+
+            return newComp;
+        }
+
+        protected override CompProperties_FireModes MakeCopy(CompProperties_FireModes original)
+        {
+            if (original == null)
+            {
+                return null;
+            }
+
+            CompProperties_FireModes copy = new CompProperties_FireModes();
+
+            PropUtility.CopyPropValue(original, copy);
+            copy.aiAimMode = original.aiAimMode;
+
+            return copy;
         }
     }
 }

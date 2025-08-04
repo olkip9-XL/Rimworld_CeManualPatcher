@@ -38,14 +38,14 @@ namespace CeManualPatcher
         internal CustomAmmoManager customAmmoManager = new CustomAmmoManager();
 
         //CEPatcher
-        internal CEPatchManager patchManager = new CEPatchManager();
+        //internal CEPatchManager patchManager = new CEPatchManager();
         public override void ExposeData()
         {
             base.ExposeData();
 
             Scribe_Deep.Look(ref ammoManager, "ammoManager");
             Scribe_Deep.Look(ref weaponManager, "weaponManager");
-            Scribe_Deep.Look(ref patchManager, "patchManager");
+            //Scribe_Deep.Look(ref patchManager, "patchManager");
             Scribe_Deep.Look(ref apparelManager, "apparelManager");
             Scribe_Deep.Look(ref customAmmoManager, "customAmmoManager");
             Scribe_Deep.Look(ref bodyDefManager, "bodyDefManager");
@@ -61,10 +61,10 @@ namespace CeManualPatcher
                 {
                     weaponManager = new WeaponManager();
                 }
-                if (patchManager == null)
-                {
-                    patchManager = new CEPatchManager();
-                }
+                //if (patchManager == null)
+                //{
+                //    patchManager = new CEPatchManager();
+                //}
                 if (apparelManager == null)
                 {
                     apparelManager = new ApparelManager();
@@ -87,7 +87,7 @@ namespace CeManualPatcher
         public void PostLoad()
         {
             //init
-            patchManager?.PostLoadInit();
+            //patchManager?.PostLoadInit();
             customAmmoManager?.PostLoadInit();
 
             ammoManager?.PostLoadInit();
@@ -101,12 +101,13 @@ namespace CeManualPatcher
         {
             XmlUtility.CreateBasicFolders();
 
-            patchManager?.ExportAll();
+            //patchManager?.ExportAll();
             apparelManager?.ExportAll();
             customAmmoManager?.ExportAll();
             bodyDefManager?.ExportAll();
             ammoManager?.ExportAll();
             raceManager?.ExportAll();
+            weaponManager?.ExportAll();
 
             string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "CE Patches");
             Messages.Message($"MP_CEPatchExportMsg".Translate(path), MessageTypeDefOf.NeutralEvent);

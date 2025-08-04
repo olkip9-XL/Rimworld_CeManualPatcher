@@ -4,6 +4,7 @@ using CombatExtended;
 using RimWorld;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Xml;
 using Verse;
 using Verse.AI;
@@ -31,8 +32,7 @@ namespace CeManualPatcher.Patch
 
         //private
         List<Tool> originalTools = new List<Tool>();
-
-        public override string PatchName => throw new NotImplementedException();
+        public override string PatchName => "Weapon";
 
         public WeaponPatch() { }
         public WeaponPatch(ThingDef thingDef)
@@ -64,22 +64,11 @@ namespace CeManualPatcher.Patch
             //comps
             if (thingDef.comps != null)
             {
-                if (thingDef.HasComp<CompAmmoUser>())
-                {
-                    ammoUser = new CompAmmoUserSaveable(thingDef);
-                }
+                ammoUser = new CompAmmoUserSaveable(thingDef);
 
-                if (thingDef.HasComp<CompFireModes>())
-                {
-                    fireMode = new CompFireModesSaveable(thingDef);
-                }
+                fireMode = new CompFireModesSaveable(thingDef);
 
-                //comp charges
-                if (thingDef.HasComp<CompCharges>())
-                {
-                    charges = new CompChargeSaveable(thingDef);
-                }
-
+                charges = new CompChargeSaveable(thingDef);
             }
 
             //weapon tags
@@ -122,6 +111,21 @@ namespace CeManualPatcher.Patch
                     tools = new List<ToolCESaveable>();
                 }
 
+                //old save compatibility
+                if (ammoUser == null)
+                {
+                    ammoUser = new CompAmmoUserSaveable(targetDef);
+                }
+
+                if (fireMode == null)
+                {
+                    fireMode = new CompFireModesSaveable(targetDef);
+                }
+
+                if (charges == null)
+                {
+                    charges = new CompChargeSaveable(targetDef);
+                }
             }
 
             if (Scribe.mode == LoadSaveMode.LoadingVars)
@@ -172,7 +176,7 @@ namespace CeManualPatcher.Patch
                     targetDef.tools.Clear();
                     this.tools.ForEach(x => x?.PostLoadInit(targetDef));
                 }
-             
+
                 this.ammoUser?.PostLoadInit(targetDef);
                 this.fireMode?.PostLoadInit(targetDef);
                 this.charges?.PostLoadInit(targetDef);
@@ -184,8 +188,8 @@ namespace CeManualPatcher.Patch
                 {
                     weaponTags = new WeaponTagsSaveable(targetDef);
                 }
-                
-                if(statOffsets == null)
+
+                if (statOffsets == null)
                 {
                     statOffsets = new StatOffsetSaveable(targetDef);
                 }
@@ -216,34 +220,35 @@ namespace CeManualPatcher.Patch
             }
         }
 
-        public void AddVerb()
-        {
-            this.verbProperties = new VerbPropertiesCESaveable(targetDef, true);
-        }
-
-        public void AddAmmoUser()
-        {
-            this.ammoUser = new CompAmmoUserSaveable(targetDef, true);
-        }
-
-        public void AddFireMode()
-        {
-            this.fireMode = new CompFireModesSaveable(targetDef, true);
-        }
-
-        public void AddCharges()
-        {
-            this.charges = new CompChargeSaveable(targetDef);
-        }
-
-        public override void ExportPatch(string dirPath)
-        {
-            throw new NotImplementedException();
-        }
 
         protected override void MakePatch(XmlDocument xmlDoc, XmlElement root)
         {
-            throw new NotImplementedException();
+            XmlUtility.Replace_Tools(xmlDoc, root, targetDef.defName, targetDef.tools);
+            XmlUtility.MakeGunCECompatible(xmlDoc, root, targetDef);
+            XmlUtility.Replace_StatOffsets(xmlDoc, root, targetDef.defName, targetDef.equippedStatOffsets);
+
+            //comps
+            root.AppendChild(XmlUtility.PatchAddCompRoot(xmlDoc, targetDef.defName));
+
+            MakeCompPatch_Charges();
+
+            void MakeCompPatch_Charges()
+            {
+                if (!this.charges.CompChanged)
+                    return;
+
+                CompProperties_Charges compProps = targetDef.GetCompProperties<CompProperties_Charges>();
+                if (compProps == null)
+                    return;
+
+                XmlElement valueElement = xmlDoc.CreateElement("li");
+                valueElement.SetAttribute("Class", typeof(CompProperties_Charges).ToString());
+
+                XmlUtility.AddChildElementList(xmlDoc, valueElement, "chargeSpeeds", compProps.chargeSpeeds.Select(x => x.ToString()));
+
+                XmlUtility.PatchComp(xmlDoc, root, valueElement, targetDef.defName, typeof(CompProperties_Charges).ToString());
+            }
+
         }
     }
 }

@@ -14,6 +14,8 @@ namespace CeManualPatcher.Saveable
 
         protected TComp originalData;
 
+        public bool compIsNull = true;
+
         protected abstract TComp compProps { get; }
 
         public abstract bool CompChanged { get; }
@@ -30,10 +32,13 @@ namespace CeManualPatcher.Saveable
 
         public override void ExposeData()
         {
-            if (def != null && Scribe.mode == LoadSaveMode.Saving)
+            if (def != null && Scribe.mode == LoadSaveMode.Saving && def.GetCompProperties<TComp>() != null)
             {
+                compIsNull = false;
                 SaveData();
             }
+
+            Scribe_Values.Look(ref compIsNull, "compIsNull", true);
         }
         public override void Reset()
         {
@@ -51,13 +56,18 @@ namespace CeManualPatcher.Saveable
 
         protected override void Apply()
         {
-            if (def == null)
+            if (def == null || this.compIsNull)
             {
                 return;
             }
 
             def.comps.RemoveAll(x => x is TComp);
-            def.comps.Add(ReadData());
+
+            TComp newComp = ReadData();
+            if(newComp != null)
+            {
+                def.comps.Add(newComp);
+            }
         }
 
         protected override void InitOriginalData()

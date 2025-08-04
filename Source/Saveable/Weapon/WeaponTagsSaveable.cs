@@ -31,6 +31,8 @@ namespace CeManualPatcher.Saveable
 
         List<string> originalData = new List<string>();
 
+        public List<string> OriginalTags => originalData;
+
         public WeaponTagsSaveable() { }
         public WeaponTagsSaveable(ThingDef thingDef) : base(thingDef)
         {

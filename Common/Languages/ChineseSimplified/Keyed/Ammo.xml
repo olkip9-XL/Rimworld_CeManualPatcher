@@ -9,6 +9,31 @@
   <MP_DescExplosionGas>爆炸气体</MP_DescExplosionGas>
   <MP_DescStoppingPower>停止力</MP_DescStoppingPower>
 
+  <MP_ProjectilePropertiesCE.suppressionFactor>压制系数</MP_ProjectilePropertiesCE.suppressionFactor>
+  <MP_ProjectilePropertiesCE.stoppingPower>停止力</MP_ProjectilePropertiesCE.stoppingPower>
+  <MP_ProjectilePropertiesCE.speedGain>Speed gain</MP_ProjectilePropertiesCE.speedGain>
+  <MP_ProjectilePropertiesCE.fuelTicks>Fuel ticks</MP_ProjectilePropertiesCE.fuelTicks>
+  <MP_ProjectilePropertiesCE.pelletCount>弹丸数量</MP_ProjectilePropertiesCE.pelletCount>
+  <MP_ProjectilePropertiesCE.spreadMult>散步乘数</MP_ProjectilePropertiesCE.spreadMult>
+  <MP_ProjectilePropertiesCE.damageAdjacentTiles>邻近地块伤害</MP_ProjectilePropertiesCE.damageAdjacentTiles>
+  <MP_ProjectilePropertiesCE.dropsCasings>掉落弹壳</MP_ProjectilePropertiesCE.dropsCasings>
+  <MP_ProjectilePropertiesCE.gravityFactor>重力系数</MP_ProjectilePropertiesCE.gravityFactor>
+  <MP_ProjectilePropertiesCE.isInstant>即时</MP_ProjectilePropertiesCE.isInstant>
+  <MP_ProjectilePropertiesCE.damageFalloff>伤害衰减</MP_ProjectilePropertiesCE.damageFalloff>
+  <MP_ProjectilePropertiesCE.castShadow>Cast shadow</MP_ProjectilePropertiesCE.castShadow>
+  <MP_ProjectilePropertiesCE.airborneSuppressionFactor>空中压制系数</MP_ProjectilePropertiesCE.airborneSuppressionFactor>
+  <MP_ProjectilePropertiesCE.dangerFactor>危险系数</MP_ProjectilePropertiesCE.dangerFactor>
+  <MP_ProjectilePropertiesCE.detonateEffectsScaleOverride>Detonate effect scale overide</MP_ProjectilePropertiesCE.detonateEffectsScaleOverride>
+  <MP_ProjectilePropertiesCE.fuze_delay>引信延迟</MP_ProjectilePropertiesCE.fuze_delay>
+  <MP_ProjectilePropertiesCE.HP_penetration>HP穿透</MP_ProjectilePropertiesCE.HP_penetration>
+  <MP_ProjectilePropertiesCE.HP_penetration_ratio>HP穿透比例</MP_ProjectilePropertiesCE.HP_penetration_ratio>
+  <MP_ProjectilePropertiesCE.armingDelay>Arming delay</MP_ProjectilePropertiesCE.armingDelay>
+  <MP_ProjectilePropertiesCE.aimHeightOffset>瞄准高度偏移</MP_ProjectilePropertiesCE.aimHeightOffset>
+  <MP_ProjectilePropertiesCE.empShieldBreakChance>EMP护盾破坏率</MP_ProjectilePropertiesCE.empShieldBreakChance>
+  <MP_ProjectilePropertiesCE.collideDistance>碰撞距离</MP_ProjectilePropertiesCE.collideDistance>
+  <MP_ProjectilePropertiesCE.impactChance>Impact chance</MP_ProjectilePropertiesCE.impactChance>
+  
+  
   <!--Ammo Recipe-->
   <MP_Recipe>制作清单</MP_Recipe>
   <MP_RecipeParentClass>清单父类</MP_RecipeParentClass>

@@ -24,6 +24,9 @@ namespace CeManualPatcher.Misc
         public float stoppingPower = 0.5f;
         public float speed = 168f;
 
+        public int pelletCount = 1;
+        public bool isInstant = false;
+
         public string label;
 
         //Non explosive
@@ -184,6 +187,16 @@ namespace CeManualPatcher.Misc
                     XmlUtility.AddChildElement(doc, projectileElement, "stoppingPower", stoppingPower.ToString());
                 }
 
+                if (pelletCount != 1)
+                {
+                    XmlUtility.AddChildElement(doc, projectileElement, "pelletCount", pelletCount.ToString());
+                }
+
+                if (isInstant)
+                {
+                    XmlUtility.AddChildElement(doc, projectileElement, "isInstant", isInstant.ToString());
+                }
+
                 //comps
                 List<XmlElement> compsElements = new List<XmlElement>();
                 compsElements.Add(GetSecondaryExplosive());
@@ -283,6 +296,8 @@ namespace CeManualPatcher.Misc
             Scribe_Values.Look(ref damageDefString, "damageDef");
             Scribe_Values.Look(ref suppressionFactor, "supressFactor");
             Scribe_Values.Look(ref stoppingPower, "stoppingPower");
+            Scribe_Values.Look(ref pelletCount, "pelletCount", 1);
+            Scribe_Values.Look(ref isInstant, "isInstant", false);
             Scribe_Values.Look(ref speed, "speed");
             //Non explosive
             Scribe_Values.Look(ref armorPenetrationBlunt, "armorPenetrationBlunt");

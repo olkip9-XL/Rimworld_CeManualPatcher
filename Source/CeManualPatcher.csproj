@@ -51,12 +51,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CEPatcher.cs" />
     <Compile Include="DefOf\MP_AmmoSetDefOf.cs" />
     <Compile Include="DefOf\MP_ProjectileDefOf.cs" />
     <Compile Include="DefOf\MP_ThingCategoryDefOf.cs" />
     <Compile Include="Dialogs\Dialog_AddTool.cs" />
-    <Compile Include="Dialogs\Dialog_MakeCEPatch.cs" />
     <Compile Include="Dialogs\Dialog_SelectBodyParts.cs" />
     <Compile Include="Dialogs\Dialog_SetDefaultProjectile.cs" />
     <Compile Include="Extension\BodyDefExtension.cs" />
@@ -75,7 +73,6 @@
     <Compile Include="Manager\AmmoManager.cs" />
     <Compile Include="Manager\ApparelManager.cs" />
     <Compile Include="Manager\BodyDefManager.cs" />
-    <Compile Include="Manager\CEPatchManager.cs" />
     <Compile Include="Manager\CustomAmmoManager.cs" />
     <Compile Include="Manager\MP_DefManagerBase.cs" />
     <Compile Include="Manager\RaceManager.cs" />

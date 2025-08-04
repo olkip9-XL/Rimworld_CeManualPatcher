@@ -8,6 +8,30 @@
   <MP_DescSuppressionFactor>Suppression Factor</MP_DescSuppressionFactor>
   <MP_DescExplosionGas>Explosion Gas</MP_DescExplosionGas>
   <MP_DescStoppingPower>Stopping Power</MP_DescStoppingPower>
+  
+  <MP_ProjectilePropertiesCE.suppressionFactor>Suppression factor</MP_ProjectilePropertiesCE.suppressionFactor>
+  <MP_ProjectilePropertiesCE.stoppingPower>Stopping power</MP_ProjectilePropertiesCE.stoppingPower>
+  <MP_ProjectilePropertiesCE.speedGain>Speed gain</MP_ProjectilePropertiesCE.speedGain>
+  <MP_ProjectilePropertiesCE.fuelTicks>Fuel ticks</MP_ProjectilePropertiesCE.fuelTicks>
+  <MP_ProjectilePropertiesCE.pelletCount>Pellet count</MP_ProjectilePropertiesCE.pelletCount>
+  <MP_ProjectilePropertiesCE.spreadMult>Spread mult</MP_ProjectilePropertiesCE.spreadMult>
+  <MP_ProjectilePropertiesCE.damageAdjacentTiles>Damage adjacent tiles</MP_ProjectilePropertiesCE.damageAdjacentTiles>
+  <MP_ProjectilePropertiesCE.dropsCasings>Drops casings</MP_ProjectilePropertiesCE.dropsCasings>
+  <MP_ProjectilePropertiesCE.gravityFactor>Gravity factor</MP_ProjectilePropertiesCE.gravityFactor>
+  <MP_ProjectilePropertiesCE.isInstant>is instant</MP_ProjectilePropertiesCE.isInstant>
+  <MP_ProjectilePropertiesCE.damageFalloff>Damage falloff</MP_ProjectilePropertiesCE.damageFalloff>
+  <MP_ProjectilePropertiesCE.castShadow>Cast shadow</MP_ProjectilePropertiesCE.castShadow>
+  <MP_ProjectilePropertiesCE.airborneSuppressionFactor>Airborne suppression factor</MP_ProjectilePropertiesCE.airborneSuppressionFactor>
+  <MP_ProjectilePropertiesCE.dangerFactor>Danger factor</MP_ProjectilePropertiesCE.dangerFactor>
+  <MP_ProjectilePropertiesCE.detonateEffectsScaleOverride>Detonate effect scale overide</MP_ProjectilePropertiesCE.detonateEffectsScaleOverride>
+  <MP_ProjectilePropertiesCE.fuze_delay>Fuze delay</MP_ProjectilePropertiesCE.fuze_delay>
+  <MP_ProjectilePropertiesCE.HP_penetration>HP penetration</MP_ProjectilePropertiesCE.HP_penetration>
+  <MP_ProjectilePropertiesCE.HP_penetration_ratio>HP penetration ratio</MP_ProjectilePropertiesCE.HP_penetration_ratio>
+  <MP_ProjectilePropertiesCE.armingDelay>Arming delay</MP_ProjectilePropertiesCE.armingDelay>
+  <MP_ProjectilePropertiesCE.aimHeightOffset>Aim height offset</MP_ProjectilePropertiesCE.aimHeightOffset>
+  <MP_ProjectilePropertiesCE.empShieldBreakChance>EMP Shield Break Chance</MP_ProjectilePropertiesCE.empShieldBreakChance>
+  <MP_ProjectilePropertiesCE.collideDistance>Collide Distance</MP_ProjectilePropertiesCE.collideDistance>
+  <MP_ProjectilePropertiesCE.impactChance>Impact chance</MP_ProjectilePropertiesCE.impactChance>
 
   <!--Ammo Recipe-->
   <MP_Recipe>Recipe</MP_Recipe>
