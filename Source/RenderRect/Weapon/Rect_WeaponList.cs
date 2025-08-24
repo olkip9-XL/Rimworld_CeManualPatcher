@@ -14,6 +14,9 @@ namespace CeManualPatcher.RenderRect
 {
     internal class Rect_WeaponList : RenderRectBase
     {
+
+        WeaponManager manager => WeaponManager.instance;
+
         public ThingDef curWeaponDef
         {
             get
@@ -41,6 +44,7 @@ namespace CeManualPatcher.RenderRect
 
         private string keyWords;
         private ModContentPack curSourceMod = null;
+        private bool modifiedOnly = false;
 
         private Vector2 scrollPosition;
         private float innerHeight = 0;
@@ -61,6 +65,11 @@ namespace CeManualPatcher.RenderRect
                     list = list.Where(x => x.modContentPack == curSourceMod).ToList();
                 }
 
+                if(modifiedOnly)
+                {
+                    list = list.Where(x => manager.HasPatch(x)).ToList();
+                }   
+
                 return list;
             }
         }
@@ -72,7 +81,7 @@ namespace CeManualPatcher.RenderRect
             listingStandard.Begin(rect);
 
             //来源mod
-            listingStandard.ButtonX("MP_Source".Translate(), 150f, curSourceMod?.Name ?? "MP_All".Translate(), delegate
+            listingStandard.ButtonTextLine("MP_Source".Translate(), curSourceMod?.Name ?? "MP_All".Translate(), delegate
             {
                 List<ModContentPack> options = new List<ModContentPack>();
                 options.Add(null);
@@ -85,6 +94,8 @@ namespace CeManualPatcher.RenderRect
                         curSourceMod = mod;
                     });
             });
+
+            listingStandard.FieldLine("MP_ModifiedOnly".Translate(), ref modifiedOnly);
 
             listingStandard.SearchBar(ref keyWords);
 

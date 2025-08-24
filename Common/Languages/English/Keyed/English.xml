@@ -8,6 +8,7 @@
   <MP_CustomAmmo>Custom Ammo</MP_CustomAmmo>
   <MP_Body>Body</MP_Body>
   <MP_Race>Race</MP_Race>
+  <MP_Hediff>Hediff</MP_Hediff>
 
   <!--UI 武器-->
   <MP_Source>Source: </MP_Source>

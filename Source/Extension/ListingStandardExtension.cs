@@ -1,4 +1,5 @@
-﻿using CeManualPatcher.Misc;
+﻿using CeManualPatcher.Manager;
+using CeManualPatcher.Misc;
 using CombatExtended;
 using RimWorld;
 using RuntimeAudioClipLoader;
@@ -29,43 +30,6 @@ namespace CeManualPatcher.Extension
             listing.Gap(listing.verticalSpacing);
         }
 
-        public static void ButtonX(this Listing_Standard listing, string label, float buttonWidth, string buttonLabel, Action onClick, float indent = 0f, string tooltip = null)
-        {
-            Rect rect = listing.GetRect(Text.LineHeight);
-            rect.x += indent;
-            rect.width -= indent;
-            Rect buttonRect = rect.RightPartPixels(buttonWidth);
-
-            Widgets.Label(rect, label);
-            if (Widgets.ButtonText(buttonRect, buttonLabel))
-            {
-                onClick();
-            }
-            Widgets.DrawHighlightIfMouseover(rect);
-            if (!tooltip.NullOrEmpty())
-            {
-                TooltipHandler.TipRegion(rect, tooltip);
-            }
-            listing.Gap(listing.verticalSpacing);
-        }
-        public static void TextX(this Listing_Standard listing, string label, float inputWidth, ref string value, float indent = 0f, string tooltip = null)
-        {
-            Rect rect = listing.GetRect(Text.LineHeight);
-            rect.x += indent;
-            rect.width -= indent;
-
-            Rect textRect = rect.RightPartPixels(inputWidth);
-
-            value = Widgets.TextField(textRect, value);
-
-            Widgets.Label(rect, label);
-            Widgets.DrawHighlightIfMouseover(rect);
-            if (!tooltip.NullOrEmpty())
-            {
-                TooltipHandler.TipRegion(rect, tooltip);
-            }
-            listing.Gap(listing.verticalSpacing);
-        }
         public static void DamageRow(this Listing_Standard listing, string damageLabel, float buttonWidth, Action onClick, int damageAmount, float fieldWidth, Action<int> onChange, Action onDelete = null, float indent = 0f)
         {
             Rect rect = listing.GetRect(Text.LineHeight);
@@ -379,6 +343,23 @@ namespace CeManualPatcher.Extension
             Widgets.Label(rect3, "x");
 
             listing.Gap(listing.verticalSpacing);
+        }
+
+        internal static void ControlPannel<T>(this Listing_Standard listing, MP_DefManagerBase<T> manager) where T : Def
+        {
+            Rect rect = listing.GetRect(30f);
+
+            Rect resetAllRect = rect.LeftPartPixels(100f);
+            if (Widgets.ButtonText(resetAllRect, "MP_ResetAll".Translate()))
+            {
+                manager.ResetAll();
+            }
+
+            Rect exportCEPatchRect = rect.RightPartPixels(120f);
+            if (Widgets.ButtonText(exportCEPatchRect, "MP_Export".Translate()))
+            {
+                Mod_CEManualPatcher.settings.ExportPatch();
+            }
         }
     }
 }

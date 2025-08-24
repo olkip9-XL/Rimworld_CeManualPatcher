@@ -47,7 +47,6 @@ namespace CeManualPatcher.Manager
             }
             catch (Exception e)
             {
-                //Log.ErrorOnce($"[CeManualPatcher] ApparelManager apparel info error on thing {curApparelDef?.defName ?? "null"} form {curApparelDef?.modContentPack?.Name ?? "null"} : {e}", e.GetHashCode());
                 MP_Log.Error("ApparelManager apparel info error", e, curApparelDef);
             }
         }
@@ -66,14 +65,7 @@ namespace CeManualPatcher.Manager
         public override void ExposeData()
         {
             base.ExposeData();
-            //Scribe_Collections.Look(ref patches, "apparelPatches", LookMode.Deep);
-            //if (Scribe.mode == LoadSaveMode.LoadingVars)
-            //{
-            //    if (patches == null)
-            //    {
-            //        patches = new List<ApparelPatch>();
-            //    }
-            //}
+
             if (Scribe.mode == LoadSaveMode.LoadingVars)
             {
                 List<ApparelPatch> apparelPatches = new List<ApparelPatch>();
@@ -84,68 +76,6 @@ namespace CeManualPatcher.Manager
                 }
             }
         }
-
-        //public override void PostLoadInit()
-        //{
-        //    foreach (var patch in patches)
-        //    {
-        //        try
-        //        {
-        //            patch?.PostLoadInit();
-        //        }
-        //        catch (Exception e)
-        //        {
-        //            Log.Error($"[CeManualPatcher] PostLoadInit apparel patch {patch?.apparelDef?.defName} failed : {e}");
-        //        }
-        //    }
-        //}
-
-        //public override void Reset(ThingDef thing)
-        //{
-        //    ApparelPatch patch = patches.FirstOrDefault(x => x?.apparelDef == thing);
-        //    if (patch != null)
-        //    {
-        //        try
-        //        {
-        //            patch.Reset();
-        //        }
-        //        catch (Exception e)
-        //        {
-        //            Log.Error($"[CeManualPatcher] Resetting apparel patch {patch?.apparelDef?.defName} failed : {e}");
-        //        }
-        //        patches.Remove(patch);
-        //    }
-        //}
-
-        //public override void ResetAll()
-        //{
-        //    foreach (var patch in patches)
-        //    {
-        //        try
-        //        {
-        //            patch.Reset();
-        //        }
-        //        catch (Exception e)
-        //        {
-        //            Log.Error($"[CeManualPatcher] Resetting apparel patch {patch?.apparelDef?.defName} failed : {e}");
-        //        }
-        //    }
-        //    patches.Clear();
-        //}
-
-        //public void ExportAll()
-        //{
-        //    foreach (var patch in patches)
-        //    {
-        //        try
-        //        {
-        //            patch?.ExportPatch(MP_DefManagerBase.exportPath);
-        //        }
-        //        catch (Exception e)
-        //        {
-        //            Log.Error($"[CeManualPatcher] Exporting apparel patch {patch?.apparelDef?.defName} failed : {e}");
-        //        }
-        //    }
-        //}
+ 
     }
 }

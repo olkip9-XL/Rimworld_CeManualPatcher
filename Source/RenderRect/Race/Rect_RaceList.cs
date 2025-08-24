@@ -14,6 +14,8 @@ namespace CeManualPatcher.RenderRect
 {
     internal class Rect_RaceList : RenderRectBase
     {
+        private RaceManager manager => RaceManager.instance;
+
         private List<ModContentPack> activeModsInt = null;
         private List<ModContentPack> ActiveMods
         {
@@ -29,6 +31,7 @@ namespace CeManualPatcher.RenderRect
 
         private string keyWords;
         private ModContentPack curSourceMod = null;
+        private bool modifiedOnly = false;
 
         //scroll
         private Vector2 scrollPosition = Vector2.zero;
@@ -49,6 +52,11 @@ namespace CeManualPatcher.RenderRect
                 {
                     list = list.Where(x => x.modContentPack == curSourceMod).ToList();
                 }
+
+                if(modifiedOnly)
+                {
+                    list = list.Where(x => manager.HasPatch(x)).ToList();
+                }   
 
                 return list;
             }
@@ -73,6 +81,8 @@ namespace CeManualPatcher.RenderRect
                         curSourceMod = mod;
                     });
             });
+
+            listingStandard.FieldLine("MP_ModifiedOnly".Translate(), ref modifiedOnly);
 
             listingStandard.SearchBar(ref keyWords);
 

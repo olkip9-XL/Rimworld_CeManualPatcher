@@ -124,7 +124,6 @@ namespace CeManualPatcher.Misc
             return xmlDoc;
         }
 
-
         public static void AddChildElement(XmlDocument doc, XmlElement parent, string name, string value)
         {
             XmlElement element = doc.CreateElement(name);
@@ -633,6 +632,30 @@ namespace CeManualPatcher.Misc
             XmlElement matchElement = PatchRemove(doc, $"Defs/ThingDef[defName=\"{defName}\"]/comps/li[@Class=\"{compName}\"]", "match");
             root.AppendChild(PatchConditional(doc, $"Defs/ThingDef[defName=\"{defName}\"]/comps/li[@Class=\"{compName}\"]", matchElement, null, "li"));
             root.AppendChild(PatchAdd(doc, $"Defs/ThingDef[defName=\"{defName}\"]/comps", compValueElement));
+        }
+
+        public static XmlElement PatchReplaceValue(XmlDocument doc, string xpath, string valueName, string valueString, string opNodeName = "li")
+        {
+            XmlElement valueElement = doc.CreateElement(valueName);
+            valueElement.InnerText = valueString;
+            XmlElement matchElement = PatchReplace(doc, xpath+$"/{valueName}", valueElement, "match");
+
+            XmlElement valueElement2 = doc.CreateElement(valueName);
+            valueElement2.InnerText = valueString;
+            XmlElement nomatchElement = PatchAdd(doc, xpath, valueElement2, "nomatch");
+
+            return PatchConditional(doc, xpath+"/"+valueName, matchElement, nomatchElement, opNodeName);
+        }
+
+        public static XmlElement PatchSetAttribute(XmlDocument doc, string xpath, string attributeName, string attributeValue, string opNodeName = "li")
+        {
+            XmlElement liElement = doc.CreateElement(opNodeName);
+            liElement.SetAttribute("Class", "PatchOperationAttributeSet");
+
+            XmlUtility.AddChildElement(doc, liElement, "xpath", xpath);
+            XmlUtility.AddChildElement(doc, liElement, "attribute", attributeName);
+            XmlUtility.AddChildElement(doc, liElement, "value", attributeValue);
+            return liElement;
         }
 
     }

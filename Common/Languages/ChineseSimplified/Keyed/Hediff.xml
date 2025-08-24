@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LanguageData>
+
+  <MP_HediffDefCategory.All>全部</MP_HediffDefCategory.All>
+  <MP_HediffDefCategory.Bionic>植入物</MP_HediffDefCategory.Bionic>
+  <MP_HediffDefCategory.HasArmor>有护甲</MP_HediffDefCategory.HasArmor>
+  <MP_HediffDefCategory.HasTools>有武器</MP_HediffDefCategory.HasTools>
+
+  <MP_Hediff_Stage>阶段 {0} （{1}）</MP_Hediff_Stage>
+
+  <MP_Hediff_offsset>偏移量：</MP_Hediff_offsset>
+  <MP_Hediff_factor>乘数：</MP_Hediff_factor>
+
+  <MP_HediffDef.minSeverity>最小严重度</MP_HediffDef.minSeverity>
+  <MP_HediffDef.severityGainFactor>严重度增益系数</MP_HediffDef.severityGainFactor>
+
+  <!--verb giver-->
+  <MP_Hediff_VerbGiver>额外武器</MP_Hediff_VerbGiver>
+
+</LanguageData>

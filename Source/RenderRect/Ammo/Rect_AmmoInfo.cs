@@ -118,7 +118,7 @@ namespace CeManualPatcher.RenderRect
                     manager.GetAmmoPatch(ammo);
                 });
 
-                listing.ButtonX("MP_DescExplosionGas".Translate(), 100f, props.postExplosionGasType.GetLabel(), () =>
+                listing.ButtonTextLine("MP_DescExplosionGas".Translate(), props.postExplosionGasType.GetLabel(), () =>
                 {
                     List<GasType?> list = new List<GasType?>();
                     list.Add(null);
@@ -157,7 +157,7 @@ namespace CeManualPatcher.RenderRect
             //common
             foreach (var fieldName in ProjectileDefSaveable.propNames)
             {
-                if(fieldName == "armorPenetrationSharp" || 
+                if (fieldName == "armorPenetrationSharp" ||
                     fieldName == "armorPenetrationBlunt" ||
                     fieldName == "explosionRadius")
                 {
@@ -280,7 +280,7 @@ namespace CeManualPatcher.RenderRect
                         manager.GetAmmoPatch(ammo);
                     }, indent: 20f);
 
-                    listing.ButtonX("MP_DescExplosionGas".Translate().Colorize(fontColor), 100f, compProps.postExplosionGasType.GetLabel(), () =>
+                    listing.ButtonTextLine("MP_DescExplosionGas".Translate().Colorize(fontColor), compProps.postExplosionGasType.GetLabel(), () =>
                     {
                         List<GasType?> list = new List<GasType?>();
                         list.Add(null);

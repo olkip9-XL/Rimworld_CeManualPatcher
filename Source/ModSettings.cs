@@ -22,7 +22,8 @@ namespace CeManualPatcher
         Bionic,
         Apparel,
         Body,
-        Race
+        Race,
+        Hediff
     }
 
     public class ModSetting_CEManualPatcher : ModSettings
@@ -34,6 +35,7 @@ namespace CeManualPatcher
         internal ApparelManager apparelManager = new ApparelManager();
         internal BodyDefManager bodyDefManager = new BodyDefManager();
         internal RaceManager raceManager = new RaceManager();
+        internal HediffDefManager hediffDefManager = new HediffDefManager();
 
         internal CustomAmmoManager customAmmoManager = new CustomAmmoManager();
 
@@ -45,11 +47,11 @@ namespace CeManualPatcher
 
             Scribe_Deep.Look(ref ammoManager, "ammoManager");
             Scribe_Deep.Look(ref weaponManager, "weaponManager");
-            //Scribe_Deep.Look(ref patchManager, "patchManager");
             Scribe_Deep.Look(ref apparelManager, "apparelManager");
             Scribe_Deep.Look(ref customAmmoManager, "customAmmoManager");
             Scribe_Deep.Look(ref bodyDefManager, "bodyDefManager");
             Scribe_Deep.Look(ref raceManager, "raceManager");
+            Scribe_Deep.Look(ref hediffDefManager, "hediffDefManager");
 
             if (Scribe.mode == LoadSaveMode.LoadingVars)
             {
@@ -81,6 +83,10 @@ namespace CeManualPatcher
                 {
                     raceManager = new RaceManager();
                 }
+                if (hediffDefManager == null)
+                {
+                    hediffDefManager = new HediffDefManager();
+                }
             }
         }
 
@@ -95,6 +101,7 @@ namespace CeManualPatcher
             apparelManager?.PostLoadInit();
             bodyDefManager?.PostLoadInit();
             raceManager?.PostLoadInit();
+            hediffDefManager?.PostLoadInit();
         }
 
         public void ExportPatch()
@@ -108,6 +115,7 @@ namespace CeManualPatcher
             ammoManager?.ExportAll();
             raceManager?.ExportAll();
             weaponManager?.ExportAll();
+            hediffDefManager?.ExportAll();
 
             string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "CE Patches");
             Messages.Message($"MP_CEPatchExportMsg".Translate(path), MessageTypeDefOf.NeutralEvent);
@@ -179,6 +187,9 @@ namespace CeManualPatcher
                     break;
                 case MP_SettingTab.Race:
                     settings.raceManager.DoWindowContents(inRect);
+                    break;
+                case MP_SettingTab.Hediff:
+                    settings.hediffDefManager.DoWindowContents(inRect);
                     break;
             }
 

@@ -62,7 +62,7 @@ namespace CeManualPatcher.Dialogs
 
             WidgetsUtility.ScrollView(listingStandard.GetRect(inRect.height - listingStandard.CurHeight - 30f), ref scrollPosition, ref scrollHeight, (innerListing) =>
             {
-                innerListing.TextX("Label", 100f, ref toolReadyToAdd.label);
+                innerListing.FieldLine("Label", ref toolReadyToAdd.label);
 
                 Rect_WeaponInfo.DrawToolContent(innerListing, toolReadyToAdd, null);
 

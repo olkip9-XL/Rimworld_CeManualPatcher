@@ -20,6 +20,7 @@ namespace CeManualPatcher.RenderRect
 
         //filter
         private string keyWords;
+        private bool modifiedOnly = false;
 
         private BodyDefManager manager => BodyDefManager.instance;
         private BodyDef body
@@ -41,6 +42,11 @@ namespace CeManualPatcher.RenderRect
                     list = list.Where(x => x.label != null && x.label.ContainsIgnoreCase(keyWords)).ToList();
                 }
 
+                if (modifiedOnly)
+                {
+                    list = list.Where(x => manager.HasPatch(x)).ToList();
+                }
+
                 return list;
             }
         }
@@ -49,6 +55,8 @@ namespace CeManualPatcher.RenderRect
         {
             Listing_Standard listing = new Listing_Standard();
             listing.Begin(rect);
+
+            listing.FieldLine("MP_ModifiedOnly".Translate(), ref modifiedOnly);
 
             listing.SearchBar(ref keyWords);
 

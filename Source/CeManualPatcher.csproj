@@ -60,11 +60,13 @@
     <Compile Include="Extension\BodyDefExtension.cs" />
     <Compile Include="Extension\GasTypeExtensions.cs" />
     <Compile Include="Extension\ListingStandardExtension.cs" />
+    <Compile Include="Extension\List_StatModifierExtension.cs" />
     <Compile Include="Extension\MP_SettingTabExtension.cs" />
     <Compile Include="Extension\ProjectilePropertiesCeExtension.cs" />
     <Compile Include="Extension\RectExtension.cs" />
     <Compile Include="Extension\stringExtension.cs" />
     <Compile Include="Extension\ThingDefExtension.cs" />
+    <Compile Include="Manager\HediffDefManager.cs" />
     <Compile Include="Misc\CopyUtility.cs" />
     <Compile Include="Misc\CustomAmmoMisc\CustomAmmo.cs" />
     <Compile Include="Misc\CustomAmmoMisc\CustomAmmoRecipe.cs" />
@@ -87,6 +89,7 @@
     <Compile Include="Misc\MP_Texture.cs" />
     <Compile Include="Patch\ApparelPatch.cs" />
     <Compile Include="Patch\BodyDefPatch.cs" />
+    <Compile Include="Patch\HediffDefPatch.cs" />
     <Compile Include="Patch\PatchBase.cs" />
     <Compile Include="Misc\PropUtility.cs" />
     <Compile Include="Misc\WidgetsUtility.cs" />
@@ -103,6 +106,8 @@
     <Compile Include="RenderRect\Body\Rect_BodyList.cs" />
     <Compile Include="RenderRect\CustomAmmo\Rect_CustomAmmoInfo.cs" />
     <Compile Include="RenderRect\CustomAmmo\Rect_CustomAmmoList.cs" />
+    <Compile Include="RenderRect\Hediff\Rect_HediffInfo.cs" />
+    <Compile Include="RenderRect\Hediff\Rect_HediffList.cs" />
     <Compile Include="RenderRect\Race\Rect_RaceInfo.cs" />
     <Compile Include="RenderRect\Race\Rect_RaceList.cs" />
     <Compile Include="RenderRect\RenderRectUtility.cs" />
@@ -124,6 +129,8 @@
     <Compile Include="Saveable\Comps\CompChargeSaveable.cs" />
     <Compile Include="Saveable\Comps\CompFireModesSaveable.cs" />
     <Compile Include="Saveable\Comps\CompSaveableBase.cs" />
+    <Compile Include="Saveable\Hediff\HediffComp_VerbGiverSaveable.cs" />
+    <Compile Include="Saveable\Hediff\HediffDefSaveable.cs" />
     <Compile Include="Saveable\SaveableBase.cs" />
     <Compile Include="Saveable\Weapon\StatOffsetSaveable.cs" />
     <Compile Include="Saveable\Weapon\StatSaveable.cs" />

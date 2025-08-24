@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LanguageData>
+
+  <MP_HediffDefCategory.All>All</MP_HediffDefCategory.All>
+  <MP_HediffDefCategory.Bionic>Bionic</MP_HediffDefCategory.Bionic>
+  <MP_HediffDefCategory.HasArmor>Has armor</MP_HediffDefCategory.HasArmor>
+  <MP_HediffDefCategory.HasTools>Has tools</MP_HediffDefCategory.HasTools>
+
+  <MP_Hediff_Stage>Stage {0} （{1}）</MP_Hediff_Stage>
+
+  <MP_Hediff_offsset>Offset: </MP_Hediff_offsset>
+  <MP_Hediff_factor>Factor: </MP_Hediff_factor>
+
+  <MP_HediffDef.minSeverity>min severity</MP_HediffDef.minSeverity>
+  <MP_HediffDef.severityGainFactor>severity gain factor</MP_HediffDef.severityGainFactor>
+
+  <!--verb giver-->
+  <MP_Hediff_VerbGiver>Verb Giver</MP_Hediff_VerbGiver>
+
+</LanguageData>

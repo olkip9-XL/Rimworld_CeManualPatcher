@@ -135,7 +135,7 @@ namespace CeManualPatcher.RenderRect
             listingStandard.Begin(rect);
 
             //filter
-            listingStandard.ButtonX("MP_Category".Translate(), 150f, curCategory?.Label ?? "MP_All".Translate(), () =>
+            listingStandard.ButtonTextLine("MP_Category".Translate(), curCategory?.Label ?? "MP_All".Translate(), () =>
             {
                 List<FloatMenuOption> list = new List<FloatMenuOption>();
 

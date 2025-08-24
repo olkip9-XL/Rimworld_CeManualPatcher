@@ -67,13 +67,6 @@ namespace CeManualPatcher.RenderRect
                 DrawVebs(innerListing, curWeaponDef.Verbs.FirstOrDefault(), curWeaponDef.GetCompProperties<CompProperties_AmmoUser>(), preChange);
                 DrawTools(innerListing, curWeaponDef.tools, preChange);
 
-                //CompProperties_AmmoUser ammoUser = curWeaponDef.GetCompProperties<CompProperties_AmmoUser>();
-                //if (manager.HasWeaponPatch(curWeaponDef) && ammoUser == null)
-                //{
-                //    WeaponPatch patch = manager.GetWeaponPatch(curWeaponDef);
-                //    ammoUser = patch.ammoUser?.reservedData;
-                //}
-
                 DrawComp_Firemodes(innerListing);
 
                 DrawComp_Ammouser(innerListing);
@@ -196,19 +189,10 @@ namespace CeManualPatcher.RenderRect
 
             //sign
             Rect rect0 = rect.LeftPartPixels(3f);
-            if (manager.HasWeaponPatch(curWeaponDef))
+            if (manager.HasPatch(curWeaponDef))
             {
                 Widgets.DrawBoxSolid(rect0, MP_Color.SignGreen);
             }
-
-
-            //if (CEPatchManager.instance.HasPatcher(curWeaponDef))
-            //{
-            //    Widgets.DrawBoxSolid(rect0, Color.blue);
-            //}
-            //else if (manager.HasWeaponPatch(curWeaponDef))
-            //{
-            //}
 
             //icon
             Rect rect1 = rect0.RightAdjoin(30f, 0);
@@ -226,7 +210,6 @@ namespace CeManualPatcher.RenderRect
             if (Widgets.ButtonImage(rect3, MP_Texture.Reset))
             {
                 manager.Reset(curWeaponDef);
-                //patchManager.Reset(curWeaponDef);
             }
 
             //CE patch button
@@ -478,7 +461,7 @@ namespace CeManualPatcher.RenderRect
             }
 
             //verbClass
-            listing.ButtonX("MP_VerbClass".Translate(), 250f, props.verbClass.ToString(), () =>
+            listing.ButtonTextLine("MP_VerbClass".Translate(), props.verbClass.ToString(), () =>
             {
                 FloatMenuUtility.MakeMenu(MP_Options.VerbClasses,
                     (Type x) => x.ToString(),
@@ -489,7 +472,7 @@ namespace CeManualPatcher.RenderRect
                     });
             }, indent: 20f);
 
-            listing.ButtonX("MP_RecoilPattern".Translate(), 100f, props.recoilPattern.ToString(), () =>
+            listing.ButtonTextLine("MP_RecoilPattern".Translate(), props.recoilPattern.ToString(), () =>
             {
                 List<RecoilPattern> list = Enum.GetValues(typeof(RecoilPattern)).Cast<RecoilPattern>().ToList();
 
@@ -504,7 +487,7 @@ namespace CeManualPatcher.RenderRect
             }, indent: 20f);
 
             //if (props.defaultProjectile != null)
-            listing.ButtonX("MP_DefaultProjectile".Translate(), 250f, props.defaultProjectile?.LabelCap ?? "null", () =>
+            listing.ButtonTextLine("MP_DefaultProjectile".Translate(), props.defaultProjectile?.LabelCap ?? "null", () =>
             {
                 preChange?.Invoke();
                 Dialog_SetDefaultProjectile dialog = new Dialog_SetDefaultProjectile(props, ammoUser);
@@ -512,7 +495,7 @@ namespace CeManualPatcher.RenderRect
             }, indent: 20f);
 
             //Sounds
-            listing.ButtonX("MP_SoundCast".Translate(), 150f, props.soundCast?.defName ?? "null", () =>
+            listing.ButtonTextLine("MP_SoundCast".Translate(), props.soundCast?.defName ?? "null", () =>
             {
                 FloatMenuUtility.MakeMenu(MP_Options.soundCast,
                     (SoundDef x) => x.defName,
@@ -523,7 +506,7 @@ namespace CeManualPatcher.RenderRect
                     });
             }, indent: 20f);
 
-            listing.ButtonX("MP_SoundCastTail".Translate(), 150f, props.soundCastTail?.defName ?? "null", () =>
+            listing.ButtonTextLine("MP_SoundCastTail".Translate(), props.soundCastTail?.defName ?? "null", () =>
             {
                 FloatMenuUtility.MakeMenu(MP_Options.soundCastTail,
                     (SoundDef x) => x.defName,
@@ -609,7 +592,7 @@ namespace CeManualPatcher.RenderRect
             DrawCapacities(listing, tool, preChange);
             DrawSurpriseAttack(listing, tool, preChange);
             DrawExtraMeleeDamage(listing, tool, preChange);
-            listing.ButtonX("MP_LinkedBodyPartsGroup".Translate(), 100f, tool.linkedBodyPartsGroup?.label ?? "null", () =>
+            listing.ButtonTextLine("MP_LinkedBodyPartsGroup".Translate(), tool.linkedBodyPartsGroup?.label ?? "null", () =>
             {
                 FloatMenuUtility.MakeMenu(MP_Options.bodyPartGroupDefs,
                     (BodyPartGroupDef x) => $"{x.LabelCap} ({x.defName})",
@@ -815,7 +798,7 @@ namespace CeManualPatcher.RenderRect
             {
                 listing.DrawComp("MP_FireModes".Translate(), (innerListing) =>
                 {
-                    innerListing.ButtonX("MP_AiAimMode".Translate(), 100f, fireModes.aiAimMode.ToString(), () =>
+                    innerListing.ButtonTextLine("MP_AiAimMode".Translate(), fireModes.aiAimMode.ToString(), () =>
                     {
                         List<AimMode> list = Enum.GetValues(typeof(AimMode)).Cast<AimMode>().ToList();
                         FloatMenuUtility.MakeMenu(list,
@@ -918,7 +901,7 @@ namespace CeManualPatcher.RenderRect
 
             listing.DrawComp("MP_FireModes".Translate(), (innerListing) =>
             {
-                innerListing.ButtonX("MP_AiAimMode".Translate(), 100f, compProps.aiAimMode.ToString(), () =>
+                innerListing.ButtonTextLine("MP_AiAimMode".Translate(), compProps.aiAimMode.ToString(), () =>
                 {
                     List<AimMode> list = Enum.GetValues(typeof(AimMode)).Cast<AimMode>().ToList();
                     FloatMenuUtility.MakeMenu(list,

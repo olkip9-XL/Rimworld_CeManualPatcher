@@ -23,6 +23,7 @@ namespace CeManualPatcher.RenderRect
         //filter
         private string keyWords;
         private ModContentPack curMod;
+        private bool modifiedOnly = false;
 
         private List<ModContentPack> activeModsInt = null;
         private List<ModContentPack> ActiveMods
@@ -51,6 +52,11 @@ namespace CeManualPatcher.RenderRect
                 if (curMod != null)
                 {
                     list = list.Where(x => x.modContentPack == curMod).ToList();
+                }
+
+                if(modifiedOnly)
+                {
+                    list = list.Where(x => manager.HasPatch(x)).ToList();
                 }
 
                 return list;
@@ -85,6 +91,8 @@ namespace CeManualPatcher.RenderRect
                     });
 
             }, fieldWidth:150f);
+
+            listing.FieldLine("MP_ModifiedOnly".Translate(), ref modifiedOnly);
 
             listing.SearchBar(ref keyWords);
 

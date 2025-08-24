@@ -27,6 +27,8 @@ namespace CeManualPatcher.Extension
                     return "MP_Body".Translate();
                 case MP_SettingTab.Race:
                     return "MP_Race".Translate();
+                case MP_SettingTab.Hediff:
+                    return "MP_Hediff".Translate();
                 default:
                     return "Unknown";
             }

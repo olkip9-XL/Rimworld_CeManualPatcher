@@ -8,6 +8,7 @@
   <MP_CustomAmmo>自定义弹药</MP_CustomAmmo>
   <MP_Body>身体</MP_Body>
   <MP_Race>物种</MP_Race>
+  <MP_Hediff>Hediff</MP_Hediff>
 
   <!--UI-->
   <MP_Source>来源：</MP_Source>

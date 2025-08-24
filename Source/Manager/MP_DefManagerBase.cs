@@ -21,6 +21,10 @@ namespace CeManualPatcher.Manager
 
         protected abstract void NewPatch(ref PatchBase<T> patch, T def);
 
+        public virtual bool HasPatch(T def)
+        {
+            return patches.Any(x => x?.targetDef == def);
+        }
 
         public virtual PatchBase<T> GetPatch(T def)
         {
@@ -30,7 +34,8 @@ namespace CeManualPatcher.Manager
                 try
                 {
                     NewPatch(ref patch, def);
-                    this.patches.Add(patch);
+                    if (patch != null)
+                        this.patches.Add(patch);
                 }
                 catch (Exception e)
                 {

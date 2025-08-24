@@ -36,11 +36,6 @@ namespace CeManualPatcher.Manager
             return base.GetPatch(thingDef) as WeaponPatch;
         }
 
-        public bool HasWeaponPatch(ThingDef thingDef)
-        {
-            return patches.Any(x => x?.targetDef == thingDef);
-        }
-
         public override void DoWindowContents(Rect rect)
         {
             Rect rightRect = rect.RightPart(0.7f);
@@ -73,6 +68,7 @@ namespace CeManualPatcher.Manager
         {
             base.ExposeData();
 
+            //old save compatibility
             if (Scribe.mode == LoadSaveMode.LoadingVars)
             {
                 List<WeaponPatch> weaponPatches = new List<WeaponPatch>();
