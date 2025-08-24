@@ -18,6 +18,10 @@ namespace CeManualPatcher.Misc
         public string description;
         public string defNameBase;
 
+        //reference ammo
+        public List<string> referencedAmmoStr = new List<string>();
+        public List<string> referencedProjectileStr = new List<string>();
+
         //category
         public string categoryTexPath = "UI/Icons/ThingCategories/CaliberRifle";
         private string categoryDefString = "AmmoRifles";
@@ -193,6 +197,23 @@ namespace CeManualPatcher.Misc
                 {
                     XmlUtility.AddChildElement(xmlDoc, ammoTypesElement, ammoType.ammo.DefName, ammoType.projectile.DefName);
                 }
+
+                //referenced ammo
+                if (!referencedAmmoStr.NullOrEmpty())
+                {
+                    if (referencedAmmoStr.Count != referencedProjectileStr.Count)
+                    {
+                        MP_Log.Warning($"The referenced ammo count is not match referenced projectile in ammo set: {AmmoSetDefName}, {referencedAmmoStr.Count} to {referencedProjectileStr.Count}");
+                    }
+                    else
+                    {
+                        for (int i = 0; i < referencedAmmoStr.Count; i++)
+                        {
+                            XmlUtility.AddChildElement(xmlDoc, ammoTypesElement, referencedAmmoStr[i], referencedProjectileStr[i]);
+                        }
+                    }
+                }
+
             }
 
             void CreateAmmoBase()
@@ -257,6 +278,9 @@ namespace CeManualPatcher.Misc
             Scribe_Collections.Look(ref tradeTags, "tradeTags", LookMode.Value);
             Scribe_Collections.Look(ref ammoTypes, "ammoTypes", LookMode.Deep);
 
+            Scribe_Collections.Look(ref referencedAmmoStr, "referencedAmmo", LookMode.Value);
+            Scribe_Collections.Look(ref referencedProjectileStr, "referencedProjectile", LookMode.Value);
+
             if (Scribe.mode == LoadSaveMode.LoadingVars)
             {
                 if (tradeTags == null)
@@ -275,6 +299,16 @@ namespace CeManualPatcher.Misc
                         item.ammo.parentSet = this;
                         item.projectile.parentSet = this;
                     }
+                }
+
+                if (referencedAmmoStr == null)
+                {
+                    referencedAmmoStr = new List<string>();
+                }
+
+                if (referencedProjectileStr == null)
+                {
+                    referencedProjectileStr = new List<string>();
                 }
             }
 

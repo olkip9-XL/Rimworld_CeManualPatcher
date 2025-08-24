@@ -35,7 +35,6 @@ namespace CeManualPatcher.RenderRect
         };
 
         CustomAmmoManager manager => CustomAmmoManager.instance;
-
         CustomAmmoSet curAmmoSet => CustomAmmoManager.curAmmoSet;
 
         MP_Ammo copiedAmmo
@@ -71,6 +70,16 @@ namespace CeManualPatcher.RenderRect
                 catch (Exception e)
                 {
                     Log.Error($"[CeManualPatcher] Error while drawing BaseInfo : {e}");
+                }
+
+                //ammo reference
+                try
+                {
+                    DrawAmmoReference(innerListing);
+                }
+                catch (Exception e)
+                {
+                    Log.Error($"[CeManualPatcher] Error while drawing Ammo Reference : {e}");
                 }
 
                 foreach (var item in curAmmoSet.ammoTypes)
@@ -114,6 +123,41 @@ namespace CeManualPatcher.RenderRect
             if (Widgets.ButtonText(exportCEPatchRect, "MP_Export".Translate()))
             {
                 Mod_CEManualPatcher.settings.ExportPatch();
+            }
+        }
+
+        private void DrawAmmoReference(Listing_Standard listing)
+        {
+            listing.GapLine();
+
+            //head
+            listing.ButtonImageLine("<b>" + "MP_AmmoReference".Translate() + "</b>", TexButton.Add, () =>
+            {
+                Find.WindowStack.Add(new Dialog_AddAmmoReference(curAmmoSet.referencedAmmoStr, curAmmoSet.referencedProjectileStr));
+            });
+
+            //items
+            foreach (var item in curAmmoSet.referencedAmmoStr)
+            {
+                AmmoDef ammo = DefDatabase<AmmoDef>.GetNamedSilentFail(item);
+
+                Rect rect = listing.GetRect(Text.LineHeight);
+                rect.width -= 20f;
+                rect.x += 20f;
+
+                Rect iconRect = rect.LeftPartPixels(rect.height);
+                Texture2D icon = ammo.uiIcon ?? BaseContent.BadTex;
+                Widgets.DrawTextureFitted(iconRect, icon, 1f);
+
+                Rect labelRect = iconRect.RightAdjoin(rect.width - rect.height);
+                Widgets.Label(labelRect, ammo.LabelCap);
+
+                Rect buttonRect = rect.RightPartPixels(rect.height);
+                if (Widgets.ButtonImage(buttonRect, TexButton.Delete))
+                {
+                    curAmmoSet.referencedAmmoStr.Remove(item);
+                    break;
+                }
             }
         }
 
@@ -169,7 +213,6 @@ namespace CeManualPatcher.RenderRect
                     });
             }, indent: 20f);
 
-            //listing.FieldLine("iconPath", ref curAmmoSet.categoryTexPath);
             listing.ButtonImageLine("MP_CategoryIcon".Translate(), ContentFinder<Texture2D>.Get(curAmmoSet.categoryTexPath, false) ?? BaseContent.BadTex, () =>
             {
                 List<FloatMenuOption> options = new List<FloatMenuOption>();
@@ -439,7 +482,7 @@ namespace CeManualPatcher.RenderRect
             listing.FieldLine($"CE_DescSharpPenetration".Translate().Colorize(isExpo ? ColorGrey : Color.white), ref projectile.armorPenetrationSharp, indent: 20f);
 
             listing.FieldLine("MP_ProjectilePropertiesCE.pelletCount".Translate(), ref projectile.pelletCount, indent: 20f);
-            listing.FieldLine("MP_ProjectilePropertiesCE.isInstant".Translate(), ref projectile.isInstant, indent:20f);
+            listing.FieldLine("MP_ProjectilePropertiesCE.isInstant".Translate(), ref projectile.isInstant, indent: 20f);
 
             DrawSecondaryDamages(listing, projectile.secondaryDamages, isExpo);
 
@@ -745,7 +788,7 @@ namespace CeManualPatcher.RenderRect
                     {
                         recipe.parentRecipeClass = x;
                     });
-            }, indent:20f);
+            }, indent: 20f);
 
             //properties
             listing.FieldLine("MP_RecipeLabel".Translate(), ref recipe.label, indent: 20f);

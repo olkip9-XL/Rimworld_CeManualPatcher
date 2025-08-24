@@ -54,6 +54,7 @@
     <Compile Include="DefOf\MP_AmmoSetDefOf.cs" />
     <Compile Include="DefOf\MP_ProjectileDefOf.cs" />
     <Compile Include="DefOf\MP_ThingCategoryDefOf.cs" />
+    <Compile Include="Dialogs\Dialog_AddAmmoReference.cs" />
     <Compile Include="Dialogs\Dialog_AddTool.cs" />
     <Compile Include="Dialogs\Dialog_SelectBodyParts.cs" />
     <Compile Include="Dialogs\Dialog_SetDefaultProjectile.cs" />
