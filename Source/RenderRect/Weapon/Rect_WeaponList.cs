@@ -65,10 +65,10 @@ namespace CeManualPatcher.RenderRect
                     list = list.Where(x => x.modContentPack == curSourceMod).ToList();
                 }
 
-                if(modifiedOnly)
+                if (modifiedOnly)
                 {
                     list = list.Where(x => manager.HasPatch(x)).ToList();
-                }   
+                }
 
                 return list;
             }
@@ -113,7 +113,6 @@ namespace CeManualPatcher.RenderRect
                     }
                     catch (Exception e)
                     {
-                        //Log.ErrorOnce($"[CeManualPatcher] Error while drawing Weapon tab {item?.defName ?? "null"} from {item?.modContentPack.Name ?? "null"} : {e}", e.GetHashCode());
                         MP_Log.Error("Error while drawing Weapon tab", e, item);
                     }
 

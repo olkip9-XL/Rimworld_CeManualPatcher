@@ -21,9 +21,7 @@ namespace CeManualPatcher.RenderRect
             if (item == null)
                 return;
 
-
-            string description = $"{item.description}\n\n{"MP_Source".Translate()} {item.modContentPack.Name}";
-
+            string description = $"{item?.description}\n\n{"MP_Source".Translate()} {item.modContentPack?.Name}";
 
             bool changed = false;
             DrawItemRow(listing, item.uiIcon, item.label, description, () =>

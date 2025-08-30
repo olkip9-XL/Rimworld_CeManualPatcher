@@ -298,7 +298,7 @@ namespace CeManualPatcher.Misc
 
             //remove current verb
             WeaponPatch patch = WeaponManager.instance.GetWeaponPatch(thingDef);
-            Type originalVerbClass = patch.verbProperties?.OriginalData.verbClass;
+            Type originalVerbClass = patch.verbProperties?.OriginalVerbClass;
 
             if (originalVerbClass != null &&
                 (originalVerbClass != typeof(Verb_Shoot) &&

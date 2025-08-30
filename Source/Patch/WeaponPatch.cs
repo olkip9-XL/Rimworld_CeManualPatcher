@@ -46,8 +46,10 @@ namespace CeManualPatcher.Patch
             statBase = new StatSaveable(thingDef);
             statOffsets = new StatOffsetSaveable(thingDef);
 
-            if (!thingDef.Verbs.NullOrEmpty() && thingDef.Verbs[0] is VerbPropertiesCE)
-                verbProperties = new VerbPropertiesCESaveable(thingDef);
+            verbProperties = new VerbPropertiesCESaveable(thingDef);
+
+            //if (!thingDef.Verbs.NullOrEmpty() && thingDef.Verbs[0] is VerbPropertiesCE)
+            //    verbProperties = new VerbPropertiesCESaveable(thingDef);
 
             if (thingDef.tools != null)
             {
@@ -211,7 +213,7 @@ namespace CeManualPatcher.Patch
                     tool = new ToolCE();
                 }
 
-                PropUtility.CopyPropValue(item, tool);
+                PropUtility.CopyPropValue<ToolCE>(item as ToolCE, tool as ToolCE);
 
                 List<ToolCapacityDef> toolCapacityDefs = new List<ToolCapacityDef>(item.capacities);
                 tool.capacities = toolCapacityDefs;
@@ -223,14 +225,35 @@ namespace CeManualPatcher.Patch
 
         protected override void MakePatch(XmlDocument xmlDoc, XmlElement root)
         {
+            bool needCEPatch = verbProperties.NeedCEPatch;
+
             XmlUtility.Replace_Tools(xmlDoc, root, targetDef.defName, targetDef.tools);
-            XmlUtility.MakeGunCECompatible(xmlDoc, root, targetDef);
+            if (needCEPatch)
+            {
+                XmlUtility.MakeGunCECompatible(xmlDoc, root, targetDef);
+            }
             XmlUtility.Replace_StatOffsets(xmlDoc, root, targetDef.defName, targetDef.equippedStatOffsets);
 
             //comps
             root.AppendChild(XmlUtility.PatchAddCompRoot(xmlDoc, targetDef.defName));
 
+            if (!needCEPatch)
+            {
+                //todo: normal patch stat, verb, weapontags
+                XmlUtility.Replace_StatBase(xmlDoc, root, targetDef.defName, targetDef.statBases);
+
+                ReplaceVerb();
+
+                ReplaceWeaponTags();
+            }
+
             MakeCompPatch_Charges();
+
+            if (!needCEPatch)
+            {
+                MakeCompPatch_AmmoUser();
+                MakeCompPatch_FireModes();
+            }
 
             void MakeCompPatch_Charges()
             {
@@ -249,6 +272,141 @@ namespace CeManualPatcher.Patch
                 XmlUtility.PatchComp(xmlDoc, root, valueElement, targetDef.defName, typeof(CompProperties_Charges).ToString());
             }
 
+            void MakeCompPatch_AmmoUser()
+            {
+                if (!targetDef.HasComp<CompAmmoUser>())
+                {
+                    return;
+                }
+
+                CompProperties_AmmoUser defaultAmmoUser = new CompProperties_AmmoUser();
+                CompProperties_AmmoUser currentAmmoUser = targetDef.GetCompProperties<CompProperties_AmmoUser>();
+
+                if (currentAmmoUser.ammoSet == null)
+                    return;
+
+                XmlElement valueElement = xmlDoc.CreateElement("li");
+                valueElement.SetAttribute("Class", typeof(CompProperties_AmmoUser).ToString());
+
+                foreach (var propName in CompAmmoUserSaveable.propNames)
+                {
+                    if (PropUtility.GetPropValue(defaultAmmoUser, propName).ToString() != PropUtility.GetPropValue(currentAmmoUser, propName).ToString())
+                    {
+                        XmlUtility.AddChildElement(xmlDoc, valueElement, propName, PropUtility.GetPropValue(currentAmmoUser, propName).ToString());
+                    }
+                }
+
+                if (currentAmmoUser.ammoSet != defaultAmmoUser.ammoSet)
+                {
+                    XmlUtility.AddChildElement(xmlDoc, valueElement, "ammoSet", currentAmmoUser.ammoSet.defName);
+                }
+
+                XmlUtility.PatchComp(xmlDoc, root, valueElement, targetDef.defName, typeof(CompProperties_AmmoUser).ToString());
+            }
+
+            void MakeCompPatch_FireModes()
+            {
+                if (!targetDef.HasComp<CompFireModes>())
+                {
+                    return;
+                }
+
+                XmlElement valueElement = xmlDoc.CreateElement("li");
+                valueElement.SetAttribute("Class", typeof(CompProperties_FireModes).ToString());
+
+                CompProperties_FireModes defaultFireMode = new CompProperties_FireModes();
+                CompProperties_FireModes currentFireMode = targetDef.GetCompProperties<CompProperties_FireModes>();
+
+                foreach (var propName in CompFireModesSaveable.propNames)
+                {
+                    if (PropUtility.GetPropValue(defaultFireMode, propName).ToString() != PropUtility.GetPropValue(currentFireMode, propName).ToString())
+                    {
+                        XmlUtility.AddChildElement(xmlDoc, valueElement, propName, PropUtility.GetPropValue(currentFireMode, propName).ToString());
+                    }
+                }
+
+                if (currentFireMode.aiAimMode != defaultFireMode.aiAimMode)
+                {
+                    XmlUtility.AddChildElement(xmlDoc, valueElement, "aiAimMode", currentFireMode.aiAimMode.ToString());
+                }
+
+                XmlUtility.PatchComp(xmlDoc, root, valueElement, targetDef.defName, typeof(CompProperties_FireModes).ToString());
+            }
+
+            void ReplaceVerb()
+            {
+                if (targetDef.Verbs.NullOrEmpty() || !(targetDef.Verbs[0] is VerbPropertiesCE))
+                {
+                    return;
+                }
+
+                //add if not exist
+                XmlElement nomatchElement = XmlUtility.PatchAdd(xmlDoc, $"Defs/ThingDef[defName=\"{targetDef.defName}\"]", xmlDoc.CreateElement("verbs"), "nomatch");
+
+                root.AppendChild(XmlUtility.PatchConditional(xmlDoc, $"Defs/ThingDef[defName=\"{targetDef.defName}\"]/verbs", null, nomatchElement));
+
+                //replace
+                XmlElement valueElement = xmlDoc.CreateElement("verbs");
+                XmlElement valueElementLi = xmlDoc.CreateElement("li");
+                valueElementLi.SetAttribute("Class", typeof(VerbPropertiesCE).ToString());
+                valueElement.AppendChild(valueElementLi);
+
+                VerbPropertiesCE defaultVerb = new VerbPropertiesCE();
+                VerbPropertiesCE currentVerb = targetDef.Verbs[0] as VerbPropertiesCE;
+
+                XmlUtility.AddChildElement(xmlDoc, valueElementLi, "verbClass", currentVerb.verbClass.ToString());
+
+                foreach (var propName in VerbPropertiesCESaveable.propNames)
+                {
+                    if (PropUtility.GetPropValue(defaultVerb, propName).ToString() != PropUtility.GetPropValue(currentVerb, propName).ToString())
+                    {
+                        XmlUtility.AddChildElement(xmlDoc, valueElementLi, propName, PropUtility.GetPropValue(currentVerb, propName).ToString());
+                    }
+                }
+
+                if (currentVerb.recoilPattern != defaultVerb.recoilPattern)
+                {
+                    XmlUtility.AddChildElement(xmlDoc, valueElementLi, "recoilPattern", currentVerb.recoilPattern.ToString());
+                }
+
+                if (currentVerb.defaultProjectile != defaultVerb.defaultProjectile)
+                {
+                    XmlUtility.AddChildElement(xmlDoc, valueElementLi, "defaultProjectile", currentVerb.defaultProjectile.defName);
+                }
+
+                if (currentVerb.soundCast != defaultVerb.soundCast)
+                {
+                    XmlUtility.AddChildElement(xmlDoc, valueElementLi, "soundCast", currentVerb.soundCast.defName);
+                }
+
+                if (currentVerb.soundCastTail != defaultVerb.soundCastTail)
+                {
+                    XmlUtility.AddChildElement(xmlDoc, valueElementLi, "soundCastTail", currentVerb.soundCastTail.defName);
+                }
+
+                root.AppendChild(XmlUtility.PatchReplace(xmlDoc, $"Defs/ThingDef[defName=\"{targetDef.defName}\"]/verbs", valueElement));
+            }
+
+            void ReplaceWeaponTags()
+            {
+                if (targetDef.weaponTags.NullOrEmpty())
+                {
+                    return;
+                }
+
+                //add if not exist
+                XmlElement nomatchElement = XmlUtility.PatchAdd(xmlDoc, $"Defs/ThingDef[defName=\"{targetDef.defName}\"]", xmlDoc.CreateElement("weaponTags"), "nomatch");
+                root.AppendChild(XmlUtility.PatchConditional(xmlDoc, $"Defs/ThingDef[defName=\"{targetDef.defName}\"]/weaponTags", null, nomatchElement));
+
+                //replace
+                XmlElement valueElement = xmlDoc.CreateElement("weaponTags");
+                foreach (var tag in targetDef.weaponTags)
+                {
+                    XmlUtility.AddChildElement(xmlDoc, valueElement, "li", tag);
+                }
+
+                root.AppendChild(XmlUtility.PatchReplace(xmlDoc, $"Defs/ThingDef[defName=\"{targetDef.defName}\"]/weaponTags", valueElement));
+            }
         }
     }
 }

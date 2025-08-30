@@ -27,7 +27,7 @@
   <MP_Verbproperties.hasStandardCommand>Has Standard Command</MP_Verbproperties.hasStandardCommand>
   <MP_Verbproperties.warmupTime>Warmup Time</MP_Verbproperties.warmupTime>
   <MP_Verbproperties.range>Range</MP_Verbproperties.range>
-  <MP_Verbproperties.burstShotCount>Burst shot count</MP_Verbproperties.burstShotCount>
+  <MP_Verbproperties.burstShotCount>Burst shot count (Full auto)</MP_Verbproperties.burstShotCount>
   <MP_Verbproperties.ticksBetweenBurstShots>Fire rate</MP_Verbproperties.ticksBetweenBurstShots>
   <MP_Verbproperties.muzzleFlashScale>muzzle flash</MP_Verbproperties.muzzleFlashScale>
 
@@ -58,7 +58,7 @@
 
   <MP_AiAimMode>AI Aim Mode</MP_AiAimMode>
 
-  <MP_FireModes.aimedBurstShotCount>Aimed Burst Shot Count</MP_FireModes.aimedBurstShotCount>
+  <MP_FireModes.aimedBurstShotCount>Aimed Burst Shot Count (Burst fire)</MP_FireModes.aimedBurstShotCount>
   <MP_FireModes.aiUseBurstMode>AI Use Burst Mode</MP_FireModes.aiUseBurstMode>
   <MP_FireModes.noSingleShot>No Single Shot</MP_FireModes.noSingleShot>
   <MP_FireModes.noSnapshot>No Snapshot</MP_FireModes.noSnapshot>

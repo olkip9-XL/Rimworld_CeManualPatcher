@@ -85,12 +85,6 @@ namespace CeManualPatcher.Misc
                 throw new ArgumentNullException(nameof(target), "Target object cannot be null");
             }
 
-            //Type type = typeof(T);
-            //if (type != target.GetType())
-            //{
-            //    throw new ArgumentException($"Source ({type.ToString()}) and target ({target.GetType().ToString()}) must be of the same type");
-            //}
-
             //Check type
             Type type = typeof(T);
             if (type.IsValueType) { 

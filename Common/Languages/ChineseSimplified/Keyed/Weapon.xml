@@ -27,7 +27,7 @@
   <MP_Verbproperties.hasStandardCommand>有标准指令</MP_Verbproperties.hasStandardCommand>
   <MP_Verbproperties.warmupTime>瞄准时间</MP_Verbproperties.warmupTime>
   <MP_Verbproperties.range>射程</MP_Verbproperties.range>
-  <MP_Verbproperties.burstShotCount>爆发性射击计数</MP_Verbproperties.burstShotCount>
+  <MP_Verbproperties.burstShotCount>爆发性射击计数（全自动）</MP_Verbproperties.burstShotCount>
   <MP_Verbproperties.ticksBetweenBurstShots>战斗射速</MP_Verbproperties.ticksBetweenBurstShots>
   <MP_Verbproperties.muzzleFlashScale>膛口焰</MP_Verbproperties.muzzleFlashScale>
 
@@ -60,7 +60,7 @@
 
   <MP_AiAimMode>AI瞄准模式</MP_AiAimMode>
 
-  <MP_FireModes.aimedBurstShotCount>瞄准时连发射击数量</MP_FireModes.aimedBurstShotCount>
+  <MP_FireModes.aimedBurstShotCount>瞄准时连发射击数量（短点射）</MP_FireModes.aimedBurstShotCount>
   <MP_FireModes.aiUseBurstMode>AI使用连发模式</MP_FireModes.aiUseBurstMode>
   <MP_FireModes.noSingleShot>无单发射击</MP_FireModes.noSingleShot>
   <MP_FireModes.noSnapshot>无快速射击</MP_FireModes.noSnapshot>

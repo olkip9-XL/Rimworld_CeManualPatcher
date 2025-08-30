@@ -80,21 +80,27 @@ namespace CeManualPatcher.Saveable
 
         public VerbProperties OriginalData => originalData;
 
+        public bool NeedCEPatch=> !(originalData is VerbPropertiesCE);
+        public Type OriginalVerbClass => originalData?.verbClass;
+
         internal VerbPropertiesCESaveable() { }
-        internal VerbPropertiesCESaveable(ThingDef thingDef, bool forceAdd = false)
+        internal VerbPropertiesCESaveable(ThingDef thingDef)
         {
             this.def = thingDef;
-            if (verbPropertiesCE == null && !forceAdd)
-            {
-                return;
-            }
 
             InitOriginalData();
         }
         protected override void Apply()
         {
-            if (verbPropertiesCE == null)
+            if (def.Verbs.NullOrEmpty())
+            {
                 return;
+            }
+
+            if (!(def.Verbs[0] is VerbPropertiesCE))
+            {
+                def.Verbs[0] = PropUtility.ConvertToChild<VerbProperties, VerbPropertiesCE>(def.Verbs[0]);
+            }
 
             //apply
             foreach (var item in propNames)
@@ -150,13 +156,12 @@ namespace CeManualPatcher.Saveable
         }
         public override void Reset()
         {
-            if (verbPropertiesCE == null)
+            if (def.Verbs.NullOrEmpty())
+            {
                 return;
+            }
 
             def.Verbs[0] = this.originalData;
-
-
-            InitOriginalData();
         }
         public override void PostLoadInit(ThingDef thingDef)
         {
@@ -164,7 +169,6 @@ namespace CeManualPatcher.Saveable
 
             if (thingDef.Verbs.NullOrEmpty())
                 return;
-
 
             InitOriginalData();
 
@@ -177,16 +181,16 @@ namespace CeManualPatcher.Saveable
         }
         protected override void InitOriginalData()
         {
-            if(def == null || def.Verbs.NullOrEmpty())
+            if (def == null || def.Verbs.NullOrEmpty())
             {
+                originalData = null;
                 return;
             }
 
             if (verbPropertiesCE != null)
             {
                 this.originalData = new VerbPropertiesCE();
-
-                PropUtility.CopyPropValue(def.Verbs[0], this.originalData);
+                PropUtility.CopyPropValue<VerbPropertiesCE>(def.Verbs[0] as VerbPropertiesCE, this.originalData as VerbPropertiesCE);
             }
             else
             {
