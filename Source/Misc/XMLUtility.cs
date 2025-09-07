@@ -43,12 +43,12 @@ namespace CeManualPatcher.Misc
             {
                 writer.WriteLine("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
                 writer.WriteLine("<loadFolders>");
-                writer.WriteLine("    <v1.5>");
+                writer.WriteLine("    <v1.6>");
                 writer.WriteLine("        <li>/</li>");
                 writer.WriteLine("        <li IfModActive=\"CETeam.CombatExtended\">CE</li>");
                 writer.WriteLine("        <li IfModActive=\"CETeam.CombatExtended_copy\">CE</li>");
                 writer.WriteLine("        <li IfModActive=\"CETeam.CombatExtended_Steam\">CE</li>");
-                writer.WriteLine("    </v1.5>");
+                writer.WriteLine("    </v1.6>");
                 writer.WriteLine("</loadFolders>");
             }
         }

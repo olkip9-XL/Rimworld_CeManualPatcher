@@ -102,24 +102,26 @@ namespace CeManualPatcher.Patch
                     string xpath_offset = $"{xpathBase}/li[{i + 1}]/statOffsets";
 
                     root.AppendChild(XmlUtility.PatchConditional(xmlDoc, xpath_offset, null, XmlUtility.PatchAdd(xmlDoc, $"{xpathBase}/li[{i + 1}]", xmlDoc.CreateElement("statOffsets"), "nomatch")));
+                    
+                    XmlElement valueElement_offset = xmlDoc.CreateElement("statOffsets");
 
-                    if (curStage.statOffset_ArmorRating_Blunt != originalStage.statOffset_ArmorRating_Blunt)
-                        root.AppendChild(XmlUtility.PatchReplaceValue(xmlDoc, xpath_offset, "ArmorRating_Blunt", curStage.statOffset_ArmorRating_Blunt.ToString("F4")));
-                    if (curStage.statOffset_ArmorRating_Sharp != originalStage.statOffset_ArmorRating_Sharp)
-                        root.AppendChild(XmlUtility.PatchReplaceValue(xmlDoc, xpath_offset, "ArmorRating_Sharp", curStage.statOffset_ArmorRating_Sharp.ToString("F4")));
-                    if (curStage.statOffset_ArmorRating_Heat != originalStage.statOffset_ArmorRating_Heat)
-                        root.AppendChild(XmlUtility.PatchReplaceValue(xmlDoc, xpath_offset, "ArmorRating_Heat", curStage.statOffset_ArmorRating_Heat.ToString("F4")));
+                    foreach(var offset in curStage.offsetDic)
+                    {
+                        XmlUtility.AddChildElement(xmlDoc, valueElement_offset, offset.Key.defName, offset.Value.ToString("F4"));
+                    }
+
+                    root.AppendChild(XmlUtility.PatchReplace(xmlDoc, xpath_offset, valueElement_offset));
 
                     //factor
                     string xpath_factor = $"{xpathBase}/li[{i + 1}]/statFactors";
                     root.AppendChild(XmlUtility.PatchConditional(xmlDoc, xpath_factor, null, XmlUtility.PatchAdd(xmlDoc, $"{xpathBase}/li[{i + 1}]", xmlDoc.CreateElement("statFactors"), "nomatch")));
 
-                    if (curStage.statFactor_ArmorRating_Blunt != originalStage.statFactor_ArmorRating_Blunt)
-                        root.AppendChild(XmlUtility.PatchReplaceValue(xmlDoc, xpath_factor, "ArmorRating_Blunt", curStage.statFactor_ArmorRating_Blunt.ToString("F4")));
-                    if (curStage.statFactor_ArmorRating_Sharp != originalStage.statFactor_ArmorRating_Sharp)
-                        root.AppendChild(XmlUtility.PatchReplaceValue(xmlDoc, xpath_factor, "ArmorRating_Sharp", curStage.statFactor_ArmorRating_Sharp.ToString("F4")));
-                    if (curStage.statFactor_ArmorRating_Heat != originalStage.statFactor_ArmorRating_Heat)
-                        root.AppendChild(XmlUtility.PatchReplaceValue(xmlDoc, xpath_factor, "ArmorRating_Heat", curStage.statFactor_ArmorRating_Heat.ToString("F4")));
+                    XmlElement valueElement_factor = xmlDoc.CreateElement("statFactors");
+                    foreach (var factor in curStage.factorDic)
+                    {
+                        XmlUtility.AddChildElement(xmlDoc, valueElement_factor, factor.Key.defName, factor.Value.ToString("F4"));
+                    }
+                    root.AppendChild(XmlUtility.PatchReplace(xmlDoc, xpath_factor, valueElement_factor));
                 }
 
 

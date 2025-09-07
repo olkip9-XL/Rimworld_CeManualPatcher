@@ -71,7 +71,7 @@ namespace CeManualPatcher.RenderRect
         //Stats dic
         private static Dictionary<int, StatCategoryDef> statCategoryDic = new Dictionary<int, StatCategoryDef>();
 
-        public static void DrawStats(Listing_Standard listing, ref List<StatModifier> stats, ReadOnlyCollection<StatDef> avaliableStats, Action preChange, string headLabel = null)
+        public static void DrawStats(Listing_Standard listing, ref List<StatModifier> stats, ReadOnlyCollection<StatDef> avaliableStats, Action preChange, string headLabel = null, bool heavyTitle = true)
         {
             listing.GapLine(6f);
 
@@ -81,7 +81,10 @@ namespace CeManualPatcher.RenderRect
             if (headLabel.NullOrEmpty())
                 headLabel = "MP_StatBase".Translate();
 
-            Widgets.Label(headRect, "<b>" + headLabel + "</b>");
+            if(heavyTitle)
+                Widgets.Label(headRect, "<b>" + headLabel + "</b>");
+            else
+                Widgets.Label(headRect, headLabel);
 
             int hashCode = stats?.GetHashCode() ?? 0;
             if (!statCategoryDic.ContainsKey(hashCode))

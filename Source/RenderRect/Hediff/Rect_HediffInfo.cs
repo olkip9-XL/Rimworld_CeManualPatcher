@@ -26,6 +26,8 @@ namespace CeManualPatcher.RenderRect
 
         Action preChange = null;
 
+
+
         public Rect_HediffInfo()
         {
             this.preChange = () =>
@@ -119,7 +121,7 @@ namespace CeManualPatcher.RenderRect
                     continue;
                 }
 
-                listing.LabelLine("MP_Hediff_Stage".Translate(i+1, stage.label));
+                listing.LabelLine("MP_Hediff_Stage".Translate(i + 1, stage.label));
 
                 foreach (var propName in propNames)
                 {
@@ -129,55 +131,16 @@ namespace CeManualPatcher.RenderRect
                     }, indent: 20f);
                 }
 
-                DrawArmorData(StatDefOf.ArmorRating_Blunt, stage);
-                DrawArmorData(StatDefOf.ArmorRating_Sharp, stage);
-                DrawArmorData(StatDefOf.ArmorRating_Heat, stage);
-            }
+                //draw stats head
+                listing.Indent(20f);
+                listing.ColumnWidth -= 20f;
 
-            void DrawArmorData(StatDef stat, HediffStage stage)
-            {
-                string statName = stat.label.CapitalizeFirst();
+                RenderRectUtility.DrawStats(listing, ref stage.statOffsets, DefDatabase<StatDef>.AllDefs.ToList().AsReadOnly(), preChange, "MP_StatOffSet".Translate(), false);
+                RenderRectUtility.DrawStats(listing, ref stage.statFactors, DefDatabase<StatDef>.AllDefs.ToList().AsReadOnly(), preChange, "MP_StatFactor".Translate(), false);
 
-                float offsets = stage.statOffsets.GetStatOffsetFromList(stat);
-                float factors = stage.statFactors.GetStatFactorFromList(stat);
+                listing.Outdent(20f);
+                listing.ColumnWidth += 20f;
 
-                Rect rect = listing.GetRect(Text.LineHeight);
-                rect.width -= 20f;
-                rect.x += 20f;
-
-                //label
-                Rect labelRect = rect.LeftPartPixels(100f);
-                Widgets.Label(labelRect, statName);
-
-                Rect inputRect1 = rect.RightPartPixels(100f);
-                WidgetsUtility.TextFieldOnChange(inputRect1, ref offsets, (newValue) =>
-                {
-                    if (stage.statOffsets == null)
-                    {
-                        stage.statOffsets = new List<StatModifier>();
-                    }
-                    preChange?.Invoke();
-                    stage.statOffsets.SetStatValueToList(stat, newValue);
-                });
-
-                Rect labelRect1 = inputRect1.LeftAdjoin(Text.CalcSize("MP_Hediff_offsset".Translate()).x);
-                Widgets.Label(labelRect1, "MP_Hediff_offsset".Translate());
-
-                Rect inputRect2 = labelRect1.LeftAdjoin(100f);
-                WidgetsUtility.TextFieldOnChange(inputRect2, ref factors, (newValue) =>
-                {
-                    if (stage.statFactors == null)
-                    {
-                        stage.statFactors = new List<StatModifier>();
-                    }
-                    preChange?.Invoke();
-                    stage.statFactors.SetStatValueToList(stat, newValue);
-                });
-
-                Rect labelRect2 = inputRect2.LeftAdjoin(Text.CalcSize("MP_Hediff_factor".Translate()).x);
-                Widgets.Label(labelRect2, "MP_Hediff_factor".Translate());
-
-                listing.Gap(listing.verticalSpacing);
             }
         }
 

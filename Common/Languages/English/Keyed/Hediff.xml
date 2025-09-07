@@ -14,6 +14,9 @@
   <MP_HediffDef.minSeverity>min severity</MP_HediffDef.minSeverity>
   <MP_HediffDef.severityGainFactor>severity gain factor</MP_HediffDef.severityGainFactor>
 
+  <MP_StatOffSet>Stat Offset</MP_StatOffSet>
+  <MP_StatFactor>Stat Factor</MP_StatFactor>
+  
   <!--verb giver-->
   <MP_Hediff_VerbGiver>Verb Giver</MP_Hediff_VerbGiver>
 

@@ -116,6 +116,8 @@ namespace CeManualPatcher.Manager
 
         public virtual void ExportAll()
         {
+            patches.RemoveWhere(x => x == null || x.targetDef == null);
+
             foreach (var patch in patches)
             {
                 try

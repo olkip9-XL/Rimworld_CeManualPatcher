@@ -15,16 +15,11 @@ namespace CeManualPatcher.Saveable
         public float minSeverity = 0f;
         public float severityGainFactor = 1f;
 
-        //statOffset
-        public float statOffset_ArmorRating_Sharp = 0f;
-        public float statOffset_ArmorRating_Blunt = 0f;
-        public float statOffset_ArmorRating_Heat = 0f;
+        public Dictionary<StatDef, float> offsetDic = new Dictionary<StatDef, float>();
+        private Dictionary<string, float> offsetDicString = new Dictionary<string, float>();
 
-        //statFactors
-        public float statFactor_ArmorRating_Sharp = 1f;
-        public float statFactor_ArmorRating_Blunt = 1f;
-        public float statFactor_ArmorRating_Heat = 1f;
-
+        public Dictionary<StatDef, float> factorDic = new Dictionary<StatDef, float>();
+        private Dictionary<string, float> factorDicString = new Dictionary<string, float>();
 
         public HediffStageExpo() { }
         public HediffStageExpo(HediffStage stage)
@@ -32,113 +27,225 @@ namespace CeManualPatcher.Saveable
             this.minSeverity = stage.minSeverity;
             this.severityGainFactor = stage.severityGainFactor;
 
-            this.statOffset_ArmorRating_Sharp = stage.statOffsets.GetStatOffsetFromList(StatDefOf.ArmorRating_Sharp);
-            this.statOffset_ArmorRating_Blunt = stage.statOffsets.GetStatOffsetFromList(StatDefOf.ArmorRating_Blunt);
-            this.statOffset_ArmorRating_Heat = stage.statOffsets.GetStatOffsetFromList(StatDefOf.ArmorRating_Heat);
+            if (stage.statOffsets != null)
+                foreach (var statOffset in stage.statOffsets)
+                {
+                    offsetDic[statOffset.stat] = statOffset.value;
+                }
 
-            this.statFactor_ArmorRating_Sharp = stage.statFactors.GetStatFactorFromList(StatDefOf.ArmorRating_Sharp);
-            this.statFactor_ArmorRating_Blunt = stage.statFactors.GetStatFactorFromList(StatDefOf.ArmorRating_Blunt);
-            this.statFactor_ArmorRating_Heat = stage.statFactors.GetStatFactorFromList(StatDefOf.ArmorRating_Heat);
+            if (stage.statFactors != null)
+                foreach (var statFactor in stage.statFactors)
+                {
+                    factorDic[statFactor.stat] = statFactor.value;
+                }
         }
 
         public void Apply(HediffStage stage)
         {
+            //construct dic for save
+            if (offsetDicString.Any())
+            {
+                offsetDic.Clear();
+                foreach (var kvp in offsetDicString)
+                {
+                    StatDef statDef = DefDatabase<StatDef>.GetNamedSilentFail(kvp.Key);
+                    if (statDef != null)
+                    {
+                        offsetDic[statDef] = kvp.Value;
+                    }
+                }
+                offsetDicString.Clear();
+            }
+
+            if(factorDicString.Any())
+            {
+                factorDic.Clear();
+                foreach (var kvp in factorDicString)
+                {
+                    StatDef statDef = DefDatabase<StatDef>.GetNamedSilentFail(kvp.Key);
+                    if (statDef != null)
+                    {
+                        factorDic[statDef] = kvp.Value;
+                    }
+                }
+                factorDicString.Clear();
+            }
+
             stage.minSeverity = minSeverity;
             stage.severityGainFactor = severityGainFactor;
 
             //statOffset
-            if(stage.statOffsets == null)
+            if (stage.statOffsets == null)
             {
                 stage.statOffsets = new List<StatModifier>();
             }
-            foreach (var statOffset in stage.statOffsets)
+            stage.statOffsets.Clear();
+
+            foreach (var kvp in offsetDic)
             {
-                if (statOffset.stat == StatDefOf.ArmorRating_Sharp)
+                if (stage.statOffsets.Any(x => x.stat == kvp.Key))
                 {
-                    statOffset.value = statOffset_ArmorRating_Sharp;
+                    stage.statOffsets.First(x => x.stat == kvp.Key).value = kvp.Value;
                 }
-                else if (statOffset.stat == StatDefOf.ArmorRating_Blunt)
+                else
                 {
-                    statOffset.value = statOffset_ArmorRating_Blunt;
+                    stage.statOffsets.Add(new StatModifier() { stat = kvp.Key, value = kvp.Value });
                 }
-                else if (statOffset.stat == StatDefOf.ArmorRating_Heat)
-                {
-                    statOffset.value = statOffset_ArmorRating_Heat;
-                }
-            }
-            if (!stage.statOffsets.Any(x => x.stat == StatDefOf.ArmorRating_Sharp))
-            {
-                stage.statOffsets.Add(new StatModifier() { stat = StatDefOf.ArmorRating_Sharp, value = statOffset_ArmorRating_Sharp });
-            }
-            if (!stage.statOffsets.Any(x => x.stat == StatDefOf.ArmorRating_Blunt))
-            {
-                stage.statOffsets.Add(new StatModifier() { stat = StatDefOf.ArmorRating_Blunt, value = statOffset_ArmorRating_Blunt });
-            }
-            if (!stage.statOffsets.Any(x => x.stat == StatDefOf.ArmorRating_Heat))
-            {
-                stage.statOffsets.Add(new StatModifier() { stat = StatDefOf.ArmorRating_Heat, value = statOffset_ArmorRating_Heat });
             }
 
             //statFactor
-            if(stage.statFactors == null)
+            if (stage.statFactors == null)
             {
                 stage.statFactors = new List<StatModifier>();
             }
-            foreach (var statFactor in stage.statFactors)
+            stage.statFactors.Clear();
+
+            foreach (var kvp in factorDic)
             {
-                if (statFactor.stat == StatDefOf.ArmorRating_Sharp)
+                if (stage.statFactors.Any(x => x.stat == kvp.Key))
                 {
-                    statFactor.value = statFactor_ArmorRating_Sharp;
+                    stage.statFactors.First(x => x.stat == kvp.Key).value = kvp.Value;
                 }
-                else if (statFactor.stat == StatDefOf.ArmorRating_Blunt)
+                else
                 {
-                    statFactor.value = statFactor_ArmorRating_Blunt;
+                    stage.statFactors.Add(new StatModifier() { stat = kvp.Key, value = kvp.Value });
                 }
-                else if (statFactor.stat == StatDefOf.ArmorRating_Heat)
-                {
-                    statFactor.value = statFactor_ArmorRating_Heat;
-                }
-            }
-            if (!stage.statFactors.Any(x => x.stat == StatDefOf.ArmorRating_Sharp))
-            {
-                stage.statFactors.Add(new StatModifier() { stat = StatDefOf.ArmorRating_Sharp, value = statFactor_ArmorRating_Sharp });
-            }
-            if (!stage.statFactors.Any(x => x.stat == StatDefOf.ArmorRating_Blunt))
-            {
-                stage.statFactors.Add(new StatModifier() { stat = StatDefOf.ArmorRating_Blunt, value = statFactor_ArmorRating_Blunt });
-            }
-            if (!stage.statFactors.Any(x => x.stat == StatDefOf.ArmorRating_Heat))
-            {
-                stage.statFactors.Add(new StatModifier() { stat = StatDefOf.ArmorRating_Heat, value = statFactor_ArmorRating_Heat });
             }
 
         }
         public void ExposeData()
         {
+            if (Scribe.mode == LoadSaveMode.Saving)
+            {
+                offsetDicString.Clear();
+                foreach (var kvp in offsetDic)
+                {
+                    offsetDicString[kvp.Key.defName] = kvp.Value;
+                }
+
+                factorDicString.Clear();
+                foreach (var kvp in factorDic)
+                {
+                    factorDicString[kvp.Key.defName] = kvp.Value;
+                }
+            }
+
             Scribe_Values.Look(ref minSeverity, "minSeverity", 0f);
             Scribe_Values.Look(ref severityGainFactor, "severityGainFactor", 1f);
 
-            Scribe_Values.Look(ref statOffset_ArmorRating_Sharp, "statOffset_ArmorRating_Sharp", 0f);
-            Scribe_Values.Look(ref statOffset_ArmorRating_Blunt, "statOffset_ArmorRating_Blunt", 0f);
-            Scribe_Values.Look(ref statOffset_ArmorRating_Heat, "statOffset_ArmorRating_Heat", 0f);
+            Scribe_Collections.Look(ref offsetDicString, "offsetDic", LookMode.Value, LookMode.Value);
+            Scribe_Collections.Look(ref factorDicString, "factorDic", LookMode.Value, LookMode.Value);
 
-            Scribe_Values.Look(ref statFactor_ArmorRating_Sharp, "statFactor_ArmorRating_Sharp", 1f);
-            Scribe_Values.Look(ref statFactor_ArmorRating_Blunt, "statFactor_ArmorRating_Blunt", 1f);
-            Scribe_Values.Look(ref statFactor_ArmorRating_Heat, "statFactor_ArmorRating_Heat", 1f);
+            //old save
+            if (Scribe.mode == LoadSaveMode.LoadingVars)
+            {
+                if (offsetDicString == null)
+                {
+                    offsetDicString = new Dictionary<string, float>();
+                }
+                if (factorDicString == null)
+                {
+                    factorDicString = new Dictionary<string, float>();
+                }
+
+                float val = 0f;
+                Scribe_Values.Look(ref val, "statOffset_ArmorRating_Sharp", 0f);
+                if (val != 0f)
+                {
+                    offsetDicString["ArmorRating_Sharp"] = val;
+                }
+
+                val = 0f;
+                Scribe_Values.Look(ref val, "statOffset_ArmorRating_Blunt", 0f);
+                if (val != 0f)
+                {
+                    offsetDicString["ArmorRating_Blunt"] = val;
+                }
+
+                val = 0f;
+                Scribe_Values.Look(ref val, "statOffset_ArmorRating_Heat", 0f);
+                if (val != 0f)
+                {
+                    offsetDicString["ArmorRating_Heat"] = val;
+                }
+
+                val = 1f;
+                Scribe_Values.Look(ref val, "statFactor_ArmorRating_Sharp", 1f);
+                if (val != 1f)
+                {
+                    offsetDicString["ArmorRating_Sharp"] = val;
+                }
+
+                val = 1f;
+                Scribe_Values.Look(ref val, "statFactor_ArmorRating_Blunt", 1f);
+                if (val != 1f)
+                {
+                    offsetDicString["ArmorRating_Blunt"] = val;
+                }
+
+                val = 1f;
+                Scribe_Values.Look(ref val, "statFactor_ArmorRating_Heat", 1f);
+                if (val != 1f)
+                {
+                    offsetDicString["ArmorRating_Heat"] = val;
+                }
+            }
+
         }
 
         public override bool Equals(object obj)
         {
-            if(obj is HediffStageExpo other)
+            //if(obj is HediffStageExpo other)
+            //{
+            //    return minSeverity == other.minSeverity &&
+            //           severityGainFactor == other.severityGainFactor &&
+            //           statOffset_ArmorRating_Sharp == other.statOffset_ArmorRating_Sharp &&
+            //           statOffset_ArmorRating_Blunt == other.statOffset_ArmorRating_Blunt &&
+            //           statOffset_ArmorRating_Heat == other.statOffset_ArmorRating_Heat &&
+            //           statFactor_ArmorRating_Sharp == other.statFactor_ArmorRating_Sharp &&
+            //           statFactor_ArmorRating_Blunt == other.statFactor_ArmorRating_Blunt &&
+            //           statFactor_ArmorRating_Heat == other.statFactor_ArmorRating_Heat;
+            //}
+            if (obj is HediffStageExpo other)
             {
-                return minSeverity == other.minSeverity &&
-                       severityGainFactor == other.severityGainFactor &&
-                       statOffset_ArmorRating_Sharp == other.statOffset_ArmorRating_Sharp &&
-                       statOffset_ArmorRating_Blunt == other.statOffset_ArmorRating_Blunt &&
-                       statOffset_ArmorRating_Heat == other.statOffset_ArmorRating_Heat &&
-                       statFactor_ArmorRating_Sharp == other.statFactor_ArmorRating_Sharp &&
-                       statFactor_ArmorRating_Blunt == other.statFactor_ArmorRating_Blunt &&
-                       statFactor_ArmorRating_Heat == other.statFactor_ArmorRating_Heat;
+                if (minSeverity != other.minSeverity ||
+                   severityGainFactor != other.severityGainFactor)
+                {
+                    return false;
+                }
+
+
+                foreach (var kvp in offsetDic)
+                {
+                    if (!other.offsetDic.TryGetValue(kvp.Key, out float otherValue) || kvp.Value != otherValue)
+                    {
+                        return false;
+                    }
+                }
+                foreach (var kvp in other.offsetDic)
+                {
+                    if (!offsetDic.TryGetValue(kvp.Key, out float thisValue) || kvp.Value != thisValue)
+                    {
+                        return false;
+                    }
+                }
+
+                foreach (var kvp in factorDic)
+                {
+                    if (!other.factorDic.TryGetValue(kvp.Key, out float otherValue) || kvp.Value != otherValue)
+                    {
+                        return false;
+                    }
+                }
+                foreach (var kvp in other.factorDic)
+                {
+                    if (!factorDic.TryGetValue(kvp.Key, out float thisValue) || kvp.Value != thisValue)
+                    {
+                        return false;
+                    }
+                }
+
+                return true;
             }
 
             return false;
@@ -156,15 +263,15 @@ namespace CeManualPatcher.Saveable
         {
             get
             {
-                if(stages_original.NullOrEmpty())
+                if (stages_original.NullOrEmpty())
                     return false;
 
-                for(int i = 0; i < stages_original.Count; i++)
+                for (int i = 0; i < stages_original.Count; i++)
                 {
                     HediffStageExpo current = new HediffStageExpo(def.stages[i]);
                     HediffStageExpo original = stages_original[i];
 
-                    if(!current.Equals(original))
+                    if (!current.Equals(original))
                     {
                         return true;
                     }

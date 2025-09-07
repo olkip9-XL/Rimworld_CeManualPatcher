@@ -211,9 +211,12 @@ namespace CeManualPatcher.Patch
                 if (item is ToolCE)
                 {
                     tool = new ToolCE();
+                    PropUtility.CopyPropValue<ToolCE>(item as ToolCE, tool as ToolCE);
                 }
-
-                PropUtility.CopyPropValue<ToolCE>(item as ToolCE, tool as ToolCE);
+                else
+                {
+                    PropUtility.CopyPropValue<Tool>(item, tool);
+                }
 
                 List<ToolCapacityDef> toolCapacityDefs = new List<ToolCapacityDef>(item.capacities);
                 tool.capacities = toolCapacityDefs;
