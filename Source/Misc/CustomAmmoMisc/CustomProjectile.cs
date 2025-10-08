@@ -1,8 +1,10 @@
-﻿using CombatExtended;
+﻿using CeManualPatcher.Saveable;
+using CombatExtended;
 using RimWorld;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
@@ -23,9 +25,40 @@ namespace CeManualPatcher.Misc
         public float suppressionFactor = 1f;
         public float stoppingPower = 0.5f;
         public float speed = 168f;
-
+        public float speedGain = 0f;
+        public int fuelTicks = 0;
         public int pelletCount = 1;
+        public float spreadMult = 1f;
+        public bool damageAdjacentTiles = false;
+        public bool dropsCasings = false;
+        public float gravityFactor = 1f;
         public bool isInstant = false;
+        public bool damageFalloff = true;
+        public bool castShadow = true;
+        public float airborneSuppressionFactor = 1f;
+        public float dangerFactor = 1f;
+        public float detonateEffectsScaleOverride = -1;
+
+        //Bunker Buster fields
+        public int fuze_delay = 2;
+        public bool HP_penetration = false;
+        public float HP_penetration_ratio = 1f;
+
+        public int armingDelay = 0;
+        public float aimHeightOffset = 0f;
+        public float empShieldBreakChance = 1f;
+        public float collideDistance = 1f;
+        public float impactChance = 1f;
+
+        //1.6 add
+        public float recoilMultiplier = 1f;
+        public float recoilOffset = 0f;
+        public float warmupMultiplier = 1f;
+        public float warmupOffset = 0f;
+        public float effectiveRangeMultiplier = 1f;
+        public float effectiveRangeOffset = 0f;
+        public float muzzleFlashMultiplier = 1f;
+        public float muzzleFlashOffset = 0f;
 
         public string label;
 
@@ -172,29 +205,67 @@ namespace CeManualPatcher.Misc
                     }
                 }
 
-                if (Math.Abs(speed - parentSet.baseSpeed) > float.Epsilon)
+                //common properties
+                ProjectilePropertiesCE defaultProjectile = new ProjectilePropertiesCE();
+                foreach (var fieldName in ProjectileDefSaveable.propNames)
                 {
-                    XmlUtility.AddChildElement(doc, projectileElement, "speed", speed.ToString());
-                }
+                    if (fieldName == "armorPenetrationSharp" ||
+                   fieldName == "armorPenetrationBlunt" ||
+                   fieldName == "explosionRadius")
+                    {
+                        continue; // Handled above
+                    }
 
-                if (Math.Abs(suppressionFactor - 1f) > float.Epsilon)
-                {
-                    XmlUtility.AddChildElement(doc, projectileElement, "suppressionFactor", suppressionFactor.ToString());
-                }
+                    FieldInfo defaultValueInfo = typeof(ProjectilePropertiesCE).GetField(fieldName);
+                    FieldInfo thisValueInfo = typeof(CustomProjectile).GetField(fieldName);
 
-                if (Math.Abs(stoppingPower - 0.5f) > float.Epsilon)
-                {
-                    XmlUtility.AddChildElement(doc, projectileElement, "stoppingPower", stoppingPower.ToString());
-                }
+                    if (defaultValueInfo == null || thisValueInfo == null)
+                    {
+                        Log.Error($"[CeManualPatcher] Field {fieldName} not found.");
+                        continue;
+                    }
 
-                if (pelletCount != 1)
-                {
-                    XmlUtility.AddChildElement(doc, projectileElement, "pelletCount", pelletCount.ToString());
-                }
+                    Type defaultType = defaultValueInfo.FieldType;
+                    Type thisType = thisValueInfo.FieldType;
 
-                if (isInstant)
-                {
-                    XmlUtility.AddChildElement(doc, projectileElement, "isInstant", isInstant.ToString());
+                    if (defaultType != thisType)
+                    {
+                        Log.Error($"[CeManualPatcher] Field {fieldName} type mismatch. Default: {defaultType}, This: {thisType}");
+                        continue;
+                    }
+
+                    if (defaultType == typeof(float))
+                    {
+                        float defaultValue = (float)defaultValueInfo.GetValue(defaultProjectile);
+                        float thisValue = (float)thisValueInfo.GetValue(this);
+                        if (Math.Abs(defaultValue - thisValue) > float.Epsilon)
+                        {
+                            XmlUtility.AddChildElement(doc, projectileElement, fieldName, thisValue.ToString());
+                        }
+                    }
+                    else if (defaultType == typeof(int))
+                    {
+                        int defaultValue = (int)defaultValueInfo.GetValue(defaultProjectile);
+                        int thisValue = (int)thisValueInfo.GetValue(this);
+                        if (defaultValue != thisValue)
+                        {
+                            XmlUtility.AddChildElement(doc, projectileElement, fieldName, thisValue.ToString());
+                        }
+                    }
+                    else if (defaultType == typeof(bool))
+                    {
+                        bool defaultValue = (bool)defaultValueInfo.GetValue(defaultProjectile);
+                        bool thisValue = (bool)thisValueInfo.GetValue(this);
+                        if (defaultValue != thisValue)
+                        {
+                            XmlUtility.AddChildElement(doc, projectileElement, fieldName, thisValue.ToString());
+                        }
+                    }
+                    else
+                    {
+                        Log.Error($"[CeManualPatcher] Field {fieldName} has unsupported type {defaultType}.");
+                    }
+
                 }
 
                 //comps
@@ -299,6 +370,38 @@ namespace CeManualPatcher.Misc
             Scribe_Values.Look(ref pelletCount, "pelletCount", 1);
             Scribe_Values.Look(ref isInstant, "isInstant", false);
             Scribe_Values.Look(ref speed, "speed");
+
+            Scribe_Values.Look(ref speedGain, "speedGain", 0f);
+            Scribe_Values.Look(ref fuelTicks, "fuelTicks", 0);
+            Scribe_Values.Look(ref spreadMult, "spreadMult", 1f);
+            Scribe_Values.Look(ref damageAdjacentTiles, "damageAdjacentTiles", false);
+            Scribe_Values.Look(ref dropsCasings, "dropsCasings", false);
+            Scribe_Values.Look(ref gravityFactor, "gravityFactor", 1f);
+            Scribe_Values.Look(ref damageFalloff, "damageFalloff", true);
+            Scribe_Values.Look(ref castShadow, "castShadow", true);
+            Scribe_Values.Look(ref airborneSuppressionFactor, "airborneSuppressionFactor", 1f);
+            Scribe_Values.Look(ref dangerFactor, "dangerFactor", 1f);
+            Scribe_Values.Look(ref detonateEffectsScaleOverride, "detonateEffectsScaleOverride", -1);
+
+            Scribe_Values.Look(ref fuze_delay, "fuze_delay", 2);
+            Scribe_Values.Look(ref HP_penetration, "HP_penetration", false);
+            Scribe_Values.Look(ref HP_penetration_ratio, "HP_penetration_ratio", 1f);
+            Scribe_Values.Look(ref armingDelay, "armingDelay", 0);
+            Scribe_Values.Look(ref aimHeightOffset, "aimHeightOffset", 0f);
+            Scribe_Values.Look(ref empShieldBreakChance, "empShieldBreakChance", 1f);
+            Scribe_Values.Look(ref collideDistance, "collideDistance", 1f);
+            Scribe_Values.Look(ref impactChance, "impactChance", 1f);
+
+            //1.6 add
+            Scribe_Values.Look(ref recoilMultiplier, "recoilMultiplier", 1f);
+            Scribe_Values.Look(ref recoilOffset, "recoilOffset", 0f);
+            Scribe_Values.Look(ref warmupMultiplier, "warmupMultiplier", 1f);
+            Scribe_Values.Look(ref warmupOffset, "warmupOffset", 0f);
+            Scribe_Values.Look(ref effectiveRangeMultiplier, "effectiveRangeMultiplier", 1f);
+            Scribe_Values.Look(ref effectiveRangeOffset, "effectiveRangeOffset", 0f);
+            Scribe_Values.Look(ref muzzleFlashMultiplier, "muzzleFlashMultiplier", 1f);
+            Scribe_Values.Look(ref muzzleFlashOffset, "muzzleFlashOffset", 0f);
+
             //Non explosive
             Scribe_Values.Look(ref armorPenetrationBlunt, "armorPenetrationBlunt");
             Scribe_Values.Look(ref armorPenetrationSharp, "armorPenetrationSharp");
@@ -358,8 +461,6 @@ namespace CeManualPatcher.Misc
         }
 
     }
-
-
 
     internal class MP_SecondaryDamage_Save : IExposable
     {

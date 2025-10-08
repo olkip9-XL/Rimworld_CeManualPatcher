@@ -48,19 +48,9 @@ namespace CeManualPatcher.Patch
 
             verbProperties = new VerbPropertiesCESaveable(thingDef);
 
-            //if (!thingDef.Verbs.NullOrEmpty() && thingDef.Verbs[0] is VerbPropertiesCE)
-            //    verbProperties = new VerbPropertiesCESaveable(thingDef);
-
             if (thingDef.tools != null)
             {
-                InitTools();
-                foreach (var tool in thingDef.tools)
-                {
-                    if (tool is ToolCE)
-                    {
-                        tools.Add(new ToolCESaveable(thingDef, tool.id));
-                    }
-                }
+                ToolCESaveable.InitTools(this.targetDef, ref originalTools);
             }
 
             //comps
@@ -85,14 +75,8 @@ namespace CeManualPatcher.Patch
             if (Scribe.mode == LoadSaveMode.Saving && targetDef != null)
             {
                 this.tools.Clear();
-                if (targetDef.tools != null)
-                    foreach (var item in targetDef.tools)
-                    {
-                        this.tools.Add(new ToolCESaveable(targetDef, item.id));
-                    }
+                ToolCESaveable.InitSaveTools(targetDef, ref this.tools);
             }
-
-            //Scribe_Values.Look(ref weaponDefString, "defName");
 
             Scribe_Deep.Look(ref statBase, "statBase");
             Scribe_Deep.Look(ref statOffsets, "statOffsets");
@@ -150,7 +134,7 @@ namespace CeManualPatcher.Patch
             if (targetDef.tools != null)
             {
                 targetDef.tools = this.originalTools;
-                InitTools();
+                ToolCESaveable.InitTools(targetDef, ref this.originalTools);
             }
 
             //comps
@@ -174,7 +158,7 @@ namespace CeManualPatcher.Patch
 
                 if (targetDef.tools != null)
                 {
-                    InitTools();
+                    ToolCESaveable.InitTools(targetDef, ref this.originalTools);
                     targetDef.tools.Clear();
                     this.tools.ForEach(x => x?.PostLoadInit(targetDef));
                 }
@@ -197,34 +181,6 @@ namespace CeManualPatcher.Patch
                 }
             }
         }
-        private void InitTools()
-        {
-            if (targetDef == null || targetDef.tools == null)
-            {
-                return;
-            }
-            originalTools = new List<Tool>();
-            foreach (var item in targetDef.tools)
-            {
-                Tool tool = new Tool();
-
-                if (item is ToolCE)
-                {
-                    tool = new ToolCE();
-                    PropUtility.CopyPropValue<ToolCE>(item as ToolCE, tool as ToolCE);
-                }
-                else
-                {
-                    PropUtility.CopyPropValue<Tool>(item, tool);
-                }
-
-                List<ToolCapacityDef> toolCapacityDefs = new List<ToolCapacityDef>(item.capacities);
-                tool.capacities = toolCapacityDefs;
-
-                this.originalTools.Add(tool);
-            }
-        }
-
 
         protected override void MakePatch(XmlDocument xmlDoc, XmlElement root)
         {

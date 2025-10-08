@@ -33,7 +33,15 @@
   <MP_ProjectilePropertiesCE.collideDistance>碰撞距离</MP_ProjectilePropertiesCE.collideDistance>
   <MP_ProjectilePropertiesCE.impactChance>Impact chance</MP_ProjectilePropertiesCE.impactChance>
   
-  
+  <MP_ProjectilePropertiesCE.recoilMultiplier>后坐力乘数</MP_ProjectilePropertiesCE.recoilMultiplier>
+  <MP_ProjectilePropertiesCE.recoilOffset>后坐力偏移</MP_ProjectilePropertiesCE.recoilOffset>
+  <MP_ProjectilePropertiesCE.warmupMultiplier>瞄准时间乘数</MP_ProjectilePropertiesCE.warmupMultiplier>
+  <MP_ProjectilePropertiesCE.warmupOffset>瞄准时间偏移</MP_ProjectilePropertiesCE.warmupOffset>
+  <MP_ProjectilePropertiesCE.effectiveRangeMultiplier>有效射程乘数</MP_ProjectilePropertiesCE.effectiveRangeMultiplier>
+  <MP_ProjectilePropertiesCE.effectiveRangeOffset>有效射程偏移</MP_ProjectilePropertiesCE.effectiveRangeOffset>
+  <MP_ProjectilePropertiesCE.muzzleFlashMultiplier>枪口焰乘数</MP_ProjectilePropertiesCE.muzzleFlashMultiplier>
+  <MP_ProjectilePropertiesCE.muzzleFlashOffset>枪口焰偏移</MP_ProjectilePropertiesCE.muzzleFlashOffset>
+
   <!--Ammo Recipe-->
   <MP_Recipe>制作清单</MP_Recipe>
   <MP_RecipeParentClass>清单父类</MP_RecipeParentClass>

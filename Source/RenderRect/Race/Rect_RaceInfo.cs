@@ -55,6 +55,8 @@ namespace CeManualPatcher.RenderRect
                 //RenderRectUtility.DrawStats(innerListing, ref curDef.equippedStatOffsets, MP_Options.statDefs_WeaponOffset, preChange, headLabel: "MP_StatOffset".Translate());
 
                 DrawComp_ArmorDurability(innerListing);
+
+                Rect_WeaponInfo.DrawTools(innerListing, curDef.tools, preChange);
             });
 
             //control pannel
@@ -101,32 +103,52 @@ namespace CeManualPatcher.RenderRect
                 manager.Reset(curDef);
             }
 
-            ////copy button
-            //Rect rect4 = rect3.LeftAdjoin(rect.height);
-            //if (Widgets.ButtonImage(rect5, TexButton.Copy))
-            //{
-            //    copiedThing = curWeaponDef;
-            //    //Messages.Message("MP_Copy".Translate(curWeaponDef.defName), MessageTypeDefOf.NeutralEvent);
-            //}
-
-            ////paste button
-            //Rect rect5 = rect4.LeftAdjoin(rect.height);
-
-            //if (copiedThing != null)
-            //{
-            //    if (Widgets.ButtonImage(rect6, TexButton.Paste))
-            //    {
-            //        if (copiedThing != null)
-            //        {
-            //            manager.GetPatch(curWeaponDef);
-            //            CopyThing();
-            //            copiedThing = null;
-            //            //Messages.Message("MP_Paste".Translate(curWeaponDef.defName), MessageTypeDefOf.NeutralEvent);
-            //        }
-            //    }
-            //}
+            //CE patch button
+            Rect rect4 = rect3.LeftAdjoin(rect.height);
+            if (!IsCECompactied(curDef))
+            {
+                if (Widgets.ButtonImage(rect4, MP_Texture.CEPatch))
+                {
+                    preChange?.Invoke();
+                    PatchRace();
+                }
+            }
 
             listing.Gap(listing.verticalSpacing);
+        }
+
+        private bool IsCECompactied(ThingDef thingDef)
+        {
+            if (thingDef.tools != null && thingDef.tools.Any(x => !(x is ToolCE)))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        private void PatchRace()
+        {
+            ThingDef thingDef = curDef;
+
+            //tools
+            if (thingDef.tools != null)
+            {
+                List<Tool> tools = new List<Tool>();
+                foreach (var tool in thingDef.tools)
+                {
+                    ToolCE toolCopy = PropUtility.ConvertToChild<Tool, ToolCE>(tool);
+
+                    List<ToolCapacityDef> capacities = new List<ToolCapacityDef>();
+                    capacities.AddRange(tool.capacities);
+                    toolCopy.capacities = capacities;
+
+                    tools.Add(toolCopy);
+                }
+
+                thingDef.tools = tools;
+            }
+
         }
 
         private void DrawControlPannel(Listing_Standard listing)

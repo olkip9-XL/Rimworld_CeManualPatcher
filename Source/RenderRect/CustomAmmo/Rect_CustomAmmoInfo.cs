@@ -2,6 +2,7 @@
 using CeManualPatcher.Extension;
 using CeManualPatcher.Manager;
 using CeManualPatcher.Misc;
+using CeManualPatcher.Saveable;
 using CombatExtended;
 using RimWorld;
 using System;
@@ -481,8 +482,17 @@ namespace CeManualPatcher.RenderRect
             listing.FieldLine($"CE_DescBluntPenetration".Translate().Colorize(isExpo ? ColorGrey : Color.white), ref projectile.armorPenetrationBlunt, indent: 20f);
             listing.FieldLine($"CE_DescSharpPenetration".Translate().Colorize(isExpo ? ColorGrey : Color.white), ref projectile.armorPenetrationSharp, indent: 20f);
 
-            listing.FieldLine("MP_ProjectilePropertiesCE.pelletCount".Translate(), ref projectile.pelletCount, indent: 20f);
-            listing.FieldLine("MP_ProjectilePropertiesCE.isInstant".Translate(), ref projectile.isInstant, indent: 20f);
+            foreach (var fieldName in ProjectileDefSaveable.propNames)
+            {
+                if (fieldName == "armorPenetrationSharp" ||
+                   fieldName == "armorPenetrationBlunt" ||
+                   fieldName == "explosionRadius")
+                {
+                    continue; // Handled above
+                }
+
+                listing.FieldLineReflexion($"MP_ProjectilePropertiesCE.{fieldName}".Translate(), fieldName, projectile, null, indent: 20f);
+            }
 
             DrawSecondaryDamages(listing, projectile.secondaryDamages, isExpo);
 

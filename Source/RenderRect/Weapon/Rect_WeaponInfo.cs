@@ -684,18 +684,16 @@ namespace CeManualPatcher.RenderRect
                     });
             }
 
-            if (tool.surpriseAttack == null)
+            if (tool.surpriseAttack != null)
             {
-                return;
-            }
-
-            foreach (var item in tool.surpriseAttack.extraMeleeDamages)
-            {
-                if (DrawExtraDamageRow(listing, item, preChange, indent: 40f))
+                foreach (var item in tool.surpriseAttack.extraMeleeDamages)
                 {
-                    preChange?.Invoke();
-                    tool.surpriseAttack.extraMeleeDamages.Remove(item);
-                    return;
+                    if (DrawExtraDamageRow(listing, item, preChange, indent: 40f))
+                    {
+                        preChange?.Invoke();
+                        tool.surpriseAttack.extraMeleeDamages.Remove(item);
+                        return;
+                    }
                 }
             }
 

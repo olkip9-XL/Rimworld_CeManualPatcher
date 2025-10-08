@@ -33,6 +33,15 @@
   <MP_ProjectilePropertiesCE.collideDistance>Collide Distance</MP_ProjectilePropertiesCE.collideDistance>
   <MP_ProjectilePropertiesCE.impactChance>Impact chance</MP_ProjectilePropertiesCE.impactChance>
 
+  <MP_ProjectilePropertiesCE.recoilMultiplier>Recoil multiplier</MP_ProjectilePropertiesCE.recoilMultiplier>
+  <MP_ProjectilePropertiesCE.recoilOffset>Recoil offset</MP_ProjectilePropertiesCE.recoilOffset>
+  <MP_ProjectilePropertiesCE.warmupMultiplier>Warmup multiplier</MP_ProjectilePropertiesCE.warmupMultiplier>
+  <MP_ProjectilePropertiesCE.warmupOffset>Warmup offset</MP_ProjectilePropertiesCE.warmupOffset>
+  <MP_ProjectilePropertiesCE.effectiveRangeMultiplier>Effective range multiplier</MP_ProjectilePropertiesCE.effectiveRangeMultiplier>
+  <MP_ProjectilePropertiesCE.effectiveRangeOffset>Effective range offset</MP_ProjectilePropertiesCE.effectiveRangeOffset>
+  <MP_ProjectilePropertiesCE.muzzleFlashMultiplier>Muzzle flash multiplier</MP_ProjectilePropertiesCE.muzzleFlashMultiplier>
+  <MP_ProjectilePropertiesCE.muzzleFlashOffset>Muzzle flash offset</MP_ProjectilePropertiesCE.muzzleFlashOffset>
+  
   <!--Ammo Recipe-->
   <MP_Recipe>Recipe</MP_Recipe>
   <MP_RecipeParentClass>Recipe Parent</MP_RecipeParentClass>

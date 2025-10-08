@@ -1,5 +1,6 @@
 ﻿using CeManualPatcher.Misc;
 using CombatExtended;
+using RimWorld;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -41,7 +42,7 @@ namespace CeManualPatcher.Saveable
         private string linkedBodyPartsGroupString;
         internal BodyPartGroupDef linkedBodyPartsGroup
         {
-            get=>DefDatabase<BodyPartGroupDef>.GetNamed(linkedBodyPartsGroupString, false);
+            get => DefDatabase<BodyPartGroupDef>.GetNamed(linkedBodyPartsGroupString, false);
             set => linkedBodyPartsGroupString = value?.defName ?? "null";
         }
 
@@ -92,7 +93,7 @@ namespace CeManualPatcher.Saveable
 
             foreach (var item in propNames)
             {
-                if(propDic.ContainsKey(item))
+                if (propDic.ContainsKey(item))
                 {
                     PropUtility.SetPropValueString(tool, item, propDic[item]);
                 }
@@ -242,5 +243,78 @@ namespace CeManualPatcher.Saveable
         {
             //do nothing
         }
+
+        //static methods
+        public static void InitTools(ThingDef def, ref List<Tool> originalTools)
+        {
+            if (def == null || def.tools == null)
+            {
+                return;
+            }
+            originalTools = new List<Tool>();
+            foreach (var item in def.tools)
+            {
+                Tool tool = new Tool();
+
+                if (item is ToolCE)
+                {
+                    tool = new ToolCE();
+                    PropUtility.CopyPropValue<ToolCE>(item as ToolCE, tool as ToolCE);
+                }
+                else
+                {
+                    PropUtility.CopyPropValue<Tool>(item, tool);
+                }
+
+                List<ToolCapacityDef> toolCapacityDefs = new List<ToolCapacityDef>(item.capacities);
+                tool.capacities = toolCapacityDefs;
+
+                //extra melee damages
+                List<ExtraDamage> extraDamages = new List<ExtraDamage>();
+                item.extraMeleeDamages?.ForEach(x => extraDamages.Add(new ExtraDamage()
+                {
+                    amount = x.amount,
+                    def = x.def,
+                    chance = x.chance,
+                    armorPenetration = x.armorPenetration
+                }));
+                tool.extraMeleeDamages = extraDamages;
+
+                //surprise attack
+                if (item.surpriseAttack != null)
+                {
+                    tool.surpriseAttack = new SurpriseAttackProps();
+                    List<ExtraDamage> surpriseAttackExtraDamages = new List<ExtraDamage>();
+                    item.surpriseAttack.extraMeleeDamages?.ForEach(x => surpriseAttackExtraDamages.Add(new ExtraDamage()
+                    {
+                        amount = x.amount,
+                        def = x.def,
+                        chance = x.chance,
+                        armorPenetration = x.armorPenetration
+                    }));
+                    tool.surpriseAttack.extraMeleeDamages = surpriseAttackExtraDamages;
+                }
+
+                originalTools.Add(tool);
+            }
+        }
+
+        public static void InitSaveTools(ThingDef def, ref List<ToolCESaveable> saveTools)
+        {
+            if (def == null || def.tools == null)
+            {
+                return;
+            }
+
+            saveTools = new List<ToolCESaveable>();
+            foreach (var item in def.tools)
+            {
+                if (item is ToolCE)
+                {
+                    saveTools.Add(new ToolCESaveable(def, item.id));
+                }
+            }
+        }
     }
+
 }

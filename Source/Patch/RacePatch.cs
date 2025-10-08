@@ -21,6 +21,10 @@ namespace CeManualPatcher.Patch
 
         internal CompArmorDurabilitySaveable armorDurability;
 
+        internal List<ToolCESaveable> tools = new List<ToolCESaveable>();
+        private List<Tool> originalTools = new List<Tool>();
+
+
         public override string PatchName => "Race";
 
         public RacePatch() { }
@@ -40,20 +44,47 @@ namespace CeManualPatcher.Patch
             {
                 armorDurability = new CompArmorDurabilitySaveable(thingDef);
             }
+
+            //tools
+            if (thingDef.tools != null)
+            {
+                ToolCESaveable.InitTools(thingDef, ref originalTools);
+            }
         }
 
         public override void ExposeData()
         {
             base.ExposeData();
 
+            if (Scribe.mode == LoadSaveMode.Saving && targetDef != null)
+            {
+                this.tools.Clear();
+                ToolCESaveable.InitSaveTools(targetDef, ref this.tools);
+            }
+
             Scribe_Deep.Look(ref statBase, "statBase");
             Scribe_Deep.Look(ref armorDurability, "armorDurability");
+            Scribe_Collections.Look(ref tools, "tools", LookMode.Deep);
+
+            if (Scribe.mode == LoadSaveMode.LoadingVars)
+            {
+                if (tools == null)
+                {
+                    tools = new List<ToolCESaveable>();
+                }
+            }
         }
 
         public override void Reset()
         {
             statBase?.Reset();
             armorDurability?.Reset();
+
+            if (targetDef.tools != null)
+            {
+                targetDef.tools = this.originalTools;
+                ToolCESaveable.InitTools(targetDef, ref originalTools);
+            }
         }
 
         public override void PostLoadInit()
@@ -65,10 +96,19 @@ namespace CeManualPatcher.Patch
 
             statBase?.PostLoadInit(targetDef);
             armorDurability?.PostLoadInit(targetDef);
+
+            if (targetDef.tools != null)
+            {
+                ToolCESaveable.InitTools(targetDef, ref this.originalTools);
+                targetDef.tools.Clear();
+                this.tools.ForEach(x => x?.PostLoadInit(targetDef));
+            }
         }
         protected override void MakePatch(XmlDocument xmlDoc, XmlElement root)
         {
             XmlUtility.Replace_StatBase(xmlDoc, root, targetDef.defName, targetDef.statBases);
+
+            XmlUtility.Replace_Tools(xmlDoc, root, targetDef.defName, targetDef.tools);
 
             //comps
             MakeCompPatch_ArmorDurability();

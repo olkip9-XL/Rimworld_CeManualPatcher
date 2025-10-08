@@ -174,7 +174,7 @@ namespace CeManualPatcher.Extension
 
                 listing.FieldLineOnChange(label, ref floatValue, (x) =>
                 {
-                    onChange(x);
+                    onChange?.Invoke(x);
                     fieldInfo.SetValue(instance, x);
                 }, fieldWidth, tooltip, indent, min, max);
 
@@ -185,7 +185,7 @@ namespace CeManualPatcher.Extension
 
                 listing.FieldLineOnChange(label, ref boolValue, (x) =>
                 {
-                    onChange(x);
+                    onChange?.Invoke(x);
                     fieldInfo.SetValue(instance, x);
                 }, fieldWidth, tooltip, indent);
             }

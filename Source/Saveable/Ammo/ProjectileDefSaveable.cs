@@ -39,14 +39,27 @@ namespace CeManualPatcher.Saveable
                 "airborneSuppressionFactor",
                 "dangerFactor",
                 "detonateEffectsScaleOverride",
+
                 "fuze_delay",
                 "HP_penetration",
                 "HP_penetration_ratio",
+
                 "armingDelay",
                 "aimHeightOffset",
                 "empShieldBreakChance",
                 "collideDistance",
                 "impactChance",
+
+                //1.6 add
+                "recoilMultiplier",
+                "recoilOffset",
+                "warmupMultiplier",
+                "warmupOffset",
+                "effectiveRangeMultiplier",
+                "effectiveRangeOffset",
+                "muzzleFlashMultiplier",
+                "muzzleFlashOffset",
+
         }.AsReadOnly();
         private Dictionary<string, string> propDic = new Dictionary<string, string>();
 
