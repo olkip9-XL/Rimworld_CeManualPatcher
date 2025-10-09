@@ -23,7 +23,6 @@ namespace CeManualPatcher.Patch
 
         public override string PatchName => "Apparel";
 
-
         public ApparelPatch() { }
         public ApparelPatch(ThingDef apparelDef)
         {

@@ -396,6 +396,27 @@ namespace CeManualPatcher.Misc
                         AddChildElement(xmlDoc, verbPropertiesElement, "soundCastTail", currentVerb.soundCastTail.defName);
                     }
 
+                    //targeting parameters
+                    TargetingParameters defaultTp = new TargetingParameters();
+                    TargetingParameters currentTp = currentVerb.targetParams;
+                    if (currentTp != null)
+                    {
+                        XmlElement tpElement = xmlDoc.CreateElement("targetParams");
+                        bool needAdd = false;
+                        foreach (var propName in TargetingParametersSaveable.propNames)
+                        {
+                            if (PropUtility.GetPropValue(defaultTp, propName).ToString() != PropUtility.GetPropValue(currentTp, propName).ToString())
+                            {
+                                needAdd = true;
+                                XmlUtility.AddChildElement(xmlDoc, tpElement, propName, PropUtility.GetPropValue(currentTp, propName).ToString());
+                            }
+                        }
+                        if (needAdd)
+                        {
+                            verbPropertiesElement.AppendChild(tpElement);
+                        }
+                    }
+
                 }
             }
 

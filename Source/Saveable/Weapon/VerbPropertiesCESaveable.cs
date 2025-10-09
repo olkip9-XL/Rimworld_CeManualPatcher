@@ -80,7 +80,7 @@ namespace CeManualPatcher.Saveable
 
         public VerbProperties OriginalData => originalData;
 
-        public bool NeedCEPatch=> !(originalData is VerbPropertiesCE);
+        public bool NeedCEPatch => !(originalData is VerbPropertiesCE);
         public Type OriginalVerbClass => originalData?.verbClass;
 
         internal VerbPropertiesCESaveable() { }

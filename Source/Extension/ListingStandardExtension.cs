@@ -361,5 +361,45 @@ namespace CeManualPatcher.Extension
                 Mod_CEManualPatcher.settings.ExportPatch();
             }
         }
+
+        internal static void CollaspseField(this Listing_Standard listing, Action<Listing_Standard> drawField, string title, int key, float indent = 0f)
+        {
+            listing.Indent(indent);
+            listing.ColumnWidth -= indent;
+
+            listing.Gap(6f);
+
+            if (!compCollapsedDic.ContainsKey(key))
+            {
+                compCollapsedDic[key] = false;
+            }
+
+            //title
+            Rect rect = listing.GetRect(Text.LineHeight);
+            Widgets.Label(rect.RightPartPixels(rect.width - rect.height), title);
+
+            bool collaspse = compCollapsedDic[key];
+            if (collaspse)
+            {
+                if (Widgets.ButtonImage(rect.LeftPartPixels(rect.height), TexButton.Reveal))
+                {
+                    compCollapsedDic[key] = false;
+                }
+            }
+            else
+            {
+                if (Widgets.ButtonImage(rect.LeftPartPixels(rect.height), TexButton.Collapse))
+                {
+                    compCollapsedDic[key] = true;
+                }
+
+                drawField?.Invoke(listing);
+            }
+
+            listing.Gap(listing.verticalSpacing);
+
+            listing.Outdent(indent);
+            listing.ColumnWidth += indent;
+        }
     }
 }

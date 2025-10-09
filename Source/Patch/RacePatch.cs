@@ -100,8 +100,12 @@ namespace CeManualPatcher.Patch
             if (targetDef.tools != null)
             {
                 ToolCESaveable.InitTools(targetDef, ref this.originalTools);
-                targetDef.tools.Clear();
-                this.tools.ForEach(x => x?.PostLoadInit(targetDef));
+
+                if (this.tools.NullOrEmpty())
+                {
+                    targetDef.tools.Clear();
+                    this.tools.ForEach(x => x?.PostLoadInit(targetDef));
+                }
             }
         }
         protected override void MakePatch(XmlDocument xmlDoc, XmlElement root)

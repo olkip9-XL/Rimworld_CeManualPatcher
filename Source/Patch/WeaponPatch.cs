@@ -20,6 +20,8 @@ namespace CeManualPatcher.Patch
 
         internal VerbPropertiesCESaveable verbProperties;
 
+        internal TargetingParametersSaveable targetingParameters;
+
         internal List<ToolCESaveable> tools = new List<ToolCESaveable>();
 
         internal CompAmmoUserSaveable ammoUser;
@@ -46,7 +48,12 @@ namespace CeManualPatcher.Patch
             statBase = new StatSaveable(thingDef);
             statOffsets = new StatOffsetSaveable(thingDef);
 
-            verbProperties = new VerbPropertiesCESaveable(thingDef);
+
+            if (!thingDef.Verbs.NullOrEmpty())
+            {
+                verbProperties = new VerbPropertiesCESaveable(thingDef);
+                targetingParameters = new TargetingParametersSaveable(thingDef);
+            }
 
             if (thingDef.tools != null)
             {
@@ -81,6 +88,7 @@ namespace CeManualPatcher.Patch
             Scribe_Deep.Look(ref statBase, "statBase");
             Scribe_Deep.Look(ref statOffsets, "statOffsets");
             Scribe_Deep.Look(ref verbProperties, "verbProperties");
+            Scribe_Deep.Look(ref targetingParameters, "targetingParameters");
 
             //comps
             Scribe_Deep.Look(ref ammoUser, "ammoUser");
@@ -130,6 +138,7 @@ namespace CeManualPatcher.Patch
             statBase?.Reset();
             statOffsets?.Reset();
             verbProperties?.Reset();
+            targetingParameters?.Reset();
 
             if (targetDef.tools != null)
             {
@@ -155,6 +164,8 @@ namespace CeManualPatcher.Patch
                 this.statOffsets?.PostLoadInit(targetDef);
 
                 this.verbProperties?.PostLoadInit(targetDef);
+
+                this.targetingParameters?.PostLoadInit(targetDef);
 
                 if (targetDef.tools != null)
                 {
@@ -184,7 +195,7 @@ namespace CeManualPatcher.Patch
 
         protected override void MakePatch(XmlDocument xmlDoc, XmlElement root)
         {
-            bool needCEPatch = verbProperties.NeedCEPatch;
+            bool needCEPatch = verbProperties?.NeedCEPatch ?? false;
 
             XmlUtility.Replace_Tools(xmlDoc, root, targetDef.defName, targetDef.tools);
             if (needCEPatch)
@@ -341,6 +352,27 @@ namespace CeManualPatcher.Patch
                 if (currentVerb.soundCastTail != defaultVerb.soundCastTail)
                 {
                     XmlUtility.AddChildElement(xmlDoc, valueElementLi, "soundCastTail", currentVerb.soundCastTail.defName);
+                }
+
+                //targeting parameters
+                TargetingParameters defaultTp = new TargetingParameters();
+                TargetingParameters currentTp = currentVerb.targetParams;
+                if (currentTp != null)
+                {
+                    XmlElement tpElement = xmlDoc.CreateElement("targetParams");
+                    bool needAdd = false;
+                    foreach (var propName in TargetingParametersSaveable.propNames)
+                    {
+                        if (PropUtility.GetPropValue(defaultTp, propName).ToString() != PropUtility.GetPropValue(currentTp, propName).ToString())
+                        {
+                            needAdd = true;
+                            XmlUtility.AddChildElement(xmlDoc, tpElement, propName, PropUtility.GetPropValue(currentTp, propName).ToString());
+                        }
+                    }
+                    if (needAdd)
+                    {
+                        valueElementLi.AppendChild(tpElement);
+                    }
                 }
 
                 root.AppendChild(XmlUtility.PatchReplace(xmlDoc, $"Defs/ThingDef[defName=\"{targetDef.defName}\"]/verbs", valueElement));

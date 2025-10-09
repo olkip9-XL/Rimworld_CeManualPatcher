@@ -85,5 +85,50 @@
   <!--Comp Charges-->
   <MP_Charges>迫击炮药包</MP_Charges>
   <MP_ChargeSpeed>药包设置</MP_ChargeSpeed>
+
+  <!--Targeting parameters-->
+  <MP_TargetingParameters>瞄准参数</MP_TargetingParameters>
+
+  <MP_TargetingParameters.canTargetLocations>可瞄准地面</MP_TargetingParameters.canTargetLocations>
+  <MP_TargetingParameters.canTargetSelf>可瞄准自己</MP_TargetingParameters.canTargetSelf>
+  <MP_TargetingParameters.canTargetPawns>可瞄准生物</MP_TargetingParameters.canTargetPawns>
+  <MP_TargetingParameters.canTargetFires>可瞄准火焰</MP_TargetingParameters.canTargetFires>
+  <MP_TargetingParameters.canTargetBuildings>可瞄准建筑</MP_TargetingParameters.canTargetBuildings>
+  <MP_TargetingParameters.canTargetItems>可瞄准物品</MP_TargetingParameters.canTargetItems>
+  <MP_TargetingParameters.canTargetAnimals>可瞄准动物</MP_TargetingParameters.canTargetAnimals>
+  <MP_TargetingParameters.canTargetHumans>可瞄准人类</MP_TargetingParameters.canTargetHumans>
+  <MP_TargetingParameters.canTargetMechs>可瞄准机械体</MP_TargetingParameters.canTargetMechs>
+  <MP_TargetingParameters.canTargetPlants>可瞄准植物</MP_TargetingParameters.canTargetPlants>
+  <MP_TargetingParameters.canTargetSubhumans>可瞄准亚人类</MP_TargetingParameters.canTargetSubhumans>
+  <MP_TargetingParameters.canTargetEntities>可瞄准实体</MP_TargetingParameters.canTargetEntities>
+  <MP_TargetingParameters.canTargetCorpses>可瞄准尸体</MP_TargetingParameters.canTargetCorpses>
+  <MP_TargetingParameters.canTargetBloodfeeders>可瞄准食血者</MP_TargetingParameters.canTargetBloodfeeders>
+
+  <MP_TargetingParameters.mustBeSelectable>必须可选中</MP_TargetingParameters.mustBeSelectable>
+
+  <MP_TargetingParameters.neverTargetDoors>不可瞄准门</MP_TargetingParameters.neverTargetDoors>
+  <MP_TargetingParameters.neverTargetIncapacitated>不可瞄准昏迷目标</MP_TargetingParameters.neverTargetIncapacitated>
+  <MP_TargetingParameters.neverTargetHostileFaction>不可瞄准敌对派系</MP_TargetingParameters.neverTargetHostileFaction>
   
+  <MP_TargetingParameters.onlyTargetFlammables>仅可瞄准可燃物</MP_TargetingParameters.onlyTargetFlammables>
+  <MP_TargetingParameters.onlyTargetSameIdeo>仅可瞄准相同信仰</MP_TargetingParameters.onlyTargetSameIdeo>
+  <MP_TargetingParameters.onlyTargetThingsAffectingRegions>仅可瞄准影响区域的物体</MP_TargetingParameters.onlyTargetThingsAffectingRegions>
+  <MP_TargetingParameters.onlyTargetDamagedThings>仅可瞄准受损物体</MP_TargetingParameters.onlyTargetDamagedThings>
+  <MP_TargetingParameters.onlyTargetIncapacitatedPawns>仅可瞄准昏迷生物</MP_TargetingParameters.onlyTargetIncapacitatedPawns>
+  <MP_TargetingParameters.onlyTargetColonistsOrPrisoners>仅可瞄准殖民者或囚犯</MP_TargetingParameters.onlyTargetColonistsOrPrisoners>
+  <MP_TargetingParameters.onlyTargetColonistsOrPrisonersOrSlaves>仅可瞄准殖民者、囚犯或奴隶</MP_TargetingParameters.onlyTargetColonistsOrPrisonersOrSlaves>
+  <MP_TargetingParameters.onlyTargetColonistsOrPrisonersOrSlavesAllowMinorMentalBreaks>仅可瞄准殖民者、囚犯或奴隶（允许轻微精神崩溃）</MP_TargetingParameters.onlyTargetColonistsOrPrisonersOrSlavesAllowMinorMentalBreaks>
+  <MP_TargetingParameters.onlyTargetControlledPawns>仅可瞄准受控生物</MP_TargetingParameters.onlyTargetControlledPawns>
+  <MP_TargetingParameters.onlyTargetColonists>仅可瞄准殖民者</MP_TargetingParameters.onlyTargetColonists>
+  <MP_TargetingParameters.onlyTargetPrisonersOfColony>仅可瞄准殖民地囚犯</MP_TargetingParameters.onlyTargetPrisonersOfColony>
+  <MP_TargetingParameters.onlyTargetPsychicSensitive>仅可瞄准灵能敏感者</MP_TargetingParameters.onlyTargetPsychicSensitive>
+  <MP_TargetingParameters.onlyTargetAnimaTrees>仅可瞄准仙树</MP_TargetingParameters.onlyTargetAnimaTrees>
+  <MP_TargetingParameters.onlyRepairableMechs>仅可瞄准可修复机械体</MP_TargetingParameters.onlyRepairableMechs>
+  <MP_TargetingParameters.onlyTargetDoors>仅可瞄准门</MP_TargetingParameters.onlyTargetDoors>
+  <MP_TargetingParameters.onlyTargetCorpses>仅可瞄准尸体</MP_TargetingParameters.onlyTargetCorpses>
+  
+  <MP_TargetingParameters.mapBoundsContractedBy>地图边界收缩量</MP_TargetingParameters.mapBoundsContractedBy>
+  <MP_TargetingParameters.mapObjectTargetsMustBeAutoAttackable>地图物体目标必须可自动攻击</MP_TargetingParameters.mapObjectTargetsMustBeAutoAttackable>
+
+
 </LanguageData>

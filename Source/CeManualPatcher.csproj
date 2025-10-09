@@ -135,6 +135,7 @@
     <Compile Include="Saveable\SaveableBase.cs" />
     <Compile Include="Saveable\Weapon\StatOffsetSaveable.cs" />
     <Compile Include="Saveable\Weapon\StatSaveable.cs" />
+    <Compile Include="Saveable\Weapon\TargetingParametersSaveable.cs" />
     <Compile Include="Saveable\Weapon\ToolCESaveable.cs" />
     <Compile Include="Saveable\Weapon\VerbPropertiesCESaveable.cs" />
     <Compile Include="Patch\WeaponPatch.cs" />

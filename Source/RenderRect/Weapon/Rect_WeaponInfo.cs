@@ -40,7 +40,7 @@ namespace CeManualPatcher.RenderRect
         {
             preChange = delegate
             {
-               manager.GetPatch(curWeaponDef);
+                manager.GetPatch(curWeaponDef);
             };
         }
 
@@ -220,7 +220,7 @@ namespace CeManualPatcher.RenderRect
                 if (Widgets.ButtonImage(rect4, MP_Texture.CEPatch))
                 {
                     //Find.WindowStack.Add(new Dialog_MakeCEPatch(curWeaponDef));
-                    
+
                     //Patch fuction
                     preChange?.Invoke();
 
@@ -404,7 +404,7 @@ namespace CeManualPatcher.RenderRect
             //tools
             if (thingDef.tools != null)
             {
-                List<Tool> tools= new List<Tool>();
+                List<Tool> tools = new List<Tool>();
                 foreach (var tool in thingDef.tools)
                 {
                     ToolCE toolCopy = PropUtility.ConvertToChild<Tool, ToolCE>(tool);
@@ -524,6 +524,30 @@ namespace CeManualPatcher.RenderRect
                     preChange?.Invoke();
                 }, indent: 20f);
             }
+
+            DrawTargetingParameters(listing, props, preChange);
+        }
+
+        private static void DrawTargetingParameters(Listing_Standard listing, VerbProperties verb, Action preChange)
+        {
+            TargetingParameters parameters = verb.targetParams;
+            if (parameters == null)
+            {
+                return;
+            }
+
+            listing.CollaspseField(innerListing =>
+            {
+                foreach (string fieldName in TargetingParametersSaveable.propNames)
+                {
+                    innerListing.FieldLineReflexion($"MP_TargetingParameters.{fieldName}".Translate(), fieldName, parameters, newValue =>
+                    {
+                        preChange?.Invoke();
+                    }, indent: 20f);
+                }
+            }, "<b>" + "MP_TargetingParameters".Translate() + "</b>", parameters.GetHashCode(), 20f);
+
+            listing.Gap(listing.verticalSpacing);
         }
         public static void DrawTools(Listing_Standard listing, List<Tool> tools, Action preChange)
         {
@@ -754,7 +778,7 @@ namespace CeManualPatcher.RenderRect
             rect.x += indent;
             rect.width -= indent;
 
-            Widgets.Label(rect, extraDamage.def.LabelCap);
+            Widgets.Label(rect, extraDamage.def?.LabelCap ?? "null");
 
             Widgets.DrawHighlightIfMouseover(rect);
 
