@@ -101,7 +101,7 @@ namespace CeManualPatcher.Patch
             {
                 ToolCESaveable.InitTools(targetDef, ref this.originalTools);
 
-                if (this.tools.NullOrEmpty())
+                if (!this.tools.NullOrEmpty())
                 {
                     targetDef.tools.Clear();
                     this.tools.ForEach(x => x?.PostLoadInit(targetDef));

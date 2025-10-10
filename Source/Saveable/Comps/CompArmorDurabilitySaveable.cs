@@ -169,6 +169,11 @@ namespace CeManualPatcher.Saveable
 
         protected override void SaveData()
         {
+            if(compProps == null)
+            {
+                return;
+            }
+
             foreach (var item in propNames)
             {
                 propDic[item] = PropUtility.GetPropValue(compProps, item).ToString();
