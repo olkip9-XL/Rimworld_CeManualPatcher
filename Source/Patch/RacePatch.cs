@@ -23,6 +23,7 @@ namespace CeManualPatcher.Patch
 
         internal List<ToolCESaveable> tools = new List<ToolCESaveable>();
         private List<Tool> originalTools = new List<Tool>();
+        private PartialArmorExtSaveable partialArmorExtSaveable;
 
 
         public override string PatchName => "Race";
@@ -45,6 +46,8 @@ namespace CeManualPatcher.Patch
                 armorDurability = new CompArmorDurabilitySaveable(thingDef);
             }
 
+            partialArmorExtSaveable = new PartialArmorExtSaveable(thingDef);
+
             //tools
             if (thingDef.tools != null)
             {
@@ -65,6 +68,7 @@ namespace CeManualPatcher.Patch
             Scribe_Deep.Look(ref statBase, "statBase");
             Scribe_Deep.Look(ref armorDurability, "armorDurability");
             Scribe_Collections.Look(ref tools, "tools", LookMode.Deep);
+            Scribe_Deep.Look(ref partialArmorExtSaveable, "partialArmorExt");
 
             if (Scribe.mode == LoadSaveMode.LoadingVars)
             {
@@ -79,6 +83,7 @@ namespace CeManualPatcher.Patch
         {
             statBase?.Reset();
             armorDurability?.Reset();
+            partialArmorExtSaveable?.Reset();
 
             if (targetDef.tools != null)
             {
@@ -96,6 +101,7 @@ namespace CeManualPatcher.Patch
 
             statBase?.PostLoadInit(targetDef);
             armorDurability?.PostLoadInit(targetDef);
+            partialArmorExtSaveable?.PostLoadInit(targetDef);
 
             if (targetDef.tools != null)
             {
@@ -116,6 +122,8 @@ namespace CeManualPatcher.Patch
 
             //comps
             MakeCompPatch_ArmorDurability();
+
+            XmlUtility.AddModExt_PartialArmor(xmlDoc, root, targetDef.defName, targetDef.GetModExtension<PartialArmorExt>());
 
             void MakeCompPatch_ArmorDurability()
             {

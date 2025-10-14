@@ -47,7 +47,10 @@ namespace CeManualPatcher.RenderRect
                     manager.GetPatch(curApparel);
                 }, headLabel: "MP_StatOffset".Translate());
 
-                DrawPartialArmorExt(innerListing);
+                DrawPartialArmorExt(innerListing, curApparel, () =>
+                {
+                    manager.GetPatch(curApparel);
+                });
             });
 
             DrawControlPannel(listing_Standard);
@@ -214,9 +217,9 @@ namespace CeManualPatcher.RenderRect
             }
         }
 
-        private void DrawPartialArmorExt(Listing_Standard listing)
+        internal static void DrawPartialArmorExt(Listing_Standard listing, ThingDef thingDef, Action preChange)
         {
-            if (curApparel == null)
+            if (thingDef == null)
                 return;
 
             listing.GapLine(6f);
@@ -235,16 +238,17 @@ namespace CeManualPatcher.RenderRect
                    (x) => x.LabelCap,
                    (x) => delegate ()
                    {
-                       manager.GetPatch(curApparel);
-                       if (!curApparel.HasModExtension<PartialArmorExt>())
+                       //manager.GetPatch(curApparel);
+                       preChange?.Invoke();
+                       if (!thingDef.HasModExtension<PartialArmorExt>())
                        {
-                           curApparel.AddModExtension(new PartialArmorExt()
+                           thingDef.AddModExtension(new PartialArmorExt()
                            {
                                stats = new List<ApparelPartialStat>()
                            });
                        }
 
-                       PartialArmorExt partialArmorExt = curApparel.GetModExtension<PartialArmorExt>();
+                       PartialArmorExt partialArmorExt = thingDef.GetModExtension<PartialArmorExt>();
                        partialArmorExt.stats.Add(new ApparelPartialStat()
                        {
                            stat = x,
@@ -254,7 +258,7 @@ namespace CeManualPatcher.RenderRect
             }, indent: 0f);
 
             //partial armor
-            if (curApparel.GetModExtension<PartialArmorExt>() is PartialArmorExt ext)
+            if (thingDef.GetModExtension<PartialArmorExt>() is PartialArmorExt ext)
             {
                 bool needBreak = false;
                 foreach (var item in ext.stats)
@@ -263,7 +267,8 @@ namespace CeManualPatcher.RenderRect
 
                     listing.ButtonImageLine(item.stat.LabelCap, TexButton.Delete, () =>
                     {
-                        manager.GetPatch(curApparel);
+                        //manager.GetPatch(curApparel);
+                        preChange?.Invoke();
                         ext.stats.Remove(item);
                         needBreak = true;
                     }, indent: 0f);
@@ -271,27 +276,31 @@ namespace CeManualPatcher.RenderRect
 
                     listing.FieldLineOnChange("MP_UseStaticValue".Translate(), ref item.isStatValueStatic, (x) =>
                     {
-                        manager.GetPatch(curApparel);
+                        //manager.GetPatch(curApparel);
+                        preChange?.Invoke();
                     }, indent: 20f);
 
                     if (item.isStatValueStatic)
                     {
                         listing.FieldLineOnChange("MP_StaticValue".Translate(), ref item.statValue, (x) =>
                         {
-                            manager.GetPatch(curApparel);
+                            //manager.GetPatch(curApparel);
+                            preChange?.Invoke();
                         }, indent: 20f);
                     }
                     else
                     {
                         listing.FieldLineOnChange("MP_MultValue".Translate(), ref item.statValue, (x) =>
                         {
-                            manager.GetPatch(curApparel);
+                            //manager.GetPatch(curApparel);
+                            preChange?.Invoke();
                         }, indent: 20f);
                     }
 
                     listing.ButtonImageLine("MP_BodyPart".Translate(), TexButton.Add, () =>
                     {
-                        manager.GetPatch(curApparel);
+                        //manager.GetPatch(curApparel);
+                        preChange?.Invoke();
                         Find.WindowStack.Add(new Dialog_SelectBodyParts(item.parts));
                     }, indent: 20f);
 
@@ -300,7 +309,8 @@ namespace CeManualPatcher.RenderRect
                     {
                         listing.ButtonImageLine(bodyPart.LabelCap, TexButton.Delete, () =>
                         {
-                            manager.GetPatch(curApparel);
+                            //manager.GetPatch(curApparel);
+                            preChange?.Invoke();
                             item.parts.Remove(bodyPart);
                             needBreak2 = true;
                         }, indent: 40f);

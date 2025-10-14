@@ -57,6 +57,8 @@ namespace CeManualPatcher.RenderRect
                 DrawComp_ArmorDurability(innerListing);
 
                 Rect_WeaponInfo.DrawTools(innerListing, curDef.tools, preChange);
+
+                Rect_ApparelInfo.DrawPartialArmorExt(innerListing, curDef, preChange);
             });
 
             //control pannel
