@@ -22,6 +22,8 @@ namespace CeManualPatcher.RenderRect
         RaceManager manager => RaceManager.instance;
         ThingDef curDef => RaceManager.curDef;
 
+        BodyDef BodyDef => curDef?.race?.body;
+
         //scroll
         private float innerHeight = 0f;
         private Vector2 scrollPosition = Vector2.zero;
@@ -52,13 +54,11 @@ namespace CeManualPatcher.RenderRect
             {
                 RenderRectUtility.DrawStats(innerListing, ref curDef.statBases, MP_Options.statDefs_Race, preChange);
 
-                //RenderRectUtility.DrawStats(innerListing, ref curDef.equippedStatOffsets, MP_Options.statDefs_WeaponOffset, preChange, headLabel: "MP_StatOffset".Translate());
-
                 DrawComp_ArmorDurability(innerListing);
 
-                Rect_WeaponInfo.DrawTools(innerListing, curDef.tools, preChange);
+                Rect_WeaponInfo.DrawTools(innerListing, curDef.tools, preChange, BodyDef);
 
-                Rect_ApparelInfo.DrawPartialArmorExt(innerListing, curDef, preChange);
+                Rect_ApparelInfo.DrawPartialArmorExt(innerListing, curDef, preChange, BodyDef);
             });
 
             //control pannel
@@ -90,7 +90,7 @@ namespace CeManualPatcher.RenderRect
             Text.Font = GameFont.Small;
 
             //hyperlink
-            string bodyDefLabel = curDef.race?.body?.LabelCap ?? "No Body Label";
+            string bodyDefLabel = BodyDef?.LabelCap ?? "No Body Label";
             Rect hyperLinkRect = rect2.RightAdjoin(Text.CalcSize(bodyDefLabel).x);
             if (Widgets.ButtonText(hyperLinkRect, bodyDefLabel, drawBackground: false, doMouseoverSound: false, textColor: Widgets.NormalOptionColor, overrideTextAnchor: TextAnchor.LowerLeft))
             {

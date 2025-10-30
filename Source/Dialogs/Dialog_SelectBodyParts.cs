@@ -17,16 +17,18 @@ namespace CeManualPatcher.Dialogs
     {
         private List<BodyPartDef> parts;
         private Dictionary<BodyPartDef, bool> selectedParts = new Dictionary<BodyPartDef, bool>();
+        private BodyDef bodyDef;
 
         private Vector2 scrollPosition = Vector2.zero;
         private float scrollHeight = 0f;
-        public Dialog_SelectBodyParts(List<BodyPartDef> parts)
+        public Dialog_SelectBodyParts(List<BodyPartDef> parts, BodyDef bodyDef)
         {
             this.parts = parts;
             foreach (var item in parts)
             {
                 this.selectedParts[item] = true;
             }
+            this.bodyDef = bodyDef ?? BodyDefOf.Human;
         }
 
         public override void PreOpen()
@@ -52,23 +54,11 @@ namespace CeManualPatcher.Dialogs
             Listing_Standard listingStandard = new Listing_Standard();
             listingStandard.Begin(inRect);
 
+            listingStandard.Label(bodyDef?.LabelCap ?? "null");
+            listingStandard.GapLine(6f);
+
             WidgetsUtility.ScrollView(listingStandard.GetRect(inRect.height - listingStandard.CurHeight - 30f), ref scrollPosition, ref scrollHeight, (innerListing) =>
             {
-                BodyDef bodyDef = BodyDefOf.Human;
-
-                //foreach (var part in bodyDef.AllParts)
-                //{
-                //    Rect rect = innerListing.GetRect(Text.LineHeight);
-
-                //    if (!selectedParts.ContainsKey(part.def))
-                //    {
-                //        selectedParts[part.def] = false;
-                //    }
-
-                //    bool isSelected = selectedParts[part.def];
-                //    Widgets.CheckboxLabeled(rect, part.LabelCap, ref isSelected);
-                //    selectedParts[part.def] = isSelected;
-                //}
                 DrawBodyParts(innerListing, bodyDef.corePart);
             });
 

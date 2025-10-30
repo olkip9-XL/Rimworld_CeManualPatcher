@@ -22,12 +22,13 @@ namespace CeManualPatcher.Dialogs
 
         private ToolCE toolReadyToAdd;
 
+        private BodyDef bodyDef = null;
 
         private Vector2 scrollPosition = Vector2.zero;
         private float scrollHeight = 0f;
         private WeaponManager manager => WeaponManager.instance;
         private ThingDef curWeaponDef => WeaponManager.curWeaponDef;
-        public Dialog_AddTool(List<Tool> tools)
+        public Dialog_AddTool(List<Tool> tools, BodyDef _bodyDef)
         {
             this.tools = tools;
             this.toolReadyToAdd = new ToolCE()
@@ -35,6 +36,7 @@ namespace CeManualPatcher.Dialogs
                 label = "New Tool",
             };
             this.toolReadyToAdd.id = "NewTool" + this.toolReadyToAdd.GetHashCode();
+            this.bodyDef = _bodyDef;
         }
 
         public override void PreOpen()
@@ -64,7 +66,7 @@ namespace CeManualPatcher.Dialogs
             {
                 innerListing.FieldLine("Label", ref toolReadyToAdd.label);
 
-                Rect_WeaponInfo.DrawToolContent(innerListing, toolReadyToAdd, null);
+                Rect_WeaponInfo.DrawToolContent(innerListing, toolReadyToAdd, null, bodyDef: bodyDef);
 
                 DrawControlPannel(innerListing);
             });

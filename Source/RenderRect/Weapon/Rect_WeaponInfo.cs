@@ -549,7 +549,7 @@ namespace CeManualPatcher.RenderRect
 
             listing.Gap(listing.verticalSpacing);
         }
-        public static void DrawTools(Listing_Standard listing, List<Tool> tools, Action preChange)
+        public static void DrawTools(Listing_Standard listing, List<Tool> tools, Action preChange, BodyDef bodyDef = null)
         {
             if (tools.NullOrEmpty())
             {
@@ -565,7 +565,7 @@ namespace CeManualPatcher.RenderRect
             if (Widgets.ButtonImage(addRect, TexButton.Add))
             {
                 preChange?.Invoke();
-                Find.WindowStack.Add(new Dialog_AddTool(tools));
+                Find.WindowStack.Add(new Dialog_AddTool(tools, bodyDef));
             }
 
             foreach (var item in tools)
@@ -602,10 +602,10 @@ namespace CeManualPatcher.RenderRect
                 Widgets.Label(idRect, idString);
 
                 //内容
-                DrawToolContent(listing, toolCE, preChange);
+                DrawToolContent(listing, toolCE, preChange, bodyDef: bodyDef);
             }
         }
-        public static void DrawToolContent(Listing_Standard listing, ToolCE tool, Action preChange, float indent = 20f)
+        public static void DrawToolContent(Listing_Standard listing, ToolCE tool, Action preChange, float indent = 20f, BodyDef bodyDef = null)
         {
             if (tool == null)
             {
@@ -618,7 +618,19 @@ namespace CeManualPatcher.RenderRect
             DrawExtraMeleeDamage(listing, tool, preChange);
             listing.ButtonTextLine("MP_LinkedBodyPartsGroup".Translate(), tool.linkedBodyPartsGroup?.label ?? "null", () =>
             {
-                FloatMenuUtility.MakeMenu(MP_Options.bodyPartGroupDefs,
+                List<BodyPartGroupDef> bodyPartGroups = null;
+
+                if (bodyDef != null)
+                {
+                    bodyPartGroups = bodyDef.AllBodyPartGroup();
+                    bodyPartGroups.RemoveWhere(x => x == CE_BodyPartGroupDefOf.CoveredByNaturalArmor);
+                }
+                else
+                {
+                    bodyPartGroups = MP_Options.bodyPartGroupDefs;
+                }
+
+                FloatMenuUtility.MakeMenu(bodyPartGroups,
                     (BodyPartGroupDef x) => $"{x.LabelCap} ({x.defName})",
                     (BodyPartGroupDef x) => delegate ()
                     {

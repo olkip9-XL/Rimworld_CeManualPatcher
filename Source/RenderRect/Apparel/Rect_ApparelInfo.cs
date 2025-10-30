@@ -37,8 +37,6 @@ namespace CeManualPatcher.RenderRect
             };
         }
 
-
-
         public override void DoWindowContents(Rect rect)
         {
             if (curApparel == null)
@@ -233,13 +231,19 @@ namespace CeManualPatcher.RenderRect
             }
         }
 
-        internal static void DrawPartialArmorExt(Listing_Standard listing, ThingDef thingDef, Action preChange)
+        internal static void DrawPartialArmorExt(Listing_Standard listing, ThingDef thingDef, Action preChange, BodyDef bodyDef = null)
         {
             if (thingDef == null)
                 return;
 
+            if (bodyDef == null)
+            {
+                bodyDef = BodyDefOf.Human;
+            }
+
             listing.GapLine(6f);
 
+            //title
             listing.ButtonImageLine("<b>" + "MP_PartialArmorExt".Translate() + "</b>", TexButton.Add, () =>
             {
                 List<StatDef> statDefs = new List<StatDef>()
@@ -271,7 +275,7 @@ namespace CeManualPatcher.RenderRect
                            parts = new List<BodyPartDef>()
                        });
                    });
-            }, indent: 0f);
+            });
 
             //partial armor
             if (thingDef.GetModExtension<PartialArmorExt>() is PartialArmorExt ext)
@@ -283,7 +287,6 @@ namespace CeManualPatcher.RenderRect
 
                     listing.ButtonImageLine(item.stat.LabelCap, TexButton.Delete, () =>
                     {
-                        //manager.GetPatch(curApparel);
                         preChange?.Invoke();
                         ext.stats.Remove(item);
                         needBreak = true;
@@ -292,7 +295,6 @@ namespace CeManualPatcher.RenderRect
 
                     listing.FieldLineOnChange("MP_UseStaticValue".Translate(), ref item.isStatValueStatic, (x) =>
                     {
-                        //manager.GetPatch(curApparel);
                         preChange?.Invoke();
                     }, indent: 20f);
 
@@ -300,7 +302,6 @@ namespace CeManualPatcher.RenderRect
                     {
                         listing.FieldLineOnChange("MP_StaticValue".Translate(), ref item.statValue, (x) =>
                         {
-                            //manager.GetPatch(curApparel);
                             preChange?.Invoke();
                         }, indent: 20f);
                     }
@@ -308,16 +309,14 @@ namespace CeManualPatcher.RenderRect
                     {
                         listing.FieldLineOnChange("MP_MultValue".Translate(), ref item.statValue, (x) =>
                         {
-                            //manager.GetPatch(curApparel);
                             preChange?.Invoke();
                         }, indent: 20f);
                     }
 
                     listing.ButtonImageLine("MP_BodyPart".Translate(), TexButton.Add, () =>
                     {
-                        //manager.GetPatch(curApparel);
                         preChange?.Invoke();
-                        Find.WindowStack.Add(new Dialog_SelectBodyParts(item.parts));
+                        Find.WindowStack.Add(new Dialog_SelectBodyParts(item.parts, bodyDef));
                     }, indent: 20f);
 
                     bool needBreak2 = false;
@@ -325,7 +324,6 @@ namespace CeManualPatcher.RenderRect
                     {
                         listing.ButtonImageLine(bodyPart.LabelCap, TexButton.Delete, () =>
                         {
-                            //manager.GetPatch(curApparel);
                             preChange?.Invoke();
                             item.parts.Remove(bodyPart);
                             needBreak2 = true;
@@ -344,7 +342,7 @@ namespace CeManualPatcher.RenderRect
                 return;
 
             listing.GapLine(6f);
-            listing.Label("<b>"+"MP_ApparelProps".Translate()+"</b>");
+            listing.Label("<b>" + "MP_ApparelProps".Translate() + "</b>");
             listing.Gap();
 
             bool needBreak = false;
@@ -354,7 +352,7 @@ namespace CeManualPatcher.RenderRect
                 bodyPartDefs.RemoveDuplicates();
                 if (bodyPartDefs.NullOrEmpty())
                     return;
-                
+
                 FloatMenuUtility.MakeMenu(bodyPartDefs,
                    (x) => $"{x.LabelCap} ({x.defName})",
                    (x) => delegate ()
@@ -363,6 +361,8 @@ namespace CeManualPatcher.RenderRect
                        apparel.bodyPartGroups.Add(x);
                    });
             }, indent: 0f);
+
+
             foreach (var item in apparel.bodyPartGroups)
             {
                 listing.ButtonImageLine($"{item.LabelCap} ({item.defName})", TexButton.Delete, () =>
@@ -379,8 +379,8 @@ namespace CeManualPatcher.RenderRect
             {
                 List<ApparelLayerDef> layerDefs = DefDatabase<ApparelLayerDef>.AllDefs.ToList();
                 layerDefs = layerDefs.Where(x => !apparel.layers.Contains(x)).ToList();
-                if(layerDefs.NullOrEmpty())
-                    return; 
+                if (layerDefs.NullOrEmpty())
+                    return;
 
                 FloatMenuUtility.MakeMenu(layerDefs,
                    (x) => $"{x.LabelCap} ({x.defName})",
