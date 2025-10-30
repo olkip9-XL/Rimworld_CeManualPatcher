@@ -53,6 +53,11 @@
   <MP_MultValue>Multiplier</MP_MultValue>
   <MP_BodyPart>Body Parts</MP_BodyPart>
 
+  <MP_ApparelProps>Apparel Properties</MP_ApparelProps>
+  <MP_BodyPartGroups>Body Part Groups</MP_BodyPartGroups>
+  <MP_ApparelLayers>Apparel Layers</MP_ApparelLayers>
+
+
   <!--Custom Ammo-->
    <MP_AddCustomAmmo>Add Custom Ammo</MP_AddCustomAmmo>
   
@@ -85,7 +90,7 @@
   <MP_Height>Height</MP_Height>
   <MP_Depth>Depth</MP_Depth>
   <MP_Coverage>Coverage</MP_Coverage>
-  <MP_CoverdByArmor>Coverd By Armor</MP_CoverdByArmor>
+  <MP_CoverdByArmor>Covered By Armor</MP_CoverdByArmor>
 
   <MP_BodyUser>Races that use this body</MP_BodyUser>
   

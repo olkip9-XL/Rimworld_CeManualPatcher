@@ -27,7 +27,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="CombatExtended">
-      <HintPath>..\..\..\..\..\workshop\content\294100\3495749827\Assemblies\CombatExtended.dll</HintPath>
+      <HintPath>..\..\..\..\..\workshop\content\294100\2890901044\Assemblies\CombatExtended.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
@@ -122,6 +122,7 @@
     <Compile Include="Saveable\Ammo\SecondaryDamageSaveable.cs" />
     <Compile Include="Saveable\Ammo\SecondaryExplosionSaveable.cs" />
     <Compile Include="Saveable\Ammo\ThingDefCountClassSaveable.cs" />
+    <Compile Include="Saveable\Apparel\ApparelPropertiesSaveable.cs" />
     <Compile Include="Saveable\Apparel\PartialArmorExtItem.cs" />
     <Compile Include="Saveable\Apparel\PartialArmorExtSaveable.cs" />
     <Compile Include="Saveable\Body\BodyPartRecordSaveable.cs" />

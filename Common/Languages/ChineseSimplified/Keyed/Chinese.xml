@@ -53,6 +53,10 @@
   <MP_MultValue>倍数</MP_MultValue>
   <MP_BodyPart>身体部位</MP_BodyPart>
 
+  <MP_ApparelProps>服装参数</MP_ApparelProps>
+  <MP_BodyPartGroups>身体部位组</MP_BodyPartGroups>
+  <MP_ApparelLayers>服装层</MP_ApparelLayers>
+
   <!--Custom Ammo-->
   <MP_AddCustomAmmo>添加自定义弹药</MP_AddCustomAmmo>
 
