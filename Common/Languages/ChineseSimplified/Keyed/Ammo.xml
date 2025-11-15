@@ -42,6 +42,15 @@
   <MP_ProjectilePropertiesCE.muzzleFlashMultiplier>枪口焰乘数</MP_ProjectilePropertiesCE.muzzleFlashMultiplier>
   <MP_ProjectilePropertiesCE.muzzleFlashOffset>枪口焰偏移</MP_ProjectilePropertiesCE.muzzleFlashOffset>
 
+  <MP_ProjectilePropertiesCE.speed>飞行速度</MP_ProjectilePropertiesCE.speed>
+  <MP_ProjectilePropertiesCE.flyOverhead>飞越头顶</MP_ProjectilePropertiesCE.flyOverhead>
+  <MP_ProjectilePropertiesCE.alwaysFreeIntercept>总是自由拦截</MP_ProjectilePropertiesCE.alwaysFreeIntercept>
+  <MP_ProjectilePropertiesCE.arcHeightFactor>曲线高度系数</MP_ProjectilePropertiesCE.arcHeightFactor>
+  <MP_ProjectilePropertiesCE.shadowSize>阴影大小</MP_ProjectilePropertiesCE.shadowSize>
+  <MP_ProjectilePropertiesCE.spinRate>旋转率</MP_ProjectilePropertiesCE.spinRate>
+  <MP_ProjectilePropertiesCE.explosionDelay>爆炸延迟</MP_ProjectilePropertiesCE.explosionDelay>
+  <MP_ProjectilePropertiesCE.ai_IsIncendiary>AI视为燃烧弹</MP_ProjectilePropertiesCE.ai_IsIncendiary>
+
   <!--Ammo Recipe-->
   <MP_Recipe>制作清单</MP_Recipe>
   <MP_RecipeParentClass>清单父类</MP_RecipeParentClass>

@@ -22,6 +22,15 @@ namespace CeManualPatcher.Misc
 
         public int damageAmount = -1;
 
+        //vanilla
+        public bool flyOverhead;
+        public bool alwaysFreeIntercept;
+        public float arcHeightFactor;
+        public float shadowSize;
+        public float spinRate;
+        public int explosionDelay;
+        public bool ai_IsIncendiary;
+
         public float suppressionFactor = 1f;
         public float stoppingPower = 0.5f;
         public float speed = 168f;

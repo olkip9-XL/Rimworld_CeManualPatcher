@@ -20,6 +20,16 @@ namespace CeManualPatcher.Saveable
         //字段
         public static ReadOnlyCollection<string> propNames = new List<string>()
         {
+                //vanilla
+                "speed",
+                "flyOverhead",
+                "alwaysFreeIntercept",
+                "arcHeightFactor",
+                "shadowSize",
+                "spinRate",
+                "explosionDelay",
+                "ai_IsIncendiary",
+
                 "armorPenetrationSharp",
                 "armorPenetrationBlunt",
                 "explosionRadius",

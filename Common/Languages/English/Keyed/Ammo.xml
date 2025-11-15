@@ -41,6 +41,15 @@
   <MP_ProjectilePropertiesCE.effectiveRangeOffset>Effective range offset</MP_ProjectilePropertiesCE.effectiveRangeOffset>
   <MP_ProjectilePropertiesCE.muzzleFlashMultiplier>Muzzle flash multiplier</MP_ProjectilePropertiesCE.muzzleFlashMultiplier>
   <MP_ProjectilePropertiesCE.muzzleFlashOffset>Muzzle flash offset</MP_ProjectilePropertiesCE.muzzleFlashOffset>
+
+  <MP_ProjectilePropertiesCE.speed>Speed</MP_ProjectilePropertiesCE.speed>
+  <MP_ProjectilePropertiesCE.flyOverhead>Fly Overhead</MP_ProjectilePropertiesCE.flyOverhead>
+  <MP_ProjectilePropertiesCE.alwaysFreeIntercept>Always Free Intercept</MP_ProjectilePropertiesCE.alwaysFreeIntercept>
+  <MP_ProjectilePropertiesCE.arcHeightFactor>Arc Height Factor</MP_ProjectilePropertiesCE.arcHeightFactor>
+  <MP_ProjectilePropertiesCE.shadowSize>Shadow Size</MP_ProjectilePropertiesCE.shadowSize>
+  <MP_ProjectilePropertiesCE.spinRate>Spin Rate</MP_ProjectilePropertiesCE.spinRate>
+  <MP_ProjectilePropertiesCE.explosionDelay>Explosion Delay</MP_ProjectilePropertiesCE.explosionDelay>
+  <MP_ProjectilePropertiesCE.ai_IsIncendiary>AI Is Incendiary</MP_ProjectilePropertiesCE.ai_IsIncendiary>
   
   <!--Ammo Recipe-->
   <MP_Recipe>Recipe</MP_Recipe>
