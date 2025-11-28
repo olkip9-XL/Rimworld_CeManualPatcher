@@ -478,9 +478,9 @@ namespace CeManualPatcher.Misc
 
             void MakeWeaponTags()
             {
-                List<string> originalTags = weaponManager.GetWeaponPatch(thingDef).weaponTags.OriginalTags;
+                List<string> originalTags = weaponManager.GetWeaponPatch(thingDef).weaponTags?.OriginalTags;
 
-                //weapontags
+                //weapon tags
                 if (thingDef.weaponTags != null)
                 {
                     XmlElement weaponTagsElement = xmlDoc.CreateElement("weaponTags");
@@ -659,13 +659,13 @@ namespace CeManualPatcher.Misc
         {
             XmlElement valueElement = doc.CreateElement(valueName);
             valueElement.InnerText = valueString;
-            XmlElement matchElement = PatchReplace(doc, xpath+$"/{valueName}", valueElement, "match");
+            XmlElement matchElement = PatchReplace(doc, xpath + $"/{valueName}", valueElement, "match");
 
             XmlElement valueElement2 = doc.CreateElement(valueName);
             valueElement2.InnerText = valueString;
             XmlElement nomatchElement = PatchAdd(doc, xpath, valueElement2, "nomatch");
 
-            return PatchConditional(doc, xpath+"/"+valueName, matchElement, nomatchElement, opNodeName);
+            return PatchConditional(doc, xpath + "/" + valueName, matchElement, nomatchElement, opNodeName);
         }
 
         public static XmlElement PatchSetAttribute(XmlDocument doc, string xpath, string attributeName, string attributeValue, string opNodeName = "li")
@@ -677,6 +677,12 @@ namespace CeManualPatcher.Misc
             XmlUtility.AddChildElement(doc, liElement, "attribute", attributeName);
             XmlUtility.AddChildElement(doc, liElement, "value", attributeValue);
             return liElement;
+        }
+
+        public static XmlElement AddIfNotExist(XmlDocument xmlDoc, string defName, string tag, string def = "ThingDef")
+        {
+            XmlElement nomatchElement = XmlUtility.PatchAdd(xmlDoc, $"Defs/{def}[defName=\"{defName}\"]", xmlDoc.CreateElement(tag), "nomatch");
+            return XmlUtility.PatchConditional(xmlDoc, $"Defs/{def}[defName=\"{defName}\"]/{tag}", null, nomatchElement);
         }
 
     }

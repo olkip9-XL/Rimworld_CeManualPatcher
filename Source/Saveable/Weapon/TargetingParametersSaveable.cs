@@ -94,6 +94,11 @@ namespace CeManualPatcher.Saveable
 
         public override void Reset()
         {
+            if (def.Verbs.NullOrEmpty() || def.Verbs[0].targetParams == null)
+            {
+                return;
+            }
+
             def.Verbs[0].targetParams = originalData;
         }
 

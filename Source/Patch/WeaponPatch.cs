@@ -197,6 +197,7 @@ namespace CeManualPatcher.Patch
         {
             bool needCEPatch = verbProperties?.NeedCEPatch ?? false;
 
+            root.AppendChild(XmlUtility.AddIfNotExist(xmlDoc, targetDef.defName, "tools"));
             XmlUtility.Replace_Tools(xmlDoc, root, targetDef.defName, targetDef.tools);
             if (needCEPatch)
             {
@@ -386,8 +387,7 @@ namespace CeManualPatcher.Patch
                 }
 
                 //add if not exist
-                XmlElement nomatchElement = XmlUtility.PatchAdd(xmlDoc, $"Defs/ThingDef[defName=\"{targetDef.defName}\"]", xmlDoc.CreateElement("weaponTags"), "nomatch");
-                root.AppendChild(XmlUtility.PatchConditional(xmlDoc, $"Defs/ThingDef[defName=\"{targetDef.defName}\"]/weaponTags", null, nomatchElement));
+                root.AppendChild(XmlUtility.AddIfNotExist(xmlDoc, targetDef.defName, "weaponTags"));
 
                 //replace
                 XmlElement valueElement = xmlDoc.CreateElement("weaponTags");
