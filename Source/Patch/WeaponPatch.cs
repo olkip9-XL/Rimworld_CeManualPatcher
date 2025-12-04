@@ -210,7 +210,6 @@ namespace CeManualPatcher.Patch
 
             if (!needCEPatch)
             {
-                //todo: normal patch stat, verb, weapontags
                 XmlUtility.Replace_StatBase(xmlDoc, root, targetDef.defName, targetDef.statBases);
 
                 ReplaceVerb();
@@ -391,6 +390,7 @@ namespace CeManualPatcher.Patch
 
                 //replace
                 XmlElement valueElement = xmlDoc.CreateElement("weaponTags");
+                valueElement.SetAttribute("Inherit", "False");
                 foreach (var tag in targetDef.weaponTags)
                 {
                     XmlUtility.AddChildElement(xmlDoc, valueElement, "li", tag);

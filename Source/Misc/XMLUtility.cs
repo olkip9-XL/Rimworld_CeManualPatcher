@@ -138,9 +138,12 @@ namespace CeManualPatcher.Misc
                 return;
 
             //add a match element
-            XmlElement noMatchElement = XmlUtility.PatchAdd(xmlDoc, $"Defs/ThingDef[defName=\"{defName}\"]", xmlDoc.CreateElement("statBases"), "nomatch");
+            //XmlElement noMatchElement = XmlUtility.PatchAdd(xmlDoc, $"Defs/ThingDef[defName=\"{defName}\"]", xmlDoc.CreateElement("statBases"), "nomatch");
 
-            rootElement.AppendChild(XmlUtility.PatchConditional(xmlDoc, $"Defs/ThingDef[defName=\"{defName}\"]/statBases", null, noMatchElement));
+            //rootElement.AppendChild(XmlUtility.PatchConditional(xmlDoc, $"Defs/ThingDef[defName=\"{defName}\"]/statBases", null, noMatchElement));
+
+            rootElement.AppendChild(XmlUtility.AddIfNotExist(xmlDoc, defName, "statBases"));
+
 
             //replace the statBases element
             XmlElement liElement = xmlDoc.CreateElement("li");
@@ -153,6 +156,7 @@ namespace CeManualPatcher.Misc
             liElement.AppendChild(valueElement);
 
             XmlElement statElement = xmlDoc.CreateElement("statBases");
+            statElement.SetAttribute("Inherit", "False");
             valueElement.AppendChild(statElement);
             foreach (var stat in stats)
             {
@@ -217,6 +221,8 @@ namespace CeManualPatcher.Misc
             liElement.AppendChild(valueElement);
 
             XmlElement toolsElement = xmlDoc.CreateElement("tools");
+            toolsElement.SetAttribute("Inherit", "False");
+
             valueElement.AppendChild(toolsElement);
             foreach (var tool in tools)
             {
@@ -499,26 +505,26 @@ namespace CeManualPatcher.Misc
             if (statOffsets == null)
                 return;
 
-            CreateOffset();
-            ReplaceOffsets();
+            //CreateOffset();
 
-            void CreateOffset()
+            rootElement.AppendChild(XmlUtility.AddIfNotExist(xmlDoc, defName, "equippedStatOffsets"));
+
+            XmlElement statoffsetsElement = xmlDoc.CreateElement("equippedStatOffsets");
+            statoffsetsElement.SetAttribute("Inherit", "False");
+
+            foreach (var stat in statOffsets)
             {
-                XmlElement nomatchElement = XmlUtility.PatchAdd(xmlDoc, $"Defs/ThingDef[defName=\"{defName}\"]", xmlDoc.CreateElement("equippedStatOffsets"), "nomatch");
-
-                rootElement.AppendChild(XmlUtility.PatchConditional(xmlDoc, $"Defs/ThingDef[defName=\"{defName}\"]/equippedStatOffsets", nomatchElement, null));
+                AddChildElement(xmlDoc, statoffsetsElement, stat.stat.defName, stat.value.ToString());
             }
 
-            void ReplaceOffsets()
-            {
-                XmlElement statoffsetsElement = xmlDoc.CreateElement("equippedStatOffsets");
-                foreach (var stat in statOffsets)
-                {
-                    AddChildElement(xmlDoc, statoffsetsElement, stat.stat.defName, stat.value.ToString());
-                }
+            rootElement.AppendChild(XmlUtility.PatchReplace(xmlDoc, $"Defs/ThingDef[defName=\"{defName}\"]/equippedStatOffsets", statoffsetsElement));
 
-                rootElement.AppendChild(XmlUtility.PatchReplace(xmlDoc, $"Defs/ThingDef[defName=\"{defName}\"]/equippedStatOffsets", statoffsetsElement));
-            }
+            //void CreateOffset()
+            //{
+            //    XmlElement nomatchElement = XmlUtility.PatchAdd(xmlDoc, $"Defs/ThingDef[defName=\"{defName}\"]", xmlDoc.CreateElement("equippedStatOffsets"), "nomatch");
+
+            //    rootElement.AppendChild(XmlUtility.PatchConditional(xmlDoc, $"Defs/ThingDef[defName=\"{defName}\"]/equippedStatOffsets", nomatchElement, null));
+            //}
         }
 
         // Defs

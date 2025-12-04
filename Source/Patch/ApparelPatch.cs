@@ -86,25 +86,6 @@ namespace CeManualPatcher.Patch
             apparel?.Reset();
         }
 
-        //public override void ExportPatch(string dirPath)
-        //{
-        //    string folderPath = Path.Combine(dirPath, targetDef.modContentPack.PackageId);
-        //    folderPath = Path.Combine(folderPath, "Apparel");
-        //    if (!Directory.Exists(folderPath))
-        //    {
-        //        Directory.CreateDirectory(folderPath);
-        //    }
-
-        //    string filePath = Path.Combine(folderPath, targetDef.defName + ".xml");
-
-        //    // 创建XML文档
-        //    XmlElement rootPatchElement = null;
-        //    XmlDocument xmlDoc = XmlUtility.CreateBasePatchDoc(ref rootPatchElement, targetDef.modContentPack.Name);
-
-
-        //    xmlDoc.Save(filePath);
-        //}
-
         protected override void MakePatch(XmlDocument xmlDoc, XmlElement root)
         {
             XmlUtility.Replace_StatBase(xmlDoc, root, targetDef.defName, targetDef.statBases);
@@ -122,10 +103,12 @@ namespace CeManualPatcher.Patch
 
                 string xpathBase = $"Defs/ThingDef[defName=\"{targetDef.defName}\"]/apparel";
 
-                root.AppendChild(XmlUtility.PatchConditional(xmlDoc, xpathBase, null,
-                      XmlUtility.PatchAdd(xmlDoc, $"Defs/ThingDef[defName=\"{targetDef.defName}\"]",
-                          xmlDoc.CreateElement("apparel"), "nomatch")
-                      ));
+                //root.AppendChild(XmlUtility.PatchConditional(xmlDoc, xpathBase, null,
+                //      XmlUtility.PatchAdd(xmlDoc, $"Defs/ThingDef[defName=\"{targetDef.defName}\"]",
+                //          xmlDoc.CreateElement("apparel"), "nomatch")
+                //      ));
+                //add if not exist
+                root.AppendChild(XmlUtility.AddIfNotExist(xmlDoc, targetDef.defName, "apparel"));
 
                 if (apparel.BodyPartGroupsChanged)
                 {
