@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace CeManualPatcher.RenderRect
 {
-    internal abstract class RenderRectBase
+    public abstract class RenderRectBase
     {
         public abstract void DoWindowContents(Rect rect);
     }

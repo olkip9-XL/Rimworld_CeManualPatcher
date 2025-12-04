@@ -8,7 +8,7 @@ using Verse;
 
 namespace CeManualPatcher.Misc
 {
-    internal static class MP_Log
+    public static class MP_Log
     {
         public static void Error(string message, Exception e = null, Def def = null)
         {

@@ -13,7 +13,7 @@ using Verse;
 
 namespace CeManualPatcher.RenderRect
 {
-    internal static class RenderRectUtility
+    public static class RenderRectUtility
     {
 
         public static void DrawItemRow(Listing_Standard listing, ThingDef item, ref ThingDef curItem)
