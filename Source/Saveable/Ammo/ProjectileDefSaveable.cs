@@ -17,6 +17,25 @@ namespace CeManualPatcher.Saveable
     internal class ProjectileDefSaveable : SaveableBase<ThingDef>
     {
 
+        public static ReadOnlyCollection<string> NoneCommonPropNames = new List<string>()
+        {
+                "armorPenetrationSharp",
+                "armorPenetrationBlunt",
+                "explosionRadius",
+                "preExplosionSpawnChance",
+                "preExplosionSpawnThingCount",
+                "postExplosionSpawnChance",
+                "postExplosionSpawnThingCount",
+
+                "preExplosionSpawnThingDef",
+                "postExplosionSpawnThingDef",
+
+                "postExplosionGasType",
+                "damageDef",
+                "damageAmountBase"
+        }.AsReadOnly();
+
+
         //字段
         public static ReadOnlyCollection<string> propNames = new List<string>()
         {
@@ -70,20 +89,21 @@ namespace CeManualPatcher.Saveable
                 "muzzleFlashMultiplier",
                 "muzzleFlashOffset",
 
+                "preExplosionSpawnChance",
+                "preExplosionSpawnThingCount",
+                "postExplosionSpawnChance",
+                "postExplosionSpawnThingCount",
+
+                //testDef
+                "preExplosionSpawnThingDef",
+                "postExplosionSpawnThingDef",
+
+                "postExplosionGasType",
+                "damageDef",
+                "damageAmountBase"
+
         }.AsReadOnly();
         private Dictionary<string, string> propDic = new Dictionary<string, string>();
-
-        private string damageDefString;
-        private DamageDef damageDef
-        {
-            get => DefDatabase<DamageDef>.GetNamed(damageDefString, false);
-            set => damageDefString = value?.defName ?? "null";
-        }
-        private GasType? postExplosionGasType;
-
-        private int damageAmountBase;
-
-        private FieldInfo fieldInfo_damageAmountBase => typeof(ProjectileProperties).GetField("damageAmountBase", BindingFlags.NonPublic | BindingFlags.Instance);
 
         private SecondaryExplosionSaveable secondaryExplosion;
 
@@ -156,10 +176,6 @@ namespace CeManualPatcher.Saveable
                 }
             }
 
-            projectile.damageDef = damageDef;
-            projectile.postExplosionGasType = postExplosionGasType;
-            fieldInfo_damageAmountBase.SetValue(projectile, damageAmountBase);
-
             def.label = this.label;
         }
 
@@ -169,12 +185,8 @@ namespace CeManualPatcher.Saveable
             {
                 foreach (var item in propNames)
                 {
-                    propDic[item] = PropUtility.GetPropValue(projectile, item).ToString();
+                    propDic[item] = PropUtility.GetPropValueString(projectile, item);
                 }
-
-                this.damageDef = projectile.damageDef;
-                this.postExplosionGasType = projectile.postExplosionGasType;
-                this.damageAmountBase = (int)fieldInfo_damageAmountBase.GetValue(projectile);
 
                 this.label = def.label;
             }
@@ -184,11 +196,30 @@ namespace CeManualPatcher.Saveable
             {
                 if (propDic == null)
                     propDic = new Dictionary<string, string>();
+
+                //old save
+                string valueString = null;
+                Scribe_Values.Look(ref valueString, "damageDef");
+                if (!string.IsNullOrEmpty(valueString))
+                {
+                    propDic["damageDef"] = valueString;
+                }
+
+                valueString = null;
+                Scribe_Values.Look(ref valueString, "postExplosionGasType");
+                if (!string.IsNullOrEmpty(valueString))
+                {
+                    propDic["postExplosionGasType"] = valueString;
+                }
+
+                valueString = null;
+                Scribe_Values.Look(ref valueString, "damageAmountBase");
+                if (!string.IsNullOrEmpty(valueString))
+                {
+                    propDic["damageAmountBase"] = valueString;
+                }
             }
             Scribe_Values.Look(ref label, "label");
-            Scribe_Values.Look(ref damageDefString, "damageDef");
-            Scribe_Values.Look(ref postExplosionGasType, "postExplosionGasType");
-            Scribe_Values.Look(ref damageAmountBase, "damageAmountBase");
 
             Scribe_Deep.Look(ref secondaryDamage, "secondaryDamage");
             Scribe_Deep.Look(ref fragments, "fragments");
@@ -205,9 +236,6 @@ namespace CeManualPatcher.Saveable
             PropUtility.CopyPropValue(originalData, projectile);
 
             def.label = originalLabel;
-
-            //damageAmountBase
-            fieldInfo_damageAmountBase.SetValue(projectile, fieldInfo_damageAmountBase.GetValue(originalData));
 
             this.secondaryExplosion?.Reset();
             this.secondaryDamage?.Reset();
@@ -250,9 +278,6 @@ namespace CeManualPatcher.Saveable
             PropUtility.CopyPropValue(projectile, originalData);
 
             this.originalLabel = def.label;
-
-            //damageAmountBase
-            fieldInfo_damageAmountBase.SetValue(originalData, fieldInfo_damageAmountBase.GetValue(projectile));
         }
     }
 }

@@ -81,23 +81,39 @@ namespace CeManualPatcher.Misc
         public float explosionRadius;
         public GasType? gas;
 
+        public float preExplosionSpawnChance = 1f;
+        public int preExplosionSpawnThingCount = 1;
+        private string preExplosionSpawnThingDefString = "null";
+        public ThingDef preExplosionSpawnThingDef
+        {
+            get => DefDatabase<ThingDef>.GetNamed(preExplosionSpawnThingDefString, false);
+            set => preExplosionSpawnThingDefString = value?.defName ?? "null";
+        }
+
+        public float postExplosionSpawnChance = 1f;
+        public int postExplosionSpawnThingCount = 1;
+        public string postExplosionSpawnThingDefString = "null";
+        public ThingDef postExplosionSpawnThingDef
+        {
+            get => DefDatabase<ThingDef>.GetNamed(postExplosionSpawnThingDefString, false);
+            set => postExplosionSpawnThingDefString = value?.defName ?? "null";
+        }
+
         //comp
         public List<ThingDefCountClass> fragments = new List<ThingDefCountClass>();
         public CompProperties_ExplosiveCE secondaryExplosion = new CompProperties_ExplosiveCE();
 
         private string damageDefString = "Bullet";
-
-        //Save
-        private List<MP_ThingDefCountClass_Save> fragments_save = new List<MP_ThingDefCountClass_Save>();
-        private List<MP_SecondaryDamage_Save> secondaryDamages_save = new List<MP_SecondaryDamage_Save>();
-        private MP_CompProperties_ExplosiveCE_Save secondaryExplosion_save = new MP_CompProperties_ExplosiveCE_Save();
-
-
         public DamageDef damageDef
         {
             get => DefDatabase<DamageDef>.GetNamed(damageDefString, false);
             set => damageDefString = value?.defName ?? "null";
         }
+
+        //Save
+        private List<MP_ThingDefCountClass_Save> fragments_save = new List<MP_ThingDefCountClass_Save>();
+        private List<MP_SecondaryDamage_Save> secondaryDamages_save = new List<MP_SecondaryDamage_Save>();
+        private MP_CompProperties_ExplosiveCE_Save secondaryExplosion_save = new MP_CompProperties_ExplosiveCE_Save();
 
         private string suffix => parentPair.suffix;
         public string DefName
@@ -108,7 +124,10 @@ namespace CeManualPatcher.Misc
             }
         }
 
-        public CustomProjectile() { }
+        public CustomProjectile()
+        {
+            this.damageDef = DamageDefOf.Bullet;
+        }
         public CustomProjectile(CustomAmmoSet parent)
         {
             this.parentSet = parent;
@@ -120,6 +139,8 @@ namespace CeManualPatcher.Misc
             };
 
             this.speed = parent.baseSpeed;
+
+            this.damageDef = DamageDefOf.Bullet;
         }
 
         public void Export(XmlDocument doc, XmlElement root)
@@ -173,7 +194,7 @@ namespace CeManualPatcher.Misc
 
                 if (this.damageDef != DamageDefOf.Bullet)
                 {
-                    XmlUtility.AddChildElement(doc, projectileElement, "damageDef", damageDefString);
+                    XmlUtility.AddChildElement(doc, projectileElement, "damageDef", damageDef?.defName);
                 }
 
                 if (Math.Abs(explosionRadius) > float.Epsilon)
@@ -183,6 +204,32 @@ namespace CeManualPatcher.Misc
                     if (gas != null)
                     {
                         XmlUtility.AddChildElement(doc, projectileElement, "postExplosionGasType", gas.ToString());
+                    }
+
+                    if (preExplosionSpawnChance != 1f)
+                    {
+                        XmlUtility.AddChildElement(doc, projectileElement, "preExplosionSpawnChance", postExplosionSpawnChance.ToString());
+                    }
+                    if (preExplosionSpawnThingCount != 1)
+                    {
+                        XmlUtility.AddChildElement(doc, projectileElement, "preExplosionSpawnThingCount", preExplosionSpawnThingCount.ToString());
+                    }
+                    if (preExplosionSpawnThingDef != null)
+                    {
+                        XmlUtility.AddChildElement(doc, projectileElement, "preExplosionSpawnThingDef", preExplosionSpawnThingDef.defName);
+                    }
+
+                    if (postExplosionSpawnChance != 1f)
+                    {
+                        XmlUtility.AddChildElement(doc, projectileElement, "postExplosionSpawnChance", postExplosionSpawnChance.ToString());
+                    }
+                    if (postExplosionSpawnThingCount != 1)
+                    {
+                        XmlUtility.AddChildElement(doc, projectileElement, "postExplosionSpawnThingCount", postExplosionSpawnThingCount.ToString());
+                    }
+                    if (postExplosionSpawnThingDef != null)
+                    {
+                        XmlUtility.AddChildElement(doc, projectileElement, "postExplosionSpawnThingDef", postExplosionSpawnThingDef.defName);
                     }
 
                 }
@@ -218,9 +265,7 @@ namespace CeManualPatcher.Misc
                 ProjectilePropertiesCE defaultProjectile = new ProjectilePropertiesCE();
                 foreach (var fieldName in ProjectileDefSaveable.propNames)
                 {
-                    if (fieldName == "armorPenetrationSharp" ||
-                   fieldName == "armorPenetrationBlunt" ||
-                   fieldName == "explosionRadius")
+                    if (ProjectileDefSaveable.NoneCommonPropNames.Contains(fieldName))
                     {
                         continue; // Handled above
                     }
@@ -417,12 +462,19 @@ namespace CeManualPatcher.Misc
             //Explosive
             Scribe_Values.Look(ref explosionRadius, "explosionRadius");
             Scribe_Values.Look(ref gas, "gas");
+
+            Scribe_Values.Look(ref preExplosionSpawnChance, "preExplosionSpawnChance", 1f);
+            Scribe_Values.Look(ref preExplosionSpawnThingCount, "preExplosionSpawnThingCount", 1);
+            Scribe_Values.Look(ref preExplosionSpawnThingDefString, "preExplosionSpawnThingDef");
+
+            Scribe_Values.Look(ref postExplosionSpawnChance, "postExplosionSpawnChance", 1f);
+            Scribe_Values.Look(ref postExplosionSpawnThingCount, "postExplosionSpawnThingCount", 1);
+            Scribe_Values.Look(ref postExplosionSpawnThingDefString, "postExplosionSpawnThingDef");
+
             //comp
             Scribe_Collections.Look(ref fragments_save, "fragments", LookMode.Deep);
             Scribe_Collections.Look(ref secondaryDamages_save, "secondaryDamages", LookMode.Deep);
             Scribe_Deep.Look(ref secondaryExplosion_save, "secondaryExplosion");
-
-
         }
 
         public IEnumerable<string> ConfigError()

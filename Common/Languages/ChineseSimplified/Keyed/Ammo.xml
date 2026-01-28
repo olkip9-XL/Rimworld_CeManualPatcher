@@ -32,7 +32,7 @@
   <MP_ProjectilePropertiesCE.empShieldBreakChance>EMP护盾破坏率</MP_ProjectilePropertiesCE.empShieldBreakChance>
   <MP_ProjectilePropertiesCE.collideDistance>碰撞距离</MP_ProjectilePropertiesCE.collideDistance>
   <MP_ProjectilePropertiesCE.impactChance>Impact chance</MP_ProjectilePropertiesCE.impactChance>
-  
+
   <MP_ProjectilePropertiesCE.recoilMultiplier>后坐力乘数</MP_ProjectilePropertiesCE.recoilMultiplier>
   <MP_ProjectilePropertiesCE.recoilOffset>后坐力偏移</MP_ProjectilePropertiesCE.recoilOffset>
   <MP_ProjectilePropertiesCE.warmupMultiplier>瞄准时间乘数</MP_ProjectilePropertiesCE.warmupMultiplier>
@@ -50,6 +50,13 @@
   <MP_ProjectilePropertiesCE.spinRate>旋转率</MP_ProjectilePropertiesCE.spinRate>
   <MP_ProjectilePropertiesCE.explosionDelay>爆炸延迟</MP_ProjectilePropertiesCE.explosionDelay>
   <MP_ProjectilePropertiesCE.ai_IsIncendiary>AI视为燃烧弹</MP_ProjectilePropertiesCE.ai_IsIncendiary>
+
+  <MP_preExplosionSpawnChance>爆炸前产物率</MP_preExplosionSpawnChance>
+  <MP_preExplosionSpawnThingCount>爆炸前产物数量</MP_preExplosionSpawnThingCount>
+  <MP_preExplosionSpawnThing>爆炸前产物</MP_preExplosionSpawnThing>
+  <MP_postExplosionSpawnChance>爆炸后产物率</MP_postExplosionSpawnChance>
+  <MP_postExplosionSpawnThingCount>爆炸后产物数量</MP_postExplosionSpawnThingCount>
+  <MP_postExplosionSpawnThing>爆炸后产物</MP_postExplosionSpawnThing>
 
   <!--Ammo Recipe-->
   <MP_Recipe>制作清单</MP_Recipe>

@@ -51,6 +51,13 @@
   <MP_ProjectilePropertiesCE.explosionDelay>Explosion Delay</MP_ProjectilePropertiesCE.explosionDelay>
   <MP_ProjectilePropertiesCE.ai_IsIncendiary>AI Is Incendiary</MP_ProjectilePropertiesCE.ai_IsIncendiary>
   
+  <MP_preExplosionSpawnChance>Pre Explosion Spawn Chance</MP_preExplosionSpawnChance>
+  <MP_preExplosionSpawnThingCount>Pre Explosion Spawn Count</MP_preExplosionSpawnThingCount>
+  <MP_preExplosionSpawnThing>Pre Explosion Spawn Thing</MP_preExplosionSpawnThing>
+  <MP_postExplosionSpawnChance>Post Explosion Spawn Chance</MP_postExplosionSpawnChance>
+  <MP_postExplosionSpawnThingCount>Post Explosion Spawn Count</MP_postExplosionSpawnThingCount>
+  <MP_postExplosionSpawnThing>Post Explosion Spawn Thing</MP_postExplosionSpawnThing>
+
   <!--Ammo Recipe-->
   <MP_Recipe>Recipe</MP_Recipe>
   <MP_RecipeParentClass>Recipe Parent</MP_RecipeParentClass>

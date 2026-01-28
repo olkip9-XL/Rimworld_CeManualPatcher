@@ -709,7 +709,7 @@ namespace CeManualPatcher
             }
         }
 
-        public static ReadOnlyCollection<ThingDef> ingredientsForRepairArmorInt = null;
+        private static ReadOnlyCollection<ThingDef> ingredientsForRepairArmorInt = null;
 
         public static ReadOnlyCollection<ThingDef> ingredientsForRepairArmor
         {
@@ -719,7 +719,7 @@ namespace CeManualPatcher
                 {
                     List<ThingDef> list = new List<ThingDef>();
 
-                    foreach(var def in DefDatabase<ThingDef>.AllDefs.Where(x => x.HasComp(typeof(CompArmorDurability))))
+                    foreach (var def in DefDatabase<ThingDef>.AllDefs.Where(x => x.HasComp(typeof(CompArmorDurability))))
                     {
                         CompProperties_ArmorDurability comp = def.GetCompProperties<CompProperties_ArmorDurability>();
                         if (comp != null && comp.RepairIngredients != null)
@@ -740,5 +740,32 @@ namespace CeManualPatcher
             }
         }
 
+
+        private static ReadOnlyCollection<ThingDef> explosionSpawnThingsInt = null;
+        public static ReadOnlyCollection<ThingDef> explosionSpawnThings
+        {
+            get
+            {
+                if (explosionSpawnThingsInt == null)
+                {
+                    List<ThingDef> list = new List<ThingDef>();
+                    foreach (var def in DefDatabase<ThingDef>.AllDefs.Where(x => x.projectile != null))
+                    {
+                        ProjectileProperties proj = def.projectile;
+                        if (proj.preExplosionSpawnThingDef != null && !list.Contains(proj.preExplosionSpawnThingDef))
+                        {
+                            list.Add(proj.preExplosionSpawnThingDef);
+                        }
+
+                        if (proj.postExplosionSpawnThingDef != null && !list.Contains(proj.postExplosionSpawnThingDef))
+                        {
+                            list.Add(proj.postExplosionSpawnThingDef);
+                        }
+                    }
+                    explosionSpawnThingsInt = list.AsReadOnly();
+                }
+                return explosionSpawnThingsInt;
+            }
+        }
     }
 }

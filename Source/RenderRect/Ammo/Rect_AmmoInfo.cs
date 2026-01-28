@@ -102,7 +102,6 @@ namespace CeManualPatcher.RenderRect
             if (props == null)
             {
                 listing.Label($"Not CE Projectile, Projectile Class is {ammo.projectile.projectile.GetType()}");
-                //DrawNonCEProjectile(listing, ammo.projectile);
                 DrawNonCEProjectile(listing, ammo);
                 return;
             }
@@ -134,6 +133,58 @@ namespace CeManualPatcher.RenderRect
                     );
                 });
 
+                listing.FieldLineReflexion("MP_preExplosionSpawnChance".Translate(), "preExplosionSpawnChance", props, newValue =>
+                {
+                    manager.GetAmmoPatch(ammo);
+                });
+
+                listing.FieldLineReflexion("MP_preExplosionSpawnThingCount".Translate(), "preExplosionSpawnThingCount", props, newValue =>
+                {
+                    manager.GetAmmoPatch(ammo);
+                });
+
+                listing.ButtonTextLine("MP_preExplosionSpawnThing".Translate(), props.preExplosionSpawnThingDef?.LabelCap ?? "null", () =>
+                {
+                    List<ThingDef> list = new List<ThingDef>();
+                    list.Add(null);
+                    list.AddRange(MP_Options.explosionSpawnThings);
+
+                    FloatMenuUtility.MakeMenu<ThingDef>(list,
+                        (def) => def?.LabelCap ?? "null",
+                        (def) => delegate
+                        {
+                            manager.GetAmmoPatch(ammo);
+                            props.preExplosionSpawnThingDef = def;
+                        }
+                    );
+                });
+
+                listing.FieldLineReflexion("MP_postExplosionSpawnChance".Translate(), "postExplosionSpawnChance", props, newValue =>
+                {
+                    manager.GetAmmoPatch(ammo);
+                });
+
+                listing.FieldLineReflexion("MP_postExplosionSpawnThingCount".Translate(), "postExplosionSpawnThingCount", props, newValue =>
+                {
+                    manager.GetAmmoPatch(ammo);
+                });
+
+                listing.ButtonTextLine("MP_postExplosionSpawnThing".Translate(), props.postExplosionSpawnThingDef?.LabelCap ?? "null", () =>
+                {
+                    List<ThingDef> list = new List<ThingDef>();
+                    list.Add(null);
+                    list.AddRange(MP_Options.explosionSpawnThings);
+
+                    FloatMenuUtility.MakeMenu<ThingDef>(list,
+                        (def) => def?.LabelCap ?? "null",
+                        (def) => delegate
+                        {
+                            manager.GetAmmoPatch(ammo);
+                            props.postExplosionSpawnThingDef = def;
+                        }
+                    );
+                });
+
                 //damage
                 DrawAmmoDamageEx(listing, ammo);
             }
@@ -157,9 +208,7 @@ namespace CeManualPatcher.RenderRect
             //common
             foreach (var fieldName in ProjectileDefSaveable.propNames)
             {
-                if (fieldName == "armorPenetrationSharp" ||
-                    fieldName == "armorPenetrationBlunt" ||
-                    fieldName == "explosionRadius")
+                if (ProjectileDefSaveable.NoneCommonPropNames.Contains(fieldName))
                 {
                     continue; // Handled above
                 }

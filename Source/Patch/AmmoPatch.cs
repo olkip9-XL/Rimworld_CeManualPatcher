@@ -169,12 +169,6 @@ namespace CeManualPatcher.Patch
                 //add empty comps
                 root.AppendChild(XmlUtility.AddIfNotExist(xmlDoc, targetDef.defName, "comps"));
 
-                //root.AppendChild(
-                //    XmlUtility.PatchConditional(xmlDoc, $"Defs/ThingDef[defName=\"{targetDef.defName}\"]/comps",
-                //        null,
-                //        XmlUtility.PatchAdd(xmlDoc, $"Defs/ThingDef[defName=\"{targetDef.defName}\"]", xmlDoc.CreateElement("comps"), "nomatch")));
-
-
                 ProjectilePropertiesCE props = targetDef.projectile as ProjectilePropertiesCE;
 
                 if (props == null)
@@ -193,9 +187,9 @@ namespace CeManualPatcher.Patch
                 ProjectilePropertiesCE originalProps = projectile?.OriginalData;
                 foreach (var fieldName in ProjectileDefSaveable.propNames)
                 {
-                    object value = PropUtility.GetPropValue(props, fieldName);
-                    object defaultValue = PropUtility.GetPropValue(defaultProps, fieldName);
-                    object originalValue = PropUtility.GetPropValue(originalProps, fieldName);
+                    object value = PropUtility.GetPropValueString(props, fieldName);
+                    object defaultValue = PropUtility.GetPropValueString(defaultProps, fieldName);
+                    object originalValue = PropUtility.GetPropValueString(originalProps, fieldName);
 
                     if (!object.Equals(value, defaultValue))
                     {
@@ -206,36 +200,6 @@ namespace CeManualPatcher.Patch
                     {
                         needPatchProjectile = true;
                     }
-                }
-
-                if (props.damageDef != null)
-                {
-                    XmlUtility.AddChildElement(xmlDoc, projectileElement, "damageDef", props.damageDef.defName);
-                }
-                if (props.damageDef != originalProps.damageDef)
-                {
-                    needPatchProjectile = true;
-                }
-
-                if (props.postExplosionGasType != null)
-                {
-                    XmlUtility.AddChildElement(xmlDoc, projectileElement, "postExplosionGasType", props.postExplosionGasType.ToString());
-                }
-                if (props.postExplosionGasType != originalProps.postExplosionGasType)
-                {
-                    needPatchProjectile = true;
-                }
-
-                var fieldInfo_damageAmountBase = typeof(ProjectileProperties).GetField("damageAmountBase", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                int damageAmountBase = (int)fieldInfo_damageAmountBase.GetValue(props);
-                int originalDamageAmountBase = (int)fieldInfo_damageAmountBase.GetValue(originalProps);
-                if (damageAmountBase != -1)
-                {
-                    XmlUtility.AddChildElement(xmlDoc, projectileElement, "damageAmountBase", damageAmountBase.ToString());
-                }
-                if (damageAmountBase != originalDamageAmountBase)
-                {
-                    needPatchProjectile = true;
                 }
 
                 //secondary damage

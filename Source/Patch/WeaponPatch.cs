@@ -217,13 +217,13 @@ namespace CeManualPatcher.Patch
                 ReplaceWeaponTags();
             }
 
-            MakeCompPatch_Charges();
-
             if (!needCEPatch)
             {
                 MakeCompPatch_AmmoUser();
                 MakeCompPatch_FireModes();
             }
+
+            MakeCompPatch_Charges();
 
             void MakeCompPatch_Charges()
             {
@@ -233,6 +233,10 @@ namespace CeManualPatcher.Patch
                 CompProperties_Charges compProps = targetDef.GetCompProperties<CompProperties_Charges>();
                 if (compProps == null)
                     return;
+                //if (!targetDef.HasComp<CompCharges>())
+                //    return;
+
+                //CompProperties_Charges compProps = targetDef.GetCompProperties<CompProperties_Charges>();
 
                 XmlElement valueElement = xmlDoc.CreateElement("li");
                 valueElement.SetAttribute("Class", typeof(CompProperties_Charges).ToString());

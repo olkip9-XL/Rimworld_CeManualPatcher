@@ -14,9 +14,14 @@ namespace CeManualPatcher.Saveable
         {
             get
             {
-                if (originalData == null || compProps == null)
+                if (compProps == null)
                 {
                     return false;
+                }
+
+                if (originalData == null && compProps != null)
+                {
+                    return true;
                 }
 
                 if (!originalData.chargeSpeeds.NullOrEmpty() && !compProps.chargeSpeeds.NullOrEmpty() && originalData.chargeSpeeds.Count == compProps.chargeSpeeds.Count)
@@ -61,10 +66,10 @@ namespace CeManualPatcher.Saveable
             base.ExposeData();
 
             //old save
-            if(Scribe.mode == LoadSaveMode.LoadingVars && base.compIsNull)
+            if (Scribe.mode == LoadSaveMode.LoadingVars && base.compIsNull)
             {
                 Scribe_Collections.Look(ref this.charges_save, "chargeSpeeds", LookMode.Value);
-                if(!this.charges_save.NullOrEmpty())
+                if (!this.charges_save.NullOrEmpty())
                 {
                     base.compIsNull = false;
                 }

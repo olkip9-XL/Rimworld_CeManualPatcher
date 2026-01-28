@@ -471,22 +471,52 @@ namespace CeManualPatcher.RenderRect
                });
             }, indent: 20f);
 
-            ;
-
             listing.FieldLine("CE_DescExplosionRadius".Translate(), ref projectile.explosionRadius, min: 0f, indent: 20f);
+
+            listing.FieldLine("MP_preExplosionSpawnChance".Translate(), ref projectile.preExplosionSpawnChance, indent: 20f);
+            listing.FieldLine("MP_preExplosionSpawnThingCount".Translate(), ref projectile.preExplosionSpawnThingCount, indent: 20f);
+            listing.ButtonTextLine("MP_preExplosionSpawnThing".Translate(), projectile.preExplosionSpawnThingDef?.LabelCap ?? "null", () =>
+            {
+                List<ThingDef> list = new List<ThingDef>();
+                list.Add(null);
+                list.AddRange(MP_Options.explosionSpawnThings);
+
+                FloatMenuUtility.MakeMenu<ThingDef>(list,
+                    (def) => def?.LabelCap ?? "null",
+                    (def) => delegate
+                    {
+                        projectile.preExplosionSpawnThingDef = def;
+                    }
+                );
+            }, indent: 20f);
+
+            listing.FieldLine("MP_postExplosionSpawnChance".Translate(), ref projectile.postExplosionSpawnChance, indent: 20f);
+            listing.FieldLine("MP_postExplosionSpawnThingCount".Translate(), ref projectile.postExplosionSpawnThingCount, indent: 20f);
+            listing.ButtonTextLine("MP_postExplosionSpawnThing".Translate(), projectile.postExplosionSpawnThingDef?.LabelCap ?? "null", () =>
+            {
+                List<ThingDef> list = new List<ThingDef>();
+                list.Add(null);
+                list.AddRange(MP_Options.explosionSpawnThings);
+
+                FloatMenuUtility.MakeMenu<ThingDef>(list,
+                    (def) => def?.LabelCap ?? "null",
+                    (def) => delegate
+                    {
+                        projectile.postExplosionSpawnThingDef = def;
+                    }
+                );
+            }, indent: 20f);
 
             listing.FieldLine("MP_DescSuppressionFactor".Translate(), ref projectile.suppressionFactor, indent: 20f);
             listing.FieldLine("MP_DescStoppingPower".Translate(), ref projectile.stoppingPower, indent: 20f);
             listing.FieldLine("MP_ProjectileSpeed".Translate(), ref projectile.speed, indent: 20f);
 
-            listing.FieldLine($"CE_DescBluntPenetration".Translate().Colorize(isExpo ? ColorGrey : Color.white), ref projectile.armorPenetrationBlunt, indent: 20f);
             listing.FieldLine($"CE_DescSharpPenetration".Translate().Colorize(isExpo ? ColorGrey : Color.white), ref projectile.armorPenetrationSharp, indent: 20f);
+            listing.FieldLine($"CE_DescBluntPenetration".Translate().Colorize(isExpo ? ColorGrey : Color.white), ref projectile.armorPenetrationBlunt, indent: 20f);
 
             foreach (var fieldName in ProjectileDefSaveable.propNames)
             {
-                if (fieldName == "armorPenetrationSharp" ||
-                   fieldName == "armorPenetrationBlunt" ||
-                   fieldName == "explosionRadius")
+                if (ProjectileDefSaveable.NoneCommonPropNames.Contains(fieldName))
                 {
                     continue; // Handled above
                 }
