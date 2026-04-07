@@ -28,19 +28,44 @@ namespace CeManualPatcher
 
     public class ModSetting_CEManualPatcher : ModSettings
     {
-
-        //manager
+        //managers
         internal AmmoManager ammoManager = new AmmoManager();
         internal WeaponManager weaponManager = new WeaponManager();
         internal ApparelManager apparelManager = new ApparelManager();
         internal BodyDefManager bodyDefManager = new BodyDefManager();
         internal RaceManager raceManager = new RaceManager();
         internal HediffDefManager hediffDefManager = new HediffDefManager();
-
         internal CustomAmmoManager customAmmoManager = new CustomAmmoManager();
 
-        //CEPatcher
-        //internal CEPatchManager patchManager = new CEPatchManager();
+        private Dictionary<MP_SettingTab, IManager> tabManagers;
+        private List<IManager> allManagers;
+
+        public ModSetting_CEManualPatcher()
+        {
+            InitManagers();
+        }
+
+        private void InitManagers()
+        {
+            tabManagers = new Dictionary<MP_SettingTab, IManager>
+            {
+                { MP_SettingTab.Weapon, weaponManager },
+                { MP_SettingTab.Ammo, ammoManager },
+                { MP_SettingTab.Apparel, apparelManager },
+                { MP_SettingTab.CustomAmmo, customAmmoManager },
+                { MP_SettingTab.Body, bodyDefManager },
+                { MP_SettingTab.Race, raceManager },
+                { MP_SettingTab.Hediff, hediffDefManager }
+            };
+
+            allManagers = tabManagers.Values.ToList();
+        }
+
+        public IManager GetManager(MP_SettingTab tab)
+        {
+            return tabManagers.TryGetValue(tab, out var manager) ? manager : null;
+        }
+
         public override void ExposeData()
         {
             base.ExposeData();
@@ -55,67 +80,34 @@ namespace CeManualPatcher
 
             if (Scribe.mode == LoadSaveMode.LoadingVars)
             {
-                if (ammoManager == null)
-                {
-                    ammoManager = new AmmoManager();
-                }
-                if (weaponManager == null)
-                {
-                    weaponManager = new WeaponManager();
-                }
-                //if (patchManager == null)
-                //{
-                //    patchManager = new CEPatchManager();
-                //}
-                if (apparelManager == null)
-                {
-                    apparelManager = new ApparelManager();
-                }
-                if (customAmmoManager == null)
-                {
-                    customAmmoManager = new CustomAmmoManager();
-                }
-                if (bodyDefManager == null)
-                {
-                    bodyDefManager = new BodyDefManager();
-                }
-                if (raceManager == null)
-                {
-                    raceManager = new RaceManager();
-                }
-                if (hediffDefManager == null)
-                {
-                    hediffDefManager = new HediffDefManager();
-                }
+                ammoManager ??= new AmmoManager();
+                weaponManager ??= new WeaponManager();
+                apparelManager ??= new ApparelManager();
+                customAmmoManager ??= new CustomAmmoManager();
+                bodyDefManager ??= new BodyDefManager();
+                raceManager ??= new RaceManager();
+                hediffDefManager ??= new HediffDefManager();
+
+                InitManagers();
             }
         }
 
         public void PostLoad()
         {
-            //init
-            //patchManager?.PostLoadInit();
-            customAmmoManager?.PostLoadInit();
-
-            ammoManager?.PostLoadInit();
-            weaponManager?.PostLoadInit();
-            apparelManager?.PostLoadInit();
-            bodyDefManager?.PostLoadInit();
-            raceManager?.PostLoadInit();
-            hediffDefManager?.PostLoadInit();
+            foreach (var manager in allManagers)
+            {
+                manager?.PostLoadInit();
+            }
         }
 
         public void ExportPatch()
         {
             XmlUtility.CreateBasicFolders();
 
-            //patchManager?.ExportAll();
-            apparelManager?.ExportAll();
-            customAmmoManager?.ExportAll();
-            bodyDefManager?.ExportAll();
-            ammoManager?.ExportAll();
-            raceManager?.ExportAll();
-            weaponManager?.ExportAll();
-            hediffDefManager?.ExportAll();
+            foreach (var manager in allManagers)
+            {
+                manager?.ExportAll();
+            }
 
             string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "CE Patches");
             Messages.Message($"MP_CEPatchExportMsg".Translate(path), MessageTypeDefOf.NeutralEvent);
@@ -136,16 +128,15 @@ namespace CeManualPatcher
             settings = GetSettings<ModSetting_CEManualPatcher>();
             instance = this;
         }
-        public override string SettingsCategory()
-        {
-            return "CE Manual Patcher";
-        }
+
+        public override string SettingsCategory() => "CE Manual Patcher";
+
         public override void DoSettingsWindowContents(Rect inRect)
         {
             inRect.y += 20f;
             inRect.height -= 20f;
 
-            List<TabRecord> tabRecords = new List<TabRecord>();
+            var tabRecords = new List<TabRecord>();
 
             foreach (MP_SettingTab tab in Enum.GetValues(typeof(MP_SettingTab)))
             {
@@ -155,10 +146,7 @@ namespace CeManualPatcher
                     continue;
                 }
 
-                tabRecords.Add(new TabRecord(tab.GetLabel(), delegate
-                {
-                    this.curTab = tab;
-                }, this.curTab == tab));
+                tabRecords.Add(new TabRecord(tab.GetLabel(), () => curTab = tab, curTab == tab));
             }
 
             TabDrawer.DrawTabs<TabRecord>(inRect, tabRecords, 150f);
@@ -166,40 +154,12 @@ namespace CeManualPatcher
             inRect.y += 10f;
             inRect.height -= 10f;
 
-            switch (curTab)
-            {
-                case MP_SettingTab.Weapon:
-                    settings.weaponManager.DoWindowContents(inRect);
-                    break;
-                case MP_SettingTab.Ammo:
-                    settings.ammoManager.DoWindowContents(inRect);
-                    break;
-                case MP_SettingTab.Bionic:
-                    break;
-                case MP_SettingTab.Apparel:
-                    settings.apparelManager.DoWindowContents(inRect);
-                    break;
-                case MP_SettingTab.CustomAmmo:
-                    settings.customAmmoManager.DoWindowContents(inRect);
-                    break;
-                case MP_SettingTab.Body:
-                    settings.bodyDefManager.DoWindowContents(inRect);
-                    break;
-                case MP_SettingTab.Race:
-                    settings.raceManager.DoWindowContents(inRect);
-                    break;
-                case MP_SettingTab.Hediff:
-                    settings.hediffDefManager.DoWindowContents(inRect);
-                    break;
-            }
+            settings.GetManager(curTab)?.DoWindowContents(inRect);
 
             WidgetsUtility.UtilityTick();
         }
 
-        public void SetCurTab(MP_SettingTab tab)
-        {
-            curTab = tab;
-        }
+        public void SetCurTab(MP_SettingTab tab) => curTab = tab;
         //test
         private void DebugLogAllButtonImage(Rect rect)
         {

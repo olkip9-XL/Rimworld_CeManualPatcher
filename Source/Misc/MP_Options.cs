@@ -287,6 +287,11 @@ namespace CeManualPatcher
                         {
                             foreach (var stat in item.statBases)
                             {
+                                if (stat == null || stat.stat == null || stat.stat.category == null)
+                                {
+                                    continue;
+                                }
+
                                 if (!categoryDefs.Contains(stat.stat.category))
                                 {
                                     categoryDefs.Add(stat.stat.category);
@@ -325,6 +330,11 @@ namespace CeManualPatcher
                         {
                             foreach (var stat in item.statBases)
                             {
+                                if (stat == null || stat.stat == null || stat.stat.category == null)
+                                {
+                                    continue;
+                                }
+
                                 if (!categoryDefs.Contains(stat.stat.category))
                                 {
                                     categoryDefs.Add(stat.stat.category);
@@ -690,6 +700,11 @@ namespace CeManualPatcher
                         {
                             foreach (var stat in item.statBases)
                             {
+                                if (stat == null || stat.stat == null || stat.stat.category == null)
+                                {
+                                    continue;
+                                }
+
                                 categoryDefs.AddDistinct(stat.stat.category);
                             }
                         }

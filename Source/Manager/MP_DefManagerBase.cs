@@ -11,7 +11,7 @@ using Verse;
 
 namespace CeManualPatcher.Manager
 {
-    internal abstract class MP_DefManagerBase<T> : IExposable where T : Def
+    internal abstract class MP_DefManagerBase<T> : IManager where T : Def
     {
         protected List<PatchBase<T>> patches = new List<PatchBase<T>>();
 

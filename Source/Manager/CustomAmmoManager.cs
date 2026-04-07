@@ -14,7 +14,7 @@ using Verse;
 
 namespace CeManualPatcher.Manager
 {
-    internal class CustomAmmoManager : IExposable
+    internal class CustomAmmoManager : IManager
     {
         public static CustomAmmoManager instance;
 

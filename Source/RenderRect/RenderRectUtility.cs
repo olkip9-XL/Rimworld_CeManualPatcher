@@ -81,7 +81,7 @@ namespace CeManualPatcher.RenderRect
             if (headLabel.NullOrEmpty())
                 headLabel = "MP_StatBase".Translate();
 
-            if(heavyTitle)
+            if (heavyTitle)
                 Widgets.Label(headRect, "<b>" + headLabel + "</b>");
             else
                 Widgets.Label(headRect, headLabel);
@@ -116,10 +116,12 @@ namespace CeManualPatcher.RenderRect
                 List<FloatMenuOption> options = new List<FloatMenuOption>();
                 foreach (var item in list)
                 {
+                    if (item == null)
+                        continue;
+
                     FloatMenuOption option = new FloatMenuOption(item.LabelCap, delegate
                     {
                         preChange?.Invoke();
-                        //???
                         localStats.Add(new StatModifier()
                         {
                             stat = item,
@@ -165,6 +167,9 @@ namespace CeManualPatcher.RenderRect
             // Stat entries
             foreach (var item in stats ?? new List<StatModifier>())
             {
+                if (item == null || item.stat == null)
+                    continue;
+
                 Rect rect = listing.GetRect(Text.LineHeight);
                 rect.x += 20f;
                 rect.width -= 20f;
